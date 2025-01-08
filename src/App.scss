@@ -1,0 +1,210 @@
+*{
+    margin:0;
+    padding:0;
+    scrollbar-width: thin;
+    scrollbar-color: #fff8ca #c4b596;
+}
+@font-face {
+    font-family: "Anteb Regular";
+    src: url('./fonts/Anteb-Regular.eot');
+    src: url("./fonts/Anteb-Regular.eot?#iefix") format("embedded-opentype"),
+         url("./fonts/Anteb-Regular.woff2") format("woff2"), 
+         url("./fonts/Anteb-Regular.woff") format("woff"),
+         url("./fonts/Anteb-Regular.ttf") format("truetype");
+}
+html, body, h1, h2, h3, h4, ul, ol, li, p, small, label, input,pre {
+    font-family: "Anteb Regular","PingFang SC","Hiragino Sans GB","Heiti SC","WenQuanYi Micro Hei",sans-serif;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 100%;
+    user-select: none;
+/*    background: rgba(0, 0, 0, 0.3);*/
+
+    background:#241509 url(./assets/bg.png);
+    background-size: 100% 100%;
+}
+::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #c4b596;
+}
+::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background: #fff8ca;
+}
+input[type=number] {
+    -moz-appearance:textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+.App {
+    height: 100%;
+    text-align: left;
+}
+.App-link{
+    color: rgb(217, 177, 84);
+}
+.App-cols {
+    display: inline-block;
+    vertical-align: top;
+}
+
+// table
+.App-game-table {
+    border-radius: 10px;
+    padding: 10px;
+    overflow: auto;
+    font-size: 14px;
+    table{
+        width: 100%;
+        line-height: 1.4;
+        border-collapse: collapse;
+    }
+    thead{
+        background: url(./assets/splitter.png) no-repeat 50% 95%;
+        background-size: 100% auto;
+
+        td{
+            padding-bottom: 10px;
+        }
+    }
+    td{
+        padding:2px 10px;
+        text-align: left;
+    }
+    td.center{
+        text-align: center;
+    }
+    td.right{
+        text-align: right;
+    }
+    thead td{
+        padding: 10px;
+        color: #c4b596;
+    }
+    tbody tr:hover td,
+    tr.selected td {
+        background: rgba(30, 17, 3, 0.8);
+        color: #fff;
+    }
+}
+.App-game-table-rank {
+    table thead {
+        background: transparent url(./assets/thead.png) no-repeat 0 0;
+        background-size: 100% 38px;
+    }
+    thead td{
+        padding: 10px;
+        background: transparent;
+        font-weight: 700;
+        color: rgb(240, 192, 103);
+    }
+    .rank,
+    .player{
+        color: rgba(240, 192, 103, 1);
+    }
+    .reward{
+        padding-right: 30px;
+    }
+    .index{
+        font-size: 12px;
+        line-height: 20px;
+    }
+    .white{
+        color: #fff;
+    }
+    tr:nth-child(1) .index,
+    tr:nth-child(2) .index,
+    tr:nth-child(3) .index{
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background: url(./assets/sort.png) no-repeat 0 0;
+        background-size: 100% auto;
+    }
+    tr:nth-child(2) .index{
+        background-position: 0 -32px;
+    }
+    tr:nth-child(3) .index{
+        background-position: 0 100%;
+    }
+}
+
+// login
+.App-login{
+    position: relative;
+    padding: 80px 50px 0;
+    text-align: center;
+
+    input {
+        height: 30px;
+        width: 200px;
+        outline: none;
+        background: #ccc;
+        color: #333;
+        font-size: 16px;
+        text-indent: 5px;
+    }
+    input:focus{
+        background: #fff;
+    }
+}
+
+.App-tips-warning{
+    color: RGBA(227, 29, 12, 1);
+}
+
+.App-preview-map-btn{
+    position: fixed;
+    left: 35px;
+    top: 150px;
+    zoom: 0.8;
+}
+.App-morale-map-btn{
+    top: 150px;
+    left: 135px;
+    zoom: 0.8;
+}
+.App-help-guidebook a{
+    position: fixed;
+    top: 150px;
+    left: 220px;
+    zoom: 0.8;
+}
+
+.App-union-bonus-btn{
+    top: 110px;
+    right: 220px;
+    left: auto;
+}
+.App-offers-btn{
+    top: 110px;
+    right: 25px;
+    left: auto;
+}
+.App-chat-map-btn{
+    top: 110px;
+    right: 125px;
+    left: auto;
+    zoom: 0.8;
+}
+
