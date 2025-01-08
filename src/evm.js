@@ -235,6 +235,19 @@ export default function EvmDApp() {
     })();
   }, []);
 
+  const funcList = [
+     "connect",
+     "accountsChanged",
+     "onChainChanged",
+     "getChain",
+     "addChain",
+     "switchChain",
+     "addToken",
+     "signMessage",
+     "signTypedData",
+     "sendTransaction",
+   ];
+
   return (
     <div id="evm-dapp" className="rounded p-5" style={{marginRight: '100px'}}>
       <h2>
@@ -279,7 +292,7 @@ export default function EvmDApp() {
                 }
               }}
             >
-              {func.name}
+              {funcList[index]}
             </Button>
           </div>
         ))}

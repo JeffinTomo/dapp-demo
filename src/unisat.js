@@ -62,6 +62,26 @@ export default function UnisatDApp() {
     "70736274ff0100890200000001668438b4fcafa31fe575284af4fd144a5b1f74edbc1733609de2634f5683607e0100000000ffffffff02920b000000000000225120f0a8ac7eeeb1a7d919c670d60120b94ef502b13e19ffda0b35cc21f8e8b458335c46000000000000225120921792fcbe19532f5a2e79734a71fb5f1270c2a1ef667d8fe2d7f9bc939e37bb000000000001012b8e5b000000000000225120921792fcbe19532f5a2e79734a71fb5f1270c2a1ef667d8fe2d7f9bc939e37bb01172047eafdc07e0d12def374cebee7a9fcf81130f6eb34530fcf936e4557a762c602000000";
   const signPsbt = async () => await provider.signPsbt(psbt);
   const signPsbts = async () => await provider.signPsbts([psbt, psbt]);
+
+
+  const funcList = [
+    "requestAccounts",
+    "getAccounts",
+    "getPublicKey",
+    "accountsChanged",
+
+    "switchNetwork",
+    "getNetwork",
+    "networkChanged",
+
+    "getBalance",
+    "signMessage",
+    "signMessageBip322Simple",
+    "signPsbt",
+    "signPsbts",
+    "sendBitcoin",
+  ];
+
   return (
     <div className="p-3">
       <h2>Unisat DApp Demo</h2>
@@ -108,7 +128,7 @@ export default function UnisatDApp() {
                 }
               }}
             >
-              {func.name}
+              {funcList[index]}
             </Button>
           </div>
         ))}
