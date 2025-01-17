@@ -1,11 +1,10 @@
 # README
-Phaser3 + React
+React
 
 ## Start
 1. node
-2. `npm run update-underlying`
-3. `npm install`
-4. `npm start`
+2. `npm install`
+3. `npm start`
 
 
 ## debug with wallets message
@@ -18,4 +17,4 @@ if (typeof req.data != 'string' ) {
 ```
 
 ## demo link
-https://ai.bluetech.top/
+https://web3.bluetech.top
