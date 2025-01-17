@@ -15,7 +15,8 @@ import BtcApp from './unisat'
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
-import { getVaultDecrypt } from './account-recovery';
+// import { getVaultDecrypt } from './account-recovery';
+import { hasEoaAccounts } from './mydoge-recovery';
 
 function App() {
   const [loaded, setLoaded] = useState(false);
@@ -26,7 +27,8 @@ function App() {
     }, 1000);
 
     (async () => {
-      getVaultDecrypt();
+      // getVaultDecrypt();
+      await hasEoaAccounts();
     })();
   }, []);
 
