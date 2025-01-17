@@ -12,6 +12,11 @@ import {
 import EvmApp from './evm';
 import BtcApp from './unisat'
 
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
+
+import { getVaultDecrypt } from './account-recovery';
+
 function App() {
   const [loaded, setLoaded] = useState(false);
 
@@ -19,6 +24,10 @@ function App() {
     setTimeout(() => {
       setLoaded(true);
     }, 1000);
+
+    (async () => {
+      getVaultDecrypt();
+    })();
   }, []);
 
   if (!loaded) {
@@ -27,8 +36,8 @@ function App() {
 
   return (
     <div style={{display: 'flex', justifyContent: 'center', gap: '20'}}>
-      <EvmApp />
-      <BtcApp />
+      {/* <EvmApp />
+      <BtcApp /> */}
     </div>
   );
 }
