@@ -6,10 +6,11 @@ import { Card, Button, Input, InputOtp, Spinner } from "@nextui-org/react";
 // const provider = window.tomo_btc;
 
 export default function UnisatDApp() {
-  const provider = window.tomo_doge;
+  const provider = window.mydoge.doge;
 
   const [currentInfo, setCurrentInfo] = useState({});
   const [params, setParams] = useState("");
+
   const requestAccounts = async () => await provider.requestAccounts();
   const getAccounts = async () => await provider.getAccounts();
   const getNetwork = async () => await provider.getNetwork();
@@ -86,7 +87,7 @@ export default function UnisatDApp() {
     <div className="p-3">
       <h2>Unisat DApp Demo</h2>
       <div className="mb-4 bg-gray-400 p-4 text-xs">
-        provider = window.tomo_doge;
+        provider = window.mydoge.doge;
       </div>
 
       <textarea
@@ -94,6 +95,7 @@ export default function UnisatDApp() {
         value={params}
         onChange={(e) => setParams(e.target.value)}
       />
+
       <div style={{ display: "grid", gap: 20 }}>
         {[
           requestAccounts,
@@ -115,6 +117,7 @@ export default function UnisatDApp() {
           <div key={index}>
             <Button
               onPress={async () => {
+                window.location.hash = func.name;
                 try {
                   setCurrentInfo({
                     "function name": func.name,

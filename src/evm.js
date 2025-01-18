@@ -9,7 +9,7 @@ import { ethers } from "ethers";
 
 export default function EvmDApp() {
 
-  const provider = window.tomo_evm;
+  const provider = window.mydoge.evm;
   const web3 = new Web3(provider);
 
 
