@@ -6,10 +6,11 @@ import { Card, Button, Input, InputOtp, Spinner } from "@nextui-org/react";
 // const provider = window.tomo_btc;
 
 export default function UnisatDApp() {
-  const provider = window.mydoge.doge;
+  let provider = window.mydoge.doge;
 
   const [currentInfo, setCurrentInfo] = useState({});
   const [params, setParams] = useState("");
+  const [providerName, setProviderName] = useState("mydoge.doge");
 
   const requestAccounts = async () => await provider.requestAccounts();
   const getAccounts = async () => await provider.getAccounts();
@@ -17,7 +18,7 @@ export default function UnisatDApp() {
   const switchNetwork = async (args) => await provider.switchNetwork(args);
   const getPublicKey = async () => await provider.getPublicKey();
   const getBalance = async () => await provider.getBalance();
-  const getInscriptions = async () => await provider.getInscriptions();
+  // const getInscriptions = async () => await provider.getInscriptions();
 
   const networkChanged = () => {};
   const accountsChanged = () => {};
@@ -87,14 +88,29 @@ export default function UnisatDApp() {
     <div className="p-3">
       <h2>Unisat DApp Demo</h2>
       <div className="mb-4 bg-gray-400 p-4 text-xs">
-        provider = window.mydoge.doge;
+        provider = window.{ providerName};
       </div>
+
+
+      <Button onPress={async () => { setProviderName('mydoge.doge'); provider = window.mydoge.doge; }}>
+        use mydoge wallet
+      </Button>
+      <Button onPress={async () => { setProviderName('unisat'); provider = window.unisat; }}>
+        use unisat wallet
+      </Button>
+      <Button onPress={async () => { setProviderName('bitkeep.unisat'); provider = window.bitkeep.unisat; }}>
+        use bitget wallet
+      </Button>
+
+      <p></p>
 
       <textarea
         className="m-4 w-4/5 border-1"
         value={params}
         onChange={(e) => setParams(e.target.value)}
       />
+
+      <p></p>
 
       <div style={{ display: "grid", gap: 20 }}>
         {[
