@@ -10,6 +10,8 @@ export default function UnisatDApp() {
 
   const [currentInfo, setCurrentInfo] = useState({});
   const [params, setParams] = useState("");
+  const [amount, setAmount] = useState(0.1);
+  const [toAddress, setToAddress] = useState('DLsbf5qa5XKXGsMamvLUWeimmMKBnFMV7h');
   const [providerName, setProviderName] = useState("mydoge.doge");
 
   const requestAccounts = async () => await provider.requestAccounts();
@@ -23,11 +25,8 @@ export default function UnisatDApp() {
   const networkChanged = () => {};
   const accountsChanged = () => {};
 
-  let toAddress =
-    "bc1pjgte9l97r9fj7k3w09e55u0mtuf8ps4paan8mrlz6lumeyu7x7asrdqz4q";
-  let satoshis = 345678;
   const sendBitcoin = async () =>
-    await provider.sendBitcoin(toAddress, satoshis);
+    await provider.sendBitcoin(toAddress, amount);
 
   // const sendInscription = async () =>
   // args = [
@@ -136,6 +135,7 @@ export default function UnisatDApp() {
                 window.location.hash = func.name;
                 try {
                   setCurrentInfo({
+                    "update time": new Date().getTime(),
                     "function name": func.name,
                     "function params": params.split(","),
                     "function returns": await func(
@@ -151,6 +151,15 @@ export default function UnisatDApp() {
             </Button>
           </div>
         ))}
+      </div>
+      <div>
+        amount: <input type="text" value={amount} onChange={(e) => {
+          setAmount(e.target.value/1);
+        }} />
+        <p></p>
+        to <input type="text" value={toAddress} style={{width: '300px'}} onChange={(e) => {
+            setToAddress(e.target.value);
+          }} />
       </div>
       {Object.keys(currentInfo).map((k) => (
         <div key={k} style={{ wordWrap: "break-word" }}>

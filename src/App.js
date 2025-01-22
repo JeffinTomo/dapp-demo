@@ -25,6 +25,17 @@ function App() {
     setTimeout(() => {
       setLoaded(true);
     }, 500);
+
+    // const wallets = [];
+    // window.addEventListener('eip6963:announceProvider', (e) => {
+    //   wallets.push(e.detail);
+    //   let { info, provider } = e.detail;
+    //   if (info.rdns === 'io.metamask') {
+    //     console.log('metamask provider', provider, wallets);
+    //   }
+    // });
+
+    // window.dispatchEvent(new Event('eip6963:requestProvider'));
   }, []);
 
   if (!loaded) {
