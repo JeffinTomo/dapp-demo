@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, Input, InputOtp, Spinner } from "@nextui-org/react";
 import Web3 from "web3";
 import { ethers } from "ethers";
 
@@ -60,7 +59,7 @@ export default function EvmDApp() {
 
   const switchChain = async () => {
     // let chainId = web3.utils.toHex("11501");
-    let chainId = "0x2ced";
+    let chainId = "0x1b58";
     console.log(chainId);
     try {
       return await provider.request({
@@ -76,8 +75,10 @@ export default function EvmDApp() {
             params: [
               {
                 chainId,
-                chainName: "BEVM Mainnet",
-                rpcUrls: ["https://rpc-mainnet-1.bevm.io"],
+                chainName: "ZetaChain",
+                rpcUrls: [
+                  "https://zetachain-evm.blockpi.network/v1/rpc/public",
+                ],
               },
             ],
           });
@@ -148,7 +149,7 @@ export default function EvmDApp() {
     let domain = {
       name: "Ether Mail",
       version: "1",
-      chainId: 1,
+      chainId: 7000,
       verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
     };
 
@@ -266,41 +267,45 @@ export default function EvmDApp() {
       </div>
 
       <div className="bg-[#dedede] p-1 mb-1">
-        <Button
-          onPress={async () => {
+        <button
+          className="bg-[#000] text-[#fff] p-1 m-5"
+          onClick={async () => {
             setProviderName("mydoge.ethereum");
             provider = window.mydoge.ethereum;
           }}
         >
           use mydoge wallet
-        </Button>
-        <Button
-          onPress={async () => {
+        </button>
+        <button
+          className="bg-[#000] text-[#fff] p-1 mr-5"
+          onClick={async () => {
             setProviderName("ethereum");
             provider = window.ethereum;
           }}
         >
           use metamask
-        </Button>
-        <Button
-          onPress={async () => {
+        </button>
+        <button
+          className="bg-[#000] text-[#fff] p-1 mr-5"
+          onClick={async () => {
             setProviderName("bitkeep.ethereum");
             provider = window.bitkeep.ethereum;
           }}
         >
           use bitget wallet
-        </Button>
-        <Button
-          onPress={async () => {
+        </button>
+        <button
+          className="bg-[#000] text-[#fff] p-1 mr-5"
+          onClick={async () => {
             setProviderName("okxwallet.ethereum");
             provider = window.okxwallet.ethereum;
           }}
         >
           use okxwallet
-        </Button>
+        </button>
       </div>
 
-      <div style={{ display: "grid", gap: 10 }} className="mb-2">
+      <div style={{ gap: 10 }} className="m-5 flex flex-wrap">
         {[
           connect,
           accountsChanged,
@@ -314,10 +319,10 @@ export default function EvmDApp() {
           sendTransaction,
         ].map((func, index) => (
           <div key={index}>
-            <Button
+            <button
               size="sm"
-              className="border-1 rounded-5 bg-[#dedede]"
-              onPress={async () => {
+              className="border-1 rounded-5 bg-[#dedede] p-1"
+              onClick={async () => {
                 setCurrentInfo({});
                 try {
                   setCurrentInfo({
@@ -330,7 +335,7 @@ export default function EvmDApp() {
               }}
             >
               {funcList[index]}
-            </Button>
+            </button>
           </div>
         ))}
       </div>

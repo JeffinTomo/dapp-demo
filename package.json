@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@metamask/browser-passworder": "^6.0.0",
-    "@nextui-org/react": "^2.2.9",
     "@reduxjs/toolkit": "1.8.3",
     "@solana/web3.js": "^1.98.0",
     "@unisat/wallet-utils": "^1.0.0",
@@ -16,7 +14,6 @@
     "crypto-js": "^4.2.0",
     "dayjs": "1.11.6",
     "ethers": "^6.13.5",
-    "framer-motion": "^12.4.1",
     "phaser": "3.55.2",
     "querystring": "^0.2.1",
     "react": "18.2.0",
@@ -32,7 +29,6 @@
     "svg": "0.1.0",
     "throttle-debounce": "5.0.0",
     "tslib": "^2.7.0",
-    "twitter-v1-oauth": "^1.0.15",
     "web-vitals": "2.1.4",
     "web3": "^4.16.0"
   },

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 // import { verifyMessage } from "@unisat/wallet-utils";
-import { Card, Button, Input, InputOtp, Spinner } from "@nextui-org/react";
 
 // const provider = window.unisat;
 // const provider = window.tomo_btc;
@@ -91,30 +90,33 @@ export default function UnisatDApp() {
       </div>
 
       <div className="bg-[#dedede] p-1 mb-1">
-        <Button
-          onPress={async () => {
+        <button
+          className="bg-[#000] text-[#fff] p-1 m-2"
+          onClick={async () => {
             setProviderName("mydoge.doge");
             provider = window.mydoge.doge;
           }}
         >
           use mydoge wallet
-        </Button>
-        <Button
-          onPress={async () => {
+        </button>
+        <button
+          className="bg-[#000] text-[#fff] p-1 m-2"
+          onClick={async () => {
             setProviderName("unisat");
             provider = window.unisat;
           }}
         >
           use unisat wallet
-        </Button>
-        <Button
-          onPress={async () => {
+        </button>
+        <button
+          className="bg-[#000] text-[#fff] p-1 m-2"
+          onClick={async () => {
             setProviderName("bitkeep.unisat");
             provider = window.bitkeep.unisat;
           }}
         >
           use bitget wallet
-        </Button>
+        </button>
       </div>
 
       <p></p>
@@ -146,9 +148,9 @@ export default function UnisatDApp() {
           sendBitcoin,
         ].map((func, index) => (
           <div key={index}>
-            <Button
+            <button
               className="border-1 p-1 text-xs rounded-5 bg-[#dedede]"
-              onPress={async () => {
+              onClick={async () => {
                 window.location.hash = func.name;
                 try {
                   setCurrentInfo({
@@ -165,7 +167,7 @@ export default function UnisatDApp() {
               }}
             >
               {funcList[index]}
-            </Button>
+            </button>
           </div>
         ))}
       </div>
