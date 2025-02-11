@@ -16,7 +16,7 @@ export const hasEoaAccounts = async()=>{
     vault: ''
   };
   try {
-    keyringState = await chrome.storage.local.get('keyringState')['keyringState'] || {};
+    // keyringState = await chrome.storage.local.get('keyringState')['keyringState'] || {};
   } catch (err) {
     console.error(err);
   }

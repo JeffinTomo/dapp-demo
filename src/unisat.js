@@ -11,7 +11,9 @@ export default function UnisatDApp() {
   const [currentInfo, setCurrentInfo] = useState({});
   const [params, setParams] = useState("");
   const [amount, setAmount] = useState(0.1);
-  const [toAddress, setToAddress] = useState('DLsbf5qa5XKXGsMamvLUWeimmMKBnFMV7h');
+  const [toAddress, setToAddress] = useState(
+    "DLsbf5qa5XKXGsMamvLUWeimmMKBnFMV7h",
+  );
   const [providerName, setProviderName] = useState("mydoge.doge");
 
   const requestAccounts = async () => await provider.requestAccounts();
@@ -25,8 +27,7 @@ export default function UnisatDApp() {
   const networkChanged = () => {};
   const accountsChanged = () => {};
 
-  const sendBitcoin = async () =>
-    await provider.sendBitcoin(toAddress, amount);
+  const sendBitcoin = async () => await provider.sendBitcoin(toAddress, amount);
 
   // const sendInscription = async () =>
   // args = [
@@ -64,7 +65,6 @@ export default function UnisatDApp() {
   const signPsbt = async () => await provider.signPsbt(psbt);
   const signPsbts = async () => await provider.signPsbts([psbt, psbt]);
 
-
   const funcList = [
     "requestAccounts",
     "getAccounts",
@@ -84,34 +84,50 @@ export default function UnisatDApp() {
   ];
 
   return (
-    <div className="p-3">
+    <div className="p-3 w-5/12  text-xs">
       <h2>Unisat DApp Demo</h2>
-      <div className="mb-4 bg-gray-400 p-4 text-xs">
-        provider = window.{ providerName};
+      <div className="mb-2 bg-gray-400 p-4 text-xs">
+        provider = window.{providerName};
       </div>
 
-
-      <Button onPress={async () => { setProviderName('mydoge.doge'); provider = window.mydoge.doge; }}>
-        use mydoge wallet
-      </Button>
-      <Button onPress={async () => { setProviderName('unisat'); provider = window.unisat; }}>
-        use unisat wallet
-      </Button>
-      <Button onPress={async () => { setProviderName('bitkeep.unisat'); provider = window.bitkeep.unisat; }}>
-        use bitget wallet
-      </Button>
+      <div className="bg-[#dedede] p-1 mb-1">
+        <Button
+          onPress={async () => {
+            setProviderName("mydoge.doge");
+            provider = window.mydoge.doge;
+          }}
+        >
+          use mydoge wallet
+        </Button>
+        <Button
+          onPress={async () => {
+            setProviderName("unisat");
+            provider = window.unisat;
+          }}
+        >
+          use unisat wallet
+        </Button>
+        <Button
+          onPress={async () => {
+            setProviderName("bitkeep.unisat");
+            provider = window.bitkeep.unisat;
+          }}
+        >
+          use bitget wallet
+        </Button>
+      </div>
 
       <p></p>
 
       <textarea
-        className="m-4 w-4/5 border-1"
+        className="m-4 w-4/5 border-1 hidden"
         value={params}
         onChange={(e) => setParams(e.target.value)}
       />
 
       <p></p>
 
-      <div style={{ display: "grid", gap: 20 }}>
+      <div style={{ gap: 10 }} className="flex flex-wrap">
         {[
           requestAccounts,
           getAccounts,
@@ -131,6 +147,7 @@ export default function UnisatDApp() {
         ].map((func, index) => (
           <div key={index}>
             <Button
+              className="border-1 p-1 text-xs rounded-5 bg-[#dedede]"
               onPress={async () => {
                 window.location.hash = func.name;
                 try {
@@ -152,20 +169,33 @@ export default function UnisatDApp() {
           </div>
         ))}
       </div>
-      <div>
-        amount: <input type="text" value={amount} onChange={(e) => {
-          setAmount(e.target.value/1);
-        }} />
+      <div className="bg-[#f5f5f5] border-1 p-5 mt-3 mb-3">
+        amount:{" "}
+        <input
+          type="text"
+          value={amount}
+          onChange={(e) => {
+            setAmount(e.target.value / 1);
+          }}
+        />
         <p></p>
-        to <input type="text" value={toAddress} style={{width: '300px'}} onChange={(e) => {
+        to{" "}
+        <input
+          type="text"
+          value={toAddress}
+          style={{ width: "300px" }}
+          onChange={(e) => {
             setToAddress(e.target.value);
-          }} />
+          }}
+        />
       </div>
-      {Object.keys(currentInfo).map((k) => (
-        <div key={k} style={{ wordWrap: "break-word" }}>
-          {k}: {JSON.stringify(currentInfo[k])}
-        </div>
-      ))}
+      <div className="bg-[#f5f5f5] border-1 p-5">
+        {Object.keys(currentInfo).map((k) => (
+          <div key={k} style={{ wordWrap: "break-word" }}>
+            {k}: {JSON.stringify(currentInfo[k])}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

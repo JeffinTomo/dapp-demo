@@ -9,43 +9,45 @@ import {
   useParams,
 } from "react-router-dom";
 
-import EvmApp from './evm';
-import BtcApp from './unisat'
+import EvmDapp from "./evm";
+import UnisatDapp from "./unisat";
+import SolanaDapp from "./solana";
 
 // import { Buffer } from 'buffer';
 // window.Buffer = Buffer;
 
-// import { getVaultDecrypt } from './account-recovery';
-// import { hasEoaAccounts } from './mydoge-recovery';
-
 function App() {
+  const chains = ["unisat", "evm", "solana"];
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
       setLoaded(true);
     }, 500);
-
-    // const wallets = [];
-    // window.addEventListener('eip6963:announceProvider', (e) => {
-    //   wallets.push(e.detail);
-    //   let { info, provider } = e.detail;
-    //   if (info.rdns === 'io.metamask') {
-    //     console.log('metamask provider', provider, wallets);
-    //   }
-    // });
-
-    // window.dispatchEvent(new Event('eip6963:requestProvider'));
   }, []);
 
   if (!loaded) {
-    return 'loading';
+    return "loading";
   }
 
   return (
-    <div style={{display: 'flex', justifyContent: 'center', gap: '20'}}>
-      {/* <EvmApp /> */}
-      <BtcApp />
+    <div>
+      <BrowserRouter>
+        <div className="dapps bg-[#000] p-3 mb-4">
+          {chains.map((chain, index) => (
+            <Link to={"/" + chain} key={index} className="m-3 text-[#fff]">
+              {chain}
+            </Link>
+          ))}
+        </div>
+
+        <Routes>
+          <Route exact path="/" element={<EvmDapp />} />
+          <Route exact path="/evm" element={<EvmDapp />} />
+          <Route exact path="/unisat" element={<UnisatDapp />} />
+          <Route exact path="/solana" element={<SolanaDapp />} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }

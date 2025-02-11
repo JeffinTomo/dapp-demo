@@ -8,10 +8,9 @@ import { ethers } from "ethers";
 // console.log("tomo_evm", provider);
 
 export default function EvmDApp() {
-
-  const provider = window.mydoge.evm;
+  const [providerName, setProviderName] = useState("mydoge.ethereum");
+  let provider = window.mydoge.ethereum;
   const web3 = new Web3(provider);
-
 
   const [currentInfo, setCurrentInfo] = useState({});
   const [res, setRes] = useState("");
@@ -182,7 +181,6 @@ export default function EvmDApp() {
 
   const verifyMessage = async (message, signature) => {
     // const recoveredAddress = ethers.verifyMessage(message, signature);
-
     // return recoveredAddress === signerAddress;
     // return recoveredAddress;
   };
@@ -236,32 +234,70 @@ export default function EvmDApp() {
   }, []);
 
   const funcList = [
-     "connect",
-     "accountsChanged",
-     "onChainChanged",
-     "getChain",
-     "addChain",
-     "switchChain",
-     "addToken",
-     "signMessage",
-     "signTypedData",
-     "sendTransaction",
-   ];
+    "connect",
+    "accountsChanged",
+    "onChainChanged",
+    "getChain",
+    "addChain",
+    "switchChain",
+    "addToken",
+    "signMessage",
+    "signTypedData",
+    "sendTransaction",
+  ];
 
   return (
-    <div id="evm-dapp" className="rounded p-5" style={{marginRight: '100px'}}>
-      <h2>
+    <div
+      id="evm-dapp"
+      className="rounded p-3 w-5/12 text-xs"
+      style={{ marginRight: "40px" }}
+    >
+      <h2 className="text-lg">
         ETH DApp Demo，{" "}
         <a
           className="text-blue-700"
           href="https://chromewebstore.google.com/detail/tomo-wallet/pfccjkejcgoppjnllalolplgogenfojk"
         >
-          老插件
+          tomo wallet 插件
         </a>
       </h2>
+      <div className="mb-2 bg-gray-400 p-4 text-xs">
+        provider = window.{providerName};
+      </div>
 
-      <div className="mb-4 mt-2 bg-gray-400 p-2 text-xs">
-        provider = window.tomo_evm
+      <div className="bg-[#dedede] p-1 mb-1">
+        <Button
+          onPress={async () => {
+            setProviderName("mydoge.ethereum");
+            provider = window.mydoge.ethereum;
+          }}
+        >
+          use mydoge wallet
+        </Button>
+        <Button
+          onPress={async () => {
+            setProviderName("ethereum");
+            provider = window.ethereum;
+          }}
+        >
+          use metamask
+        </Button>
+        <Button
+          onPress={async () => {
+            setProviderName("bitkeep.ethereum");
+            provider = window.bitkeep.ethereum;
+          }}
+        >
+          use bitget wallet
+        </Button>
+        <Button
+          onPress={async () => {
+            setProviderName("okxwallet.ethereum");
+            provider = window.okxwallet.ethereum;
+          }}
+        >
+          use okxwallet
+        </Button>
       </div>
 
       <div style={{ display: "grid", gap: 10 }} className="mb-2">
@@ -280,6 +316,7 @@ export default function EvmDApp() {
           <div key={index}>
             <Button
               size="sm"
+              className="border-1 rounded-5 bg-[#dedede]"
               onPress={async () => {
                 setCurrentInfo({});
                 try {
@@ -297,15 +334,13 @@ export default function EvmDApp() {
           </div>
         ))}
       </div>
-      {Object.keys(currentInfo).map((k) => (
-        <div
-          key={k}
-          style={{ wordWrap: "break-word" }}
-          className="mt-1 bg-gray-100 p-5 text-xs"
-        >
-          {k}: {JSON.stringify(currentInfo[k]) || res}
-        </div>
-      ))}
+      <div className="bg-[#f5f5f5] border-1 p-5">
+        {Object.keys(currentInfo).map((k) => (
+          <div key={k} style={{ wordWrap: "break-word" }}>
+            {k}: {JSON.stringify(currentInfo[k]) || res}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
