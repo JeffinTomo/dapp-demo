@@ -9,9 +9,9 @@ import {
   useParams,
 } from "react-router-dom";
 
-import EvmDapp from "./evm";
-import UnisatDapp from "./unisat";
-import SolanaDapp from "./solana";
+import EvmDapp from "./evm-dapp";
+import UnisatDapp from "./unisat-dapp";
+import SolanaDapp from "./solana-dapp";
 
 // import { Buffer } from 'buffer';
 // window.Buffer = Buffer;

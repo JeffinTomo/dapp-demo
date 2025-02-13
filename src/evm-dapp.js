@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Web3 from "web3";
 import { ethers } from "ethers";
+import { isHex, toHex, fromHex } from "viem";
 
 // const provider = window.ethereum;
 
@@ -17,9 +18,17 @@ export default function EvmDApp() {
 
   //not connect
   const connect = async () => {
-    let res = (await provider.request({ method: "eth_requestAccounts" })) || [];
+    // let res = (await provider.request({ method: "eth_requestAccounts" })) || [];
+    // let res = (await provider.connect()) || [];
+    let res = (await provider.enable()) || [];
     console.log("res", res);
     setAccount(res[0]);
+    return res;
+  };
+
+  const disconnect = async () => {
+    let res = await provider.disconnect();
+    console.log("res", res);
     return res;
   };
 
@@ -49,25 +58,35 @@ export default function EvmDApp() {
         symbol: "ZETA",
         decimals: 18,
       },
-      rpcUrls: ["https://zetachain-evm.blockpi.network/v1/rpc/public"],
+      rpcUrls: [
+        "https://zeta-chain.drpc.org?111",
+        "https://zetachain-evm.blockpi.network/v1/rpc/public",
+      ],
+      // explorer: "https://explorer.zetachain.com/",
     };
-    return await provider.request({
+    let res = await provider.request({
       method: "wallet_addEthereumChain",
       params: [chainInfo],
     });
+    return res;
   };
 
   const switchChain = async () => {
-    // let chainId = web3.utils.toHex("11501");
-    let chainId = "0x1b58";
-    console.log(chainId);
+    let currentChainId = await getChain();
+    let chainId = "0x1";
+    if (currentChainId === chainId) {
+      chainId = "0x1b58";
+    }
+    console.log("switchChain", { currentChainId, chainId });
     try {
       return await provider.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId }],
       });
+      // console.log("switchChain", chainId, res);
     } catch (switchError) {
-      // This error code indicates that the chain has not been added to MetaMask.
+      console.log(switchError);
+      // This error code indicates that the chain has not been added to wallet.
       if (switchError.code === 4902) {
         try {
           return await provider.request({
@@ -96,10 +115,11 @@ export default function EvmDApp() {
     const customTokenInfo = {
       type: "ERC20",
       options: {
-        address: account,
-        symbol: "token name",
+        address: "0x0998e94B6778ab6C4d382A142Ea779164995fCF5",
+        symbol: "symbol",
+        name: "name",
         decimals: 18,
-        image: "http://...",
+        image: "",
       },
     };
 
@@ -232,10 +252,15 @@ export default function EvmDApp() {
       let address = await verifyMessage(exampleMessage, sign);
       // console.log("verifyMessage result:", address);
     })();
+
+    console.log(fromHex("0x1b58", "number"));
+    console.log(toHex("7000"));
+    console.log(toHex(7000));
   }, []);
 
   const funcList = [
     "connect",
+    "disconnect",
     "accountsChanged",
     "onChainChanged",
     "getChain",
@@ -308,6 +333,7 @@ export default function EvmDApp() {
       <div style={{ gap: 10 }} className="m-5 flex flex-wrap">
         {[
           connect,
+          disconnect,
           accountsChanged,
           onChainChanged,
           getChain,

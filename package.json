@@ -29,6 +29,7 @@
     "svg": "0.1.0",
     "throttle-debounce": "5.0.0",
     "tslib": "^2.7.0",
+    "viem": "^2.23.2",
     "web-vitals": "2.1.4",
     "web3": "^4.16.0"
   },
