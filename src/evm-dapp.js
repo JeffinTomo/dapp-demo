@@ -49,64 +49,67 @@ export default function EvmDApp() {
     return null;
   };
 
+  let chainInfo = {
+    chainId: "0x1b58",
+    chainName: "ZetaChain",
+    nativeCurrency: {
+      name: "ZetaChain",
+      symbol: "ZETA",
+      decimals: 18,
+    },
+    rpcUrls: [
+      "https://zeta-chain.drpc.org",
+      "https://zetachain-evm.blockpi.network/v1/rpc/public",
+    ],
+    blockExplorerUrls: ["https://explorer.zetachain.com/"],
+  };
+
+  const rpcUrls = [
+    "https://eth-sepolia.api.onfinality.io/public",
+    "https://eth-sepolia-public.unifra.io",
+    "https://sepolia.drpc.org",
+    "https://ethereum-sepolia-rpc.publicnode.com",
+    "https://rpc-sepolia.rockx.com",
+    "https://rpc.sepolia.ethpandaops.io",
+    "https://api.zan.top/eth-sepolia",
+  ];
+  let chainInfo2 = {
+    chainId: "0xaa36a7",
+    chainName: "Sepolia",
+    nativeCurrency: {
+      name: "Sepolia Testnet",
+      symbol: "SepoliaETH",
+      decimals: 18,
+    },
+    rpcUrls: [rpcUrls[Math.floor(Math.random() * rpcUrls.length)]],
+    blockExplorerUrls: [],
+  };
+
   const addChain = async () => {
-    let chainInfo = {
-      chainId: "0x1b58",
-      chainName: "ZetaChain",
-      nativeCurrency: {
-        name: "ZetaChain",
-        symbol: "ZETA",
-        decimals: 18,
-      },
-      rpcUrls: [
-        "https://zeta-chain.drpc.org?111",
-        "https://zetachain-evm.blockpi.network/v1/rpc/public",
-      ],
-      // explorer: "https://explorer.zetachain.com/",
-    };
     let res = await provider.request({
       method: "wallet_addEthereumChain",
-      params: [chainInfo],
+      params: [chainInfo2],
     });
+    console.log("addChain", res);
     return res;
   };
 
   const switchChain = async () => {
     let currentChainId = await getChain();
+    // let currentChainId = provider.chainId;
     let chainId = "0x1";
     if (currentChainId === chainId) {
-      chainId = "0x1b58";
+      chainId = "0xaa36a7";
     }
-    console.log("switchChain", { currentChainId, chainId });
     try {
-      return await provider.request({
+      let res = await provider.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId }],
       });
-      // console.log("switchChain", chainId, res);
+      console.log("switchChain", chainId, res);
+      return res;
     } catch (switchError) {
       console.log(switchError);
-      // This error code indicates that the chain has not been added to wallet.
-      if (switchError.code === 4902) {
-        try {
-          return await provider.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainId,
-                chainName: "ZetaChain",
-                rpcUrls: [
-                  "https://zetachain-evm.blockpi.network/v1/rpc/public",
-                ],
-              },
-            ],
-          });
-        } catch (addError) {
-          // Handle "add" error.
-          return "err:" + JSON.stringify(addError);
-        }
-      }
-      // Handle other "switch" errors.
     }
   };
 
@@ -207,17 +210,17 @@ export default function EvmDApp() {
   };
 
   const sendTransaction = async () => {
-    // web3.utils.toHex(web3.utils.toWei("1.234", "ether"));
-    let gasLimit = 1200;
-    let gasPrice = 2500000;
+    let amount = 0.0001;
+    let value = web3.utils.toWei(amount, "ether");
+    value = web3.utils.numberToHex(value);
     let transactionParameters = {
       to: "0xa593300E785cBAADc6d4a507868bF43e6f1C1a16",
-      value: "1234567890",
-      data: "",
-      gasLimit: web3.utils.toHex(gasLimit),
-      gasPrice: web3.utils.toHex(gasPrice),
+      value,
       from: account,
+      data: "tx data test",
     };
+
+    console.log("sendTransaction", value, transactionParameters);
 
     let txHash = await provider.request({
       method: "eth_sendTransaction",
@@ -348,12 +351,14 @@ export default function EvmDApp() {
             <button
               size="sm"
               className="border-1 rounded-5 bg-[#dedede] p-1"
-              onClick={async () => {
+              onClick={() => {
                 setCurrentInfo({});
                 try {
-                  setCurrentInfo({
-                    "function name": func.name,
-                    "function returns": await func(),
+                  func().then((res) => {
+                    setCurrentInfo({
+                      "function name": func.name,
+                      "function returns": res,
+                    });
                   });
                 } catch (e) {
                   console.error(e);
