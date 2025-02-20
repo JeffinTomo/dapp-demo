@@ -118,7 +118,7 @@ export default function EvmDApp() {
     const customTokenInfo = {
       type: "ERC20",
       options: {
-        address: "0x0998e94B6778ab6C4d382A142Ea779164995fCF5",
+        address: "0x54D2252757e1672EEaD234D27B1270728fF90581",
         symbol: "symbol",
         name: "name",
         decimals: 18,
@@ -217,7 +217,7 @@ export default function EvmDApp() {
       to: "0xa593300E785cBAADc6d4a507868bF43e6f1C1a16",
       value,
       from: account,
-      data: "tx data test",
+      data: web3.utils.toHex("tx data test"),
     };
 
     console.log("sendTransaction", value, transactionParameters);
