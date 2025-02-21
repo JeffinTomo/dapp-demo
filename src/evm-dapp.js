@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Web3 from "web3";
 import { ethers } from "ethers";
-import { isHex, toHex, fromHex } from "viem";
+import { isHex, toHex, fromHex, parseTransaction } from "viem";
 
 // const provider = window.ethereum;
 
@@ -9,7 +9,7 @@ import { isHex, toHex, fromHex } from "viem";
 
 export default function EvmDApp() {
   const [providerName, setProviderName] = useState("mydoge.ethereum");
-  let provider = window.mydoge.ethereum;
+  let provider = window.bitkeep.ethereum;
   const web3 = new Web3(provider);
 
   const [currentInfo, setCurrentInfo] = useState({});
@@ -27,6 +27,25 @@ export default function EvmDApp() {
   };
 
   const disconnect = async () => {
+    if (!provider.disconnect) {
+      try {
+        // Request to revoke permissions
+        let result = await ethereum.request({
+          method: "wallet_revokePermissions",
+          params: [
+            {
+              eth_accounts: {}, // Revoke access to accounts
+            },
+          ],
+        });
+
+        console.log("Permissions revoked:", result);
+        return result;
+      } catch (error) {
+        console.error("Error revoking permissions:", error);
+      }
+      return;
+    }
     let res = await provider.disconnect();
     console.log("res", res);
     return res;
@@ -34,19 +53,17 @@ export default function EvmDApp() {
 
   const accountsChanged = async () => {
     provider.on("accountsChanged", (res) => {
-      // console.log("accountsChanged", res);
+      console.log("dapp accountsChanged", res);
       setRes("accountsChanged:" + JSON.stringify(res));
     });
   };
 
   const getChain = () => provider.request({ method: "eth_chainId" });
-  const onChainChanged = () => {
+  const onChainChanged = async () => {
     provider.on("chainChanged", (chainId) => {
-      console.log("chain changed id:", chainId);
+      console.log("dapp chain changed id:", chainId);
       setRes("chainChanged:" + JSON.stringify({ chainId }));
     });
-
-    return null;
   };
 
   let chainInfo = {
@@ -82,7 +99,6 @@ export default function EvmDApp() {
       decimals: 18,
     },
     rpcUrls: [rpcUrls[Math.floor(Math.random() * rpcUrls.length)]],
-    blockExplorerUrls: [],
   };
 
   const addChain = async () => {
@@ -101,6 +117,7 @@ export default function EvmDApp() {
     if (currentChainId === chainId) {
       chainId = "0xaa36a7";
     }
+    // chainId = "0x1b58"; for bitget
     try {
       let res = await provider.request({
         method: "wallet_switchEthereumChain",
@@ -326,7 +343,7 @@ export default function EvmDApp() {
           className="bg-[#000] text-[#fff] p-1 mr-5"
           onClick={async () => {
             setProviderName("okxwallet.ethereum");
-            provider = window.okxwallet.ethereum;
+            provider = window.okxwallet;
           }}
         >
           use okxwallet
