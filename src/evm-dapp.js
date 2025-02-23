@@ -9,7 +9,7 @@ import { isHex, toHex, fromHex, parseTransaction } from "viem";
 
 export default function EvmDApp() {
   const [providerName, setProviderName] = useState("mydoge.ethereum");
-  let provider = window.bitkeep.ethereum;
+  let provider = window.mydoge.ethereum;
   const web3 = new Web3(provider);
 
   const [currentInfo, setCurrentInfo] = useState({});
