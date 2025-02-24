@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Web3 from "web3";
 import { ethers } from "ethers";
-import { isHex, toHex, fromHex, parseTransaction } from "viem";
+import { isHex, toHex, fromHex, parseTransaction, verifyMessage } from "viem";
 
 // const provider = window.ethereum;
 
@@ -58,7 +58,7 @@ export default function EvmDApp() {
     });
   };
 
-  const getChain = () => provider.request({ method: "eth_chainId" });
+  const getChainId = () => provider.request({ method: "eth_chainId" });
   const onChainChanged = async () => {
     provider.on("chainChanged", (chainId) => {
       console.log("dapp chain changed id:", chainId);
@@ -111,7 +111,7 @@ export default function EvmDApp() {
   };
 
   const switchChain = async () => {
-    let currentChainId = await getChain();
+    let currentChainId = await getChainId();
     // let currentChainId = provider.chainId;
     let chainId = "0x1";
     if (currentChainId === chainId) {
@@ -151,6 +151,9 @@ export default function EvmDApp() {
 
   const exampleMessage = "Example `personal_sign` message.";
   const signMessage = async () => {
+    if (!account) {
+      await connect();
+    }
     try {
       const from = account;
       // For historical reasons, you must submit the message to sign in hex-encoded UTF-8.
@@ -168,6 +171,9 @@ export default function EvmDApp() {
   };
 
   const signTypedData = async () => {
+    if (!account) {
+      await connect();
+    }
     let types = {
       EIP712Domain: [
         { name: "name", type: "string" },
@@ -220,13 +226,32 @@ export default function EvmDApp() {
     });
   };
 
-  const verifyMessage = async (message, signature) => {
-    // const recoveredAddress = ethers.verifyMessage(message, signature);
-    // return recoveredAddress === signerAddress;
-    // return recoveredAddress;
+  //https://docs.metamask.io/wallet/reference/json-rpc-methods/eth_decrypt/
+  //https://viem.sh/docs/utilities/recoverTypedDataAddress#signature
+  const decryptMessage = async (signature) => {
+    if (!account) {
+      await connect();
+    }
+    await provider.request({
+      method: "eth_decrypt",
+      params: [signature, account],
+    });
+  };
+
+  //https://viem.sh/docs/utilities/verifyMessage
+  const verifySignedMessage = async (message, signature) => {
+    const valid = await verifyMessage({
+      address: account,
+      message: "hello world",
+      signature,
+    });
+    return valid;
   };
 
   const sendTransaction = async () => {
+    if (!account) {
+      await connect();
+    }
     let amount = 0.0001;
     let value = web3.utils.toWei(amount, "ether");
     value = web3.utils.numberToHex(value);
@@ -262,20 +287,15 @@ export default function EvmDApp() {
     // );
   };
 
+  const txCount = async () => {
+    return await provider.request({
+      method: "eth_getTransactionCount",
+      params: ["0xc94770007dda54cF92009BFF0dE90c06F603a09f", "latest"],
+    });
+  };
+
   useEffect(() => {
-    (async () => {
-      // await connect();
-      //
-
-      let sign =
-        "0xb0f0104788a16743f2f6a5f2b57109dc59f973cee322a3d063f49462822477ec5d604e419e8a7d3acb57ec74f743e0330deb636e176c2f7eeceac29ff35d09ee1c";
-      let address = await verifyMessage(exampleMessage, sign);
-      // console.log("verifyMessage result:", address);
-    })();
-
-    console.log(fromHex("0x1b58", "number"));
-    console.log(toHex("7000"));
-    console.log(toHex(7000));
+    (async () => {})();
   }, []);
 
   const funcList = [
@@ -283,13 +303,14 @@ export default function EvmDApp() {
     "disconnect",
     "accountsChanged",
     "onChainChanged",
-    "getChain",
+    "getChainId",
     "addChain",
     "switchChain",
     "addToken",
     "signMessage",
     "signTypedData",
     "sendTransaction",
+    "txCount",
   ];
 
   return (
@@ -356,13 +377,14 @@ export default function EvmDApp() {
           disconnect,
           accountsChanged,
           onChainChanged,
-          getChain,
+          getChainId,
           addChain,
           switchChain,
           addToken,
           signMessage,
           signTypedData,
           sendTransaction,
+          txCount,
         ].map((func, index) => (
           <div key={index}>
             <button
