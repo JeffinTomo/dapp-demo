@@ -115,7 +115,7 @@ export default function EvmDApp() {
     // let currentChainId = provider.chainId;
     let chainId = "0x1";
     if (currentChainId === chainId) {
-      chainId = "0xaa36a7";
+      chainId = "0x14a34";
     }
     // chainId = "0x1b58"; for bitget
     try {
@@ -131,13 +131,14 @@ export default function EvmDApp() {
   };
 
   //https://docs.metamask.io/wallet/reference/json-rpc-methods/wallet_watchasset/
+  //https://base-sepolia.blockscout.com/address/0x87C51CD469A0E1E2aF0e0e597fD88D9Ae4BaA967
   const addToken = async () => {
     const customTokenInfo = {
       type: "ERC20",
       options: {
-        address: "0x54D2252757e1672EEaD234D27B1270728fF90581",
-        symbol: "symbol",
-        name: "name",
+        address: "0x87C51CD469A0E1E2aF0e0e597fD88D9Ae4BaA967",
+        symbol: "TEA",
+        name: "Tea Token",
         decimals: 18,
         image: "",
       },
