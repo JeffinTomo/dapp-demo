@@ -115,7 +115,7 @@ export default function EvmDApp() {
     // let currentChainId = provider.chainId;
     let chainId = "0x1";
     if (currentChainId === chainId) {
-      chainId = "0x14a34";
+      chainId = "0x2105";
     }
     // chainId = "0x1b58"; for bitget
     try {
@@ -136,9 +136,9 @@ export default function EvmDApp() {
     const customTokenInfo = {
       type: "ERC20",
       options: {
-        address: "0x87C51CD469A0E1E2aF0e0e597fD88D9Ae4BaA967",
-        symbol: "TEA",
-        name: "Tea Token",
+        address: "0x820C137fa70C8691f0e44Dc420a5e53c168921Dc",
+        symbol: "USDS",
+        name: "USDS",
         decimals: 18,
         image: "",
       },
