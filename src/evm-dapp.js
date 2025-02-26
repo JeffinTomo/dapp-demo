@@ -153,16 +153,13 @@ export default function EvmDApp() {
   const exampleMessage = "Example `personal_sign` message.";
   const signMessage = async () => {
     if (!account) {
-      await connect();
+      alert("plase connect 1st");
+      return;
     }
     try {
-      const from = account;
-      // For historical reasons, you must submit the message to sign in hex-encoded UTF-8.
-      // This uses a Node.js-style buffer shim in the browser.
-      // const msg = `0x${Buffer.from(exampleMessage, "utf8").toString("hex")}`;
       const sign = await provider.request({
         method: "personal_sign",
-        params: [exampleMessage, from],
+        params: [exampleMessage, account],
       });
       return sign;
     } catch (err) {
@@ -173,7 +170,8 @@ export default function EvmDApp() {
 
   const signTypedData = async () => {
     if (!account) {
-      await connect();
+      alert("plase connect 1st");
+      return;
     }
     let types = {
       EIP712Domain: [
@@ -231,7 +229,8 @@ export default function EvmDApp() {
   //https://viem.sh/docs/utilities/recoverTypedDataAddress#signature
   const decryptMessage = async (signature) => {
     if (!account) {
-      await connect();
+      alert("plase connect 1st");
+      return;
     }
     await provider.request({
       method: "eth_decrypt",
@@ -251,7 +250,8 @@ export default function EvmDApp() {
 
   const sendTransaction = async () => {
     if (!account) {
-      await connect();
+      alert("plase connect 1st");
+      return;
     }
     let amount = 0.0001;
     let value = web3.utils.toWei(amount, "ether");
