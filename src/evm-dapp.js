@@ -52,6 +52,10 @@ export default function EvmDApp() {
   };
 
   const accountsChanged = async () => {
+    if (!account) {
+      alert("plase connect 1st");
+      return;
+    }
     provider.on("accountsChanged", (res) => {
       console.log("dapp accountsChanged", res);
       setRes("accountsChanged:" + JSON.stringify(res));
@@ -60,6 +64,10 @@ export default function EvmDApp() {
 
   const getChainId = () => provider.request({ method: "eth_chainId" });
   const onChainChanged = async () => {
+    if (!account) {
+      alert("plase connect 1st");
+      return;
+    }
     provider.on("chainChanged", (chainId) => {
       console.log("dapp chain changed id:", chainId);
       setRes("chainChanged:" + JSON.stringify({ chainId }));
@@ -102,6 +110,10 @@ export default function EvmDApp() {
   };
 
   const addChain = async () => {
+    if (!account) {
+      alert("plase connect 1st");
+      return;
+    }
     let res = await provider.request({
       method: "wallet_addEthereumChain",
       params: [chainInfo2],
@@ -111,6 +123,10 @@ export default function EvmDApp() {
   };
 
   const switchChain = async () => {
+    if (!account) {
+      alert("plase connect 1st");
+      return;
+    }
     let currentChainId = await getChainId();
     // let currentChainId = provider.chainId;
     let chainId = "0x1";
@@ -133,6 +149,10 @@ export default function EvmDApp() {
   //https://docs.metamask.io/wallet/reference/json-rpc-methods/wallet_watchasset/
   //https://base-sepolia.blockscout.com/address/0x87C51CD469A0E1E2aF0e0e597fD88D9Ae4BaA967
   const addToken = async () => {
+    if (!account) {
+      alert("plase connect 1st");
+      return;
+    }
     const customTokenInfo = {
       type: "ERC20",
       options: {
