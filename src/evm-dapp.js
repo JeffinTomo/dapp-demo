@@ -181,6 +181,14 @@ export default function EvmDApp() {
         method: "personal_sign",
         params: [exampleMessage, account],
       });
+
+      let pramas = {
+        address: account,
+        message: exampleMessage,
+        signature: sign,
+      };
+      let isValid = await verifyMessage(pramas);
+      console.log("verify SignedMessage", isValid, pramas);
       return sign;
     } catch (err) {
       console.error(err);
@@ -189,6 +197,8 @@ export default function EvmDApp() {
   };
 
   const signTypedData = async () => {
+    alert("not support");
+    return;
     if (!account) {
       alert("plase connect 1st");
       return;
