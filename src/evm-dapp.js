@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
 import Web3 from "web3";
 import { ethers } from "ethers";
-import { isHex, toHex, fromHex, parseTransaction, verifyMessage } from "viem";
+import {
+  isHex,
+  toHex,
+  fromHex,
+  parseTransaction,
+  verifyMessage,
+  recoverTypedDataAddress,
+} from "viem";
 
 // const provider = window.ethereum;
 
@@ -18,9 +25,9 @@ export default function EvmDApp() {
 
   //not connect
   const connect = async () => {
-    // let res = (await provider.request({ method: "eth_requestAccounts" })) || [];
+    let res = (await provider.request({ method: "eth_requestAccounts" })) || [];
     // let res = (await provider.connect()) || [];
-    let res = (await provider.enable()) || [];
+    // let res = (await provider.enable()) || [];
     console.log("res", res);
     setAccount(res[0]);
     return res;
@@ -156,7 +163,7 @@ export default function EvmDApp() {
     const customTokenInfo = {
       type: "ERC20",
       options: {
-        address: "0x820C137fa70C8691f0e44Dc420a5e53c168921Dc",
+        address: "0x3B86Ad95859b6AB773f55f8d94B4b9d443EE931f",
         symbol: "USDS",
         name: "USDS",
         decimals: 18,
@@ -197,12 +204,13 @@ export default function EvmDApp() {
   };
 
   const signTypedData = async () => {
-    alert("not support");
-    return;
     if (!account) {
       alert("plase connect 1st");
       return;
     }
+    let chainIdHex = await provider.request({ method: "eth_chainId" });
+    let chainId = fromHex(chainIdHex, "number");
+
     let types = {
       EIP712Domain: [
         { name: "name", type: "string" },
@@ -224,7 +232,7 @@ export default function EvmDApp() {
     let domain = {
       name: "Ether Mail",
       version: "1",
-      chainId: 7000,
+      chainId: chainId,
       verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
     };
 
@@ -241,7 +249,7 @@ export default function EvmDApp() {
       contents: "Hello, Bob!",
     };
 
-    return await provider.request({
+    let res = await provider.request({
       method: "eth_signTypedData_v4",
       params: [
         account,
@@ -253,6 +261,28 @@ export default function EvmDApp() {
         },
       ],
     });
+
+    let signedByMetamask =
+      "0x1962561eccb18f132b9100a149d0c6f0dcf9588dc25de280193334fcb2ed286f64f4fbd0c7a246910ca697faca13474d9ee2793a9570da3fbd47ddba859cd3d71b";
+    let signedByMydoge =
+      "0x1f97dec2b9b9189f86676d0b7cbe8fe92acba190ceff3ab44b6ffee41000983619f3f4e639d4f9cfb3dd50f844fdc4af0ad1d04a28cf79b85f4a6eb32313db9f1c";
+
+    const addressRecovered = await recoverTypedDataAddress({
+      domain,
+      types,
+      primaryType: "Mail",
+      message,
+      signature: signedByMydoge,
+    });
+
+    console.log(
+      "eth_signTypedData_v4",
+      res,
+      signedByMetamask,
+      res === signedByMetamask,
+      addressRecovered,
+    );
+    return res;
   };
 
   //https://docs.metamask.io/wallet/reference/json-rpc-methods/eth_decrypt/
