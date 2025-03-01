@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import {
   isHex,
   toHex,
+  isAddressEqual,
   fromHex,
   parseTransaction,
   verifyMessage,
@@ -21,7 +22,7 @@ export default function EvmDApp() {
 
   const [currentInfo, setCurrentInfo] = useState({});
   const [res, setRes] = useState("");
-  const [account, setAccount] = useState("");
+  const [address, setAddress] = useState("");
 
   //not connect
   const connect = async () => {
@@ -29,7 +30,7 @@ export default function EvmDApp() {
     // let res = (await provider.connect()) || [];
     // let res = (await provider.enable()) || [];
     console.log("res", res);
-    setAccount(res[0]);
+    setAddress(res[0]);
     return res;
   };
 
@@ -59,7 +60,7 @@ export default function EvmDApp() {
   };
 
   const accountsChanged = async () => {
-    if (!account) {
+    if (!address) {
       alert("plase connect 1st");
       return;
     }
@@ -71,7 +72,7 @@ export default function EvmDApp() {
 
   const getChainId = () => provider.request({ method: "eth_chainId" });
   const onChainChanged = async () => {
-    if (!account) {
+    if (!address) {
       alert("plase connect 1st");
       return;
     }
@@ -117,7 +118,7 @@ export default function EvmDApp() {
   };
 
   const addChain = async () => {
-    if (!account) {
+    if (!address) {
       alert("plase connect 1st");
       return;
     }
@@ -130,7 +131,7 @@ export default function EvmDApp() {
   };
 
   const switchChain = async () => {
-    if (!account) {
+    if (!address) {
       alert("plase connect 1st");
       return;
     }
@@ -156,7 +157,7 @@ export default function EvmDApp() {
   //https://docs.metamask.io/wallet/reference/json-rpc-methods/wallet_watchasset/
   //https://base-sepolia.blockscout.com/address/0x87C51CD469A0E1E2aF0e0e597fD88D9Ae4BaA967
   const addToken = async () => {
-    if (!account) {
+    if (!address) {
       alert("plase connect 1st");
       return;
     }
@@ -179,18 +180,18 @@ export default function EvmDApp() {
 
   const exampleMessage = "Example `personal_sign` message.";
   const signMessage = async () => {
-    if (!account) {
+    if (!address) {
       alert("plase connect 1st");
       return;
     }
     try {
       const sign = await provider.request({
         method: "personal_sign",
-        params: [exampleMessage, account],
+        params: [exampleMessage, address],
       });
 
       let pramas = {
-        address: account,
+        address,
         message: exampleMessage,
         signature: sign,
       };
@@ -204,7 +205,7 @@ export default function EvmDApp() {
   };
 
   const signTypedData = async () => {
-    if (!account) {
+    if (!address) {
       alert("plase connect 1st");
       return;
     }
@@ -249,10 +250,10 @@ export default function EvmDApp() {
       contents: "Hello, Bob!",
     };
 
-    let res = await provider.request({
+    let signature = await provider.request({
       method: "eth_signTypedData_v4",
       params: [
-        account,
+        address,
         {
           types,
           primaryType: "Mail",
@@ -262,46 +263,49 @@ export default function EvmDApp() {
       ],
     });
 
-    let signedByMetamask =
-      "0x1962561eccb18f132b9100a149d0c6f0dcf9588dc25de280193334fcb2ed286f64f4fbd0c7a246910ca697faca13474d9ee2793a9570da3fbd47ddba859cd3d71b";
-    let signedByMydoge =
-      "0x1f97dec2b9b9189f86676d0b7cbe8fe92acba190ceff3ab44b6ffee41000983619f3f4e639d4f9cfb3dd50f844fdc4af0ad1d04a28cf79b85f4a6eb32313db9f1c";
-
     const addressRecovered = await recoverTypedDataAddress({
       domain,
       types,
       primaryType: "Mail",
       message,
-      signature: signedByMydoge,
+      signature,
     });
 
-    console.log(
-      "eth_signTypedData_v4",
-      res,
-      signedByMetamask,
-      res === signedByMetamask,
-      addressRecovered,
-    );
-    return res;
+    if (isAddressEqual(addressRecovered, address)) {
+      console.log(
+        "eth_signTypedData_v4 ok",
+        signature,
+        address,
+        addressRecovered,
+      );
+    } else {
+      console.error(
+        "eth_signTypedData_v4 fail",
+        signature,
+        address,
+        addressRecovered,
+      );
+    }
+    return signature;
   };
 
   //https://docs.metamask.io/wallet/reference/json-rpc-methods/eth_decrypt/
   //https://viem.sh/docs/utilities/recoverTypedDataAddress#signature
   const decryptMessage = async (signature) => {
-    if (!account) {
+    if (!address) {
       alert("plase connect 1st");
       return;
     }
     await provider.request({
       method: "eth_decrypt",
-      params: [signature, account],
+      params: [signature, address],
     });
   };
 
   //https://viem.sh/docs/utilities/verifyMessage
   const verifySignedMessage = async (message, signature) => {
     const valid = await verifyMessage({
-      address: account,
+      address,
       message: "hello world",
       signature,
     });
@@ -309,7 +313,7 @@ export default function EvmDApp() {
   };
 
   const sendTransaction = async () => {
-    if (!account) {
+    if (!address) {
       alert("plase connect 1st");
       return;
     }
@@ -317,9 +321,9 @@ export default function EvmDApp() {
     let value = web3.utils.toWei(amount, "ether");
     value = web3.utils.numberToHex(value);
     let transactionParameters = {
-      to: "0xa593300E785cBAADc6d4a507868bF43e6f1C1a16",
+      to: "0xef565b426ce34c617170379168b61b150c223b87",
       value,
-      from: account,
+      from: address,
       data: web3.utils.toHex("tx data test"),
     };
 
