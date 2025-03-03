@@ -360,8 +360,72 @@ export default function EvmDApp() {
   };
 
   useEffect(() => {
-    (async () => {})();
-  }, []);
+    if (!address) {
+      return;
+    }
+
+    let hash =
+      "0x47a3e1bce2cf0a10170c2dde69886c27038ea6ac7f1d742df208d4c4da7fc282";
+    let methods = {
+      web3_clientVersion: [],
+      eth_blockNumber: [],
+      eth_estimateGas: [
+        {
+          from: address,
+          to: address,
+          value: "0x1",
+        },
+      ],
+      eth_feeHistory: ["0x5", "latest", [20, 30]],
+      eth_gasPrice: [],
+      eth_getBalance: [address, "latest"],
+      eth_getBlockByHash: [hash, false],
+      eth_getBlockByNumber: ["0x68b3", false],
+      eth_getBlockTransactionCountByHash: [hash],
+      eth_getBlockTransactionCountByNumber: ["0xe8"],
+      eth_getCode: ["0x3B86Ad95859b6AB773f55f8d94B4b9d443EE931f", "latest"],
+      eth_getStorageAt: [address, "0x0", "latest"],
+      eth_getTransactionByBlockHashAndIndex: [hash, "0x2"],
+      eth_getTransactionByBlockNumberAndIndex: ["0x1442e", "0x2"],
+      eth_getTransactionByHash: [hash],
+      eth_getTransactionCount: [address, "latest"],
+      eth_getTransactionReceipt: [hash],
+      eth_getUncleCountByBlockHash: [hash],
+      eth_getUncleCountByBlockNumber: ["0xe8"],
+      eth_sendRawTransaction: [
+        "0xf869018203e882520894f17f52151ebef6c7334fad080c5704d77216b732881bc16d674ec80000801ba02da1c48b670996dcb1f447ef9ef00b33033c48a4fe938f420bec3e56bfd24071a062e0aa78a81bf0290afbc3a9d8e9a068e6d74caa66c5e0fa8a46deaae96b0833",
+      ],
+    };
+
+    let index = 0;
+    for (let m in methods) {
+      index += 1;
+      setTimeout(async () => {
+        try {
+          let res = await provider.request({
+            method: m,
+            params: methods[m] || [],
+          });
+          console.log("evm.request", m, methods[m], res);
+        } catch (err) {
+          console.error("evm.request", m, methods[m], res);
+        }
+      }, index * 200);
+    }
+
+    setTimeout(async () => {
+      index += 1;
+      let res = await provider.request({
+        method: "wallet_revokePermissions",
+        params: [
+          {
+            eth_accounts: {},
+          },
+        ],
+      });
+      console.log("evm.request wallet_revokePermissions", res);
+    }, 200 * index);
+  }, [address]);
 
   const funcList = [
     "connect",
