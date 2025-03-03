@@ -1,22 +1,37 @@
+import { parseGwei, parseEther, toHex } from "viem";
+
 import Web3 from "web3";
 import erc20 from "./ERC20.json";
 
-const web3 = new Web3(window.ethereum);
-const tokenAddress = "";
+const web3 = new Web3(window.mydoge.ethereum);
+
+//https://base.blockscout.com/token/0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4
+const tokenAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
+
 const contractToken = new web3.eth.Contract(erc20.abi, tokenAddress);
 
-const allowance = (data, callback) => {
-  let { address, tokenAddress } = data;
-  contractToken.methods.allowance(address, tokenAddress).call((err, result) => {
-    console.log("erc20 allowance", result, err);
-    callback(result);
-  });
+const getBalance = async (address) => {
+  let balance = await contractToken.methods.balanceOf(address).call();
+  return balance;
+};
+
+//decreaseAllowance
+//increaseAllowance
+const allowance = async (address) => {
+  let res = await contractToken.methods.allowance(tokenAddress, address).call();
+  return res;
+};
+
+const increaseAllowance = async (address, amount) => {
+  let res = await contractToken.methods
+    .increaseAllowance(address, amount)
+    .call();
+  return res;
 };
 
 const approve = (data, callback) => {
-  let { address, to, max = 9876543, tokenAddress } = data;
-  let limit = web3.utils.toWei(max.toString(), "ether");
-  limit = web3.utils.toBN(limit);
+  let { address, max = 9876543 } = data;
+  let limit = parseEther(max.toString());
   contractToken.methods
     .approve(tokenAddress, limit)
     .send({
@@ -31,28 +46,20 @@ const approve = (data, callback) => {
     });
 };
 
-const transfer = (data, callback) => {
-  let nx = contract.methods.recharge(seasonId, rechargeId, amountCharge);
-  nx.estimateGas({
+const transfer = async (provider, data) => {
+  let { address, to } = data;
+  let value = parseGwei("1");
+  let rawTx = {
     from: address,
-    value: amountCharge,
-  })
-    .then((gasLimit) => {
-      gasLimit = Math.ceil(gasLimit * 2);
-
-      params.gasPrice = gasPrice;
-      params.gasLimit = gasLimit;
-      nx.send(params)
-        .then((err, transactionHash) => {
-          console.log("erc20 transfer ok", err, transactionHash);
-        })
-        .catch((err) => {
-          console.log("erc20 transfer err", typeof err, err);
-        });
-    })
-    .catch((err) => {
-      console.log("gasLimit err", typeof err, err.message);
-    });
+    to: to,
+    value: 0,
+    data: contractToken.methods.transfer(to, toHex(value)).encodeABI(),
+  };
+  let res = await provider.request({
+    method: "eth_sendTransaction",
+    params: [rawTx],
+  });
+  return res;
 };
 
-export { allowance, approve, transfer };
+export { getBalance, allowance, approve, transfer };

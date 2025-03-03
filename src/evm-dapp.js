@@ -11,6 +11,8 @@ import {
   recoverTypedDataAddress,
 } from "viem";
 
+import { getBalance, allowance, approve, transfer } from "./erc20/contract";
+
 // const provider = window.ethereum;
 
 // console.log("tomo_evm", provider);
@@ -363,6 +365,7 @@ export default function EvmDApp() {
     if (!address) {
       return;
     }
+    return;
 
     let hash =
       "0x47a3e1bce2cf0a10170c2dde69886c27038ea6ac7f1d742df208d4c4da7fc282";
@@ -544,6 +547,41 @@ export default function EvmDApp() {
             {k}: {JSON.stringify(currentInfo[k]) || res}
           </div>
         ))}
+      </div>
+
+      <div className="mt-10">
+        <h2>erc20</h2>
+        <button
+          size="sm"
+          className="border-1 rounded-5 bg-[#dedede] p-1 mr-5"
+          onClick={async () => {
+            let balance = await getBalance(address);
+            let limit = await allowance(address);
+            console.log("dapp balance", { balance, allowance: limit });
+          }}
+        >
+          allowance
+        </button>
+        <button
+          size="sm"
+          className="border-1 rounded-5 bg-[#dedede] p-1 mr-5"
+          onClick={() => {
+            approve({ address }, (res) => {
+              console.log("dapp approve", data, res);
+            });
+          }}
+        >
+          approve
+        </button>
+        <button
+          size="sm"
+          className="border-1 rounded-5 bg-[#dedede] p-1 mr-5"
+          onClick={async () => {
+            let res = await transfer(provider, { address, to: address });
+          }}
+        >
+          transfer
+        </button>
       </div>
     </div>
   );
