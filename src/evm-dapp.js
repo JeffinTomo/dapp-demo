@@ -549,15 +549,47 @@ export default function EvmDApp() {
         ))}
       </div>
 
+      <ERC20Contact address={address} />
+    </div>
+  );
+}
+
+function getHashData(hashDetail) {
+  let data = {};
+  for (var prop in hashDetail) {
+    if (typeof hashDetail[prop] === "bigint") {
+      data[prop] = hashDetail[prop].toString();
+    }
+    if (typeof hashDetail[prop] === "string") {
+      data[prop] = hashDetail[prop];
+    }
+  }
+  return data;
+}
+
+function ERC20Contact({ address }) {
+  const [data, setData] = useState({});
+
+  return (
+    <>
       <div className="mt-10">
-        <h2>erc20</h2>
+        <h2 className="mt-5 mb-2 text-lg">erc20</h2>
         <button
           size="sm"
           className="border-1 rounded-5 bg-[#dedede] p-1 mr-5"
           onClick={async () => {
+            if (!address) {
+              alert("plase connect 1st.");
+              return;
+            }
             let balance = await getBalance(address);
             let limit = await allowance(address);
-            console.log("dapp balance", { balance, allowance: limit });
+            console.log("erc20 allowance/balance:", { balance, limit });
+            setData({
+              balance: toHex(balance),
+              allowance: toHex(limit),
+              title: "erc20 allowance/balance",
+            });
           }}
         >
           allowance
@@ -566,8 +598,21 @@ export default function EvmDApp() {
           size="sm"
           className="border-1 rounded-5 bg-[#dedede] p-1 mr-5"
           onClick={() => {
-            approve({ address }, (res) => {
-              console.log("dapp approve", data, res);
+            if (!address) {
+              alert("plase connect 1st.");
+              return;
+            }
+            approve({ address }, (hashDetail) => {
+              console.log(
+                "erc20 approve:",
+                hashDetail.transactionHash,
+                hashDetail,
+              );
+              setData({
+                title: "erc20 approve",
+                hash: hashDetail.transactionHash,
+                hashDetail: getHashData(hashDetail),
+              });
             });
           }}
         >
@@ -577,12 +622,36 @@ export default function EvmDApp() {
           size="sm"
           className="border-1 rounded-5 bg-[#dedede] p-1 mr-5"
           onClick={async () => {
-            let res = await transfer(provider, { address, to: address });
+            if (!address) {
+              alert("plase connect 1st.");
+              return;
+            }
+            let hashDetail = await transfer({
+              address,
+              to: address,
+              amount: 123,
+            });
+            console.log(
+              "erc20 transfer:",
+              hashDetail?.transactionHash,
+              hashDetail,
+            );
+            setData({
+              title: "erc20 transfer",
+              hash: hashDetail?.transactionHash,
+              hashDetail: getHashData(hashDetail),
+            });
           }}
         >
           transfer
         </button>
       </div>
-    </div>
+
+      {data.title && (
+        <pre className="bg-[#f5f5f5] border-1 p-5 mt-5">
+          {JSON.stringify(data, null, "\t")}
+        </pre>
+      )}
+    </>
   );
 }

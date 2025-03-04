@@ -1,14 +1,13 @@
-import { parseGwei, parseEther, toHex } from "viem";
+import { parseGwei, parseEther, toHex, erc20Abi } from "viem";
 
 import Web3 from "web3";
-import erc20 from "./ERC20.json";
 
 const web3 = new Web3(window.mydoge.ethereum);
 
 //https://base.blockscout.com/token/0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4
 const tokenAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
 
-const contractToken = new web3.eth.Contract(erc20.abi, tokenAddress);
+const contractToken = new web3.eth.Contract(erc20Abi, tokenAddress);
 
 const getBalance = async (address) => {
   let balance = await contractToken.methods.balanceOf(address).call();
@@ -18,7 +17,7 @@ const getBalance = async (address) => {
 //decreaseAllowance
 //increaseAllowance
 const allowance = async (address) => {
-  let res = await contractToken.methods.allowance(tokenAddress, address).call();
+  let res = await contractToken.methods.allowance(address, tokenAddress).call();
   return res;
 };
 
@@ -38,7 +37,6 @@ const approve = (data, callback) => {
       from: address,
     })
     .then((result) => {
-      console.log("erc20 approve ok", result);
       callback(result);
     })
     .catch((err) => {
@@ -46,20 +44,32 @@ const approve = (data, callback) => {
     });
 };
 
-const transfer = async (provider, data) => {
-  let { address, to } = data;
-  let value = parseGwei("1");
-  let rawTx = {
-    from: address,
-    to: to,
-    value: 0,
-    data: contractToken.methods.transfer(to, toHex(value)).encodeABI(),
-  };
-  let res = await provider.request({
-    method: "eth_sendTransaction",
-    params: [rawTx],
-  });
-  return res;
+const transfer = async (data) => {
+  let { address, to, amount } = data;
+  let value = parseGwei(amount.toString());
+  contractToken.methods
+    .transfer(to, toHex(value))
+    .send({
+      from: address,
+    })
+    .then((result) => {
+      console.log("erc20 approve ok", result);
+    })
+    .catch((err) => {
+      console.log("erc20 approve err", err);
+    });
+
+  // let rawTx = {
+  //   from: address,
+  //   to: to,
+  //   value: 0,
+  //   data: contractToken.methods.transfer(to, toHex(value)).encodeABI(),
+  // };
+  // let res = await provider.request({
+  //   method: "eth_sendTransaction",
+  //   params: [rawTx],
+  // });
+  // return res;
 };
 
 export { getBalance, allowance, approve, transfer };
