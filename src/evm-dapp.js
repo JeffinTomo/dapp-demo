@@ -6,16 +6,29 @@ import {
   toHex,
   isAddressEqual,
   fromHex,
+  formatEther,
   parseTransaction,
   verifyMessage,
   recoverTypedDataAddress,
 } from "viem";
 
-import { getBalance, allowance, approve, transfer } from "./erc20/contract";
+import {
+  init,
+  getBalance,
+  allowance,
+  approve,
+  transfer,
+} from "./erc20/contract";
 
 // const provider = window.ethereum;
 
 // console.log("tomo_evm", provider);
+//
+
+// amount: "0x82b7078075c80819c0000"
+// const = balance: "0xcd167d21c84df9abb6db5"
+const v = formatEther(fromHex("0x82b7078075c80819c0000", "bigint"));
+console.log(v);
 
 export default function EvmDApp() {
   const [providerName, setProviderName] = useState("mydoge.ethereum");
@@ -367,12 +380,7 @@ export default function EvmDApp() {
     });
   };
 
-  useEffect(() => {
-    if (!address) {
-      return;
-    }
-    return;
-
+  const otherRequest = () => {
     let hash =
       "0x47a3e1bce2cf0a10170c2dde69886c27038ea6ac7f1d742df208d4c4da7fc282";
     let methods = {
@@ -434,6 +442,17 @@ export default function EvmDApp() {
       });
       console.log("evm.request wallet_revokePermissions", res);
     }, 200 * index);
+  };
+
+  useEffect(() => {
+    if (!address) {
+      return;
+    }
+
+    //init erc20 contract
+    init(provider, "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4");
+
+    // otherRequest();
   }, [address]);
 
   const funcList = [
@@ -457,6 +476,28 @@ export default function EvmDApp() {
       className="rounded p-3 w-5/12 text-xs"
       style={{ marginRight: "40px" }}
     >
+      <div
+        id="elementId"
+        style={{ height: "0px", overflow: "auto" }}
+        onScroll={(e) => {
+          let target = e.target;
+          console.log(
+            target,
+            target.clientHeight,
+            target.scrollHeight,
+            target.scrollTop,
+          );
+          if (
+            target.clientHeight + target.scrollTop >=
+            target.scrollHeight - 100
+          ) {
+            // User has scrolled to the bottom
+            console.log("Reached bottom!");
+          }
+        }}
+      >
+        <div style={{ height: "1000px", border: "10px solid red" }}></div>
+      </div>
       <h2 className="text-lg">
         ETH DApp Demo，{" "}
         <a
@@ -603,22 +644,21 @@ function ERC20Contact({ address }) {
         <button
           size="sm"
           className="border-1 rounded-5 bg-[#dedede] p-1 mr-5"
-          onClick={() => {
+          onClick={async () => {
             if (!address) {
               alert("plase connect 1st.");
               return;
             }
-            approve({ address }, (hashDetail) => {
-              console.log(
-                "erc20 approve:",
-                hashDetail.transactionHash,
-                hashDetail,
-              );
-              setData({
-                title: "erc20 approve",
-                hash: hashDetail.transactionHash,
-                hashDetail: getHashData(hashDetail),
-              });
+            let hashDetail = await approve({ address, amount: 9876543 });
+            console.log(
+              "erc20 approve:",
+              hashDetail.transactionHash,
+              hashDetail,
+            );
+            setData({
+              title: "erc20 approve",
+              hash: hashDetail.transactionHash,
+              hashDetail: getHashData(hashDetail),
             });
           }}
         >

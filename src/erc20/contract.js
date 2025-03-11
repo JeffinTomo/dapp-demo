@@ -2,12 +2,15 @@ import { parseGwei, parseEther, toHex, erc20Abi } from "viem";
 
 import Web3 from "web3";
 
-const web3 = new Web3(window.mydoge.ethereum);
+let web3 = new Web3(window.mydoge.ethereum);
+let tokenAddress = "";
+let contractToken = null;
 
-//https://base.blockscout.com/token/0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4
-const tokenAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
-
-const contractToken = new web3.eth.Contract(erc20Abi, tokenAddress);
+const init = (provider, address) => {
+  web3 = new Web3(provider);
+  tokenAddress = address;
+  contractToken = new web3.eth.Contract(erc20Abi, tokenAddress);
+};
 
 const getBalance = async (address) => {
   let balance = await contractToken.methods.balanceOf(address).call();
@@ -28,48 +31,22 @@ const increaseAllowance = async (address, amount) => {
   return res;
 };
 
-const approve = (data, callback) => {
-  let { address, max = 9876543 } = data;
-  let limit = parseEther(max.toString());
-  contractToken.methods
-    .approve(tokenAddress, limit)
-    .send({
-      from: address,
-    })
-    .then((result) => {
-      callback(result);
-    })
-    .catch((err) => {
-      console.log("erc20 approve err", err);
-    });
+const approve = async (data) => {
+  let { address, amount } = data;
+  let limit = parseEther(amount.toString());
+  let res = contractToken.methods.approve(tokenAddress, limit).send({
+    from: address,
+  });
+  return res;
 };
 
 const transfer = async (data) => {
   let { address, to, amount } = data;
-  let value = parseGwei(amount.toString());
-  contractToken.methods
-    .transfer(to, toHex(value))
-    .send({
-      from: address,
-    })
-    .then((result) => {
-      console.log("erc20 approve ok", result);
-    })
-    .catch((err) => {
-      console.log("erc20 approve err", err);
-    });
-
-  // let rawTx = {
-  //   from: address,
-  //   to: to,
-  //   value: 0,
-  //   data: contractToken.methods.transfer(to, toHex(value)).encodeABI(),
-  // };
-  // let res = await provider.request({
-  //   method: "eth_sendTransaction",
-  //   params: [rawTx],
-  // });
-  // return res;
+  let value = parseEther(amount.toString());
+  let res = contractToken.methods.transfer(to, value).send({
+    from: address,
+  });
+  return res;
 };
 
-export { getBalance, allowance, approve, transfer };
+export { init, getBalance, allowance, approve, transfer };

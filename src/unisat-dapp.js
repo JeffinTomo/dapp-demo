@@ -9,9 +9,9 @@ export default function UnisatDApp() {
 
   const [currentInfo, setCurrentInfo] = useState({});
   const [params, setParams] = useState("");
-  const [amount, setAmount] = useState(0.1);
+  const [amount, setAmount] = useState(0.05);
   const [toAddress, setToAddress] = useState(
-    "DLsbf5qa5XKXGsMamvLUWeimmMKBnFMV7h",
+    "D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF",
   );
   const [providerName, setProviderName] = useState("mydoge.doge");
 
