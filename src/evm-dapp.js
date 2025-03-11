@@ -27,8 +27,8 @@ import {
 
 // amount: "0x82b7078075c80819c0000"
 // const = balance: "0xcd167d21c84df9abb6db5"
-const v = formatEther(fromHex("0x82b7078075c80819c0000", "bigint"));
-console.log(v);
+const v = formatEther(fromHex("0x3a5744110930aca31b", "bigint"));
+console.log("1111", v);
 
 export default function EvmDApp() {
   const [providerName, setProviderName] = useState("mydoge.ethereum");
@@ -633,8 +633,8 @@ function ERC20Contact({ address }) {
             let limit = await allowance(address);
             console.log("erc20 allowance/balance:", { balance, limit });
             setData({
-              balance: toHex(balance),
-              allowance: toHex(limit),
+              balance: balance.toString(),
+              allowance: limit.toString(),
               title: "erc20 allowance/balance",
             });
           }}
@@ -649,7 +649,10 @@ function ERC20Contact({ address }) {
               alert("plase connect 1st.");
               return;
             }
-            let hashDetail = await approve({ address, amount: 9876543 });
+            let hashDetail = await approve({
+              address,
+              amount: 9876543 * Math.ceil(Math.random() * 9),
+            });
             console.log(
               "erc20 approve:",
               hashDetail.transactionHash,
