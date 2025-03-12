@@ -373,14 +373,7 @@ export default function EvmDApp() {
     // );
   };
 
-  const txCount = async () => {
-    return await provider.request({
-      method: "eth_getTransactionCount",
-      params: ["0xc94770007dda54cF92009BFF0dE90c06F603a09f", "latest"],
-    });
-  };
-
-  const otherRequest = () => {
+  const otherRequests = () => {
     let hash =
       "0x47a3e1bce2cf0a10170c2dde69886c27038ea6ac7f1d742df208d4c4da7fc282";
     let methods = {
@@ -451,8 +444,6 @@ export default function EvmDApp() {
 
     //init erc20 contract
     init(provider, "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4");
-
-    // otherRequest();
   }, [address]);
 
   const funcList = [
@@ -467,7 +458,7 @@ export default function EvmDApp() {
     "signMessage",
     "signTypedData",
     "sendTransaction",
-    "txCount",
+    "otherRequests",
   ];
 
   return (
@@ -563,7 +554,7 @@ export default function EvmDApp() {
           signMessage,
           signTypedData,
           sendTransaction,
-          txCount,
+          otherRequests,
         ].map((func, index) => (
           <div key={index}>
             <button
