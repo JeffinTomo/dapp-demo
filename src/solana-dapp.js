@@ -8,7 +8,8 @@ import {
   Transaction,
 } from "@solana/web3.js";
 
-const provider = window.phantom?.solana;
+// const provider = window.phantom?.solana;
+const provider = window.mydoge?.solana;
 
 export default function SolanaDApp() {
   const [connected, setConnected] = useState(false);
@@ -37,7 +38,7 @@ export default function SolanaDApp() {
   // const contractAddress = await provider.getAccount();
 
   const signMessage = async () => {
-    if (!connected) return;
+    // if (!connected) return;
     try {
       // uint8Array
       const message = `You can use uint8array to verify`;
@@ -45,6 +46,17 @@ export default function SolanaDApp() {
       const signedMessage = await provider.signMessage(encodedMessage);
       const signature = signedMessage?.signature;
       setSignature(signature);
+    } catch (e) {
+      alert(e);
+    }
+  };
+
+  const signMessage2 = async () => {
+    // if (!connected) return;
+    try {
+      // uint8Array
+      const message = `You can use uint8array to verify`;
+      const signedMessage = await provider.signMessage2(encodedMessage);
     } catch (e) {
       alert(e);
     }
@@ -118,6 +130,13 @@ export default function SolanaDApp() {
       <br />
 
       <br />
+
+      <button
+        onClick={signMessage2}
+        className="bg-[#000] text-[#fff] p-1 mb-2 mr-2"
+      >
+        signMessage2
+      </button>
       <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 mb-2">
         signMessage
       </button>
