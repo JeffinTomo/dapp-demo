@@ -20,15 +20,8 @@ import {
   transfer,
 } from "./erc20/contract";
 
-// const provider = window.ethereum;
-
-// console.log("tomo_evm", provider);
-//
-
-// amount: "0x82b7078075c80819c0000"
-// const = balance: "0xcd167d21c84df9abb6db5"
-const v = formatEther(fromHex("0x3a5744110930aca31b", "bigint"));
-console.log("1111", v);
+//https://base.blockscout.com/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+const erc20ContractAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 
 export default function EvmDApp() {
   const [providerName, setProviderName] = useState("mydoge.ethereum");
@@ -443,7 +436,7 @@ export default function EvmDApp() {
     }
 
     //init erc20 contract
-    init(provider, "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4");
+    init(provider, erc20ContractAddress);
   }, [address]);
 
   const funcList = [
@@ -642,7 +635,7 @@ function ERC20Contact({ address }) {
             }
             let hashDetail = await approve({
               address,
-              amount: 9876543 * Math.ceil(Math.random() * 9),
+              amount: 10 * Math.ceil(Math.random() * 9),
             });
             console.log(
               "erc20 approve:",
