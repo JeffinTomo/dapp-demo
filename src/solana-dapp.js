@@ -23,9 +23,26 @@ export default function SolanaDApp() {
   const connect = async () => {
     if (!provider) return;
     try {
-      let { publicKey = "" } = (await provider.connect()) || {};
+      let { publicKey = "" } =
+        (await provider.connect({ onlyIfTrusted: true })) || {};
       let address = publicKey?.toBase58();
       console.log(publicKey.toString());
+      console.log(`Switched to account ${address}, publicKey: ${publicKey}`);
+      setConnected(true);
+      setAddress(address);
+    } catch (err) {
+      setConnected(false);
+      console.error("connected error", err);
+    }
+  };
+
+  const connect2 = async () => {
+    if (!provider) return;
+    try {
+      let res = await provider.request({
+        method: 'connect',
+      });
+      let { publicKey = "" } = res || {};
       console.log(`Switched to account ${address}, publicKey: ${publicKey}`);
       setConnected(true);
       setAddress(address);
@@ -56,7 +73,10 @@ export default function SolanaDApp() {
     try {
       // uint8Array
       const message = `You can use uint8array to verify`;
-      const signedMessage = await provider.signMessage2(encodedMessage);
+      const signedMessage = await provider.request({
+        method: 'signMessage2',
+        params: message
+      });
     } catch (e) {
       alert(e);
     }
@@ -120,6 +140,10 @@ export default function SolanaDApp() {
       <h2>Solana Dapp Demo</h2>
 
       <br />
+
+      <button onClick={connect2} className="bg-[#000] text-[#fff] p-1 mb-2 mr-2">
+        connect2
+      </button>
       <button onClick={connect} className="bg-[#000] text-[#fff] p-1 mb-2">
         connect
       </button>
