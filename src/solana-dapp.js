@@ -131,7 +131,7 @@ export default function SolanaDApp() {
       await connection.getLatestBlockhash()
     ).blockhash;
 
-    const signedTransaction = await provider.signTransaction(transaction);
+    const signedTransaction =  await provider.signTransaction(transaction);
     setSignedTransaction(JSON.stringify(signedTransaction));
   };
 

@@ -21,7 +21,8 @@ import {
 } from "./erc20/contract";
 
 //https://base.blockscout.com/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
-const erc20ContractAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+// const erc20ContractAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+const erc20ContractAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
 
 export default function EvmDApp() {
   const [providerName, setProviderName] = useState("mydoge.ethereum");
@@ -186,12 +187,11 @@ export default function EvmDApp() {
     });
   };
 
-  let exampleMessage =
-    "Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message. \n\nExample `personal_sign` message.Example `personal_sign` message.Example `personal_sign` message.Example";
-
-  exampleMessage = exampleMessage.substring(0, 5000);
+  let exampleMessage = "Example message.Example";
+  // exampleMessage = exampleMessage.substring(0, 5000);
   console.log(exampleMessage.length);
 
+  const [signature, setSignature] = useState();
   const signMessage = async () => {
     if (!address) {
       alert("plase connect 1st");
@@ -202,6 +202,7 @@ export default function EvmDApp() {
         method: "personal_sign",
         params: [exampleMessage, address],
       });
+      setSignature(sign);
 
       let pramas = {
         address,
@@ -305,15 +306,21 @@ export default function EvmDApp() {
 
   //https://docs.metamask.io/wallet/reference/json-rpc-methods/eth_decrypt/
   //https://viem.sh/docs/utilities/recoverTypedDataAddress#signature
-  const decryptMessage = async (signature) => {
+  const decryptMessage = async () => {
     if (!address) {
       alert("plase connect 1st");
       return;
     }
-    await provider.request({
+    if (!signature) { 
+      alert("plase signMessage 1st");
+      return;
+    }
+    let res = await provider.request({
       method: "eth_decrypt",
       params: [signature, address],
     });
+    console.log('decryptMessage',signature, address, res);
+    return res;
   };
 
   //https://viem.sh/docs/utilities/verifyMessage
@@ -366,7 +373,7 @@ export default function EvmDApp() {
     // );
   };
 
-  const otherRequests = () => {
+  const otherRequests = async() => {
     let hash =
       "0x47a3e1bce2cf0a10170c2dde69886c27038ea6ac7f1d742df208d4c4da7fc282";
     let methods = {
@@ -449,6 +456,7 @@ export default function EvmDApp() {
     "switchChain",
     "addToken",
     "signMessage",
+    // "decryptMessage",
     "signTypedData",
     "sendTransaction",
     "otherRequests",
@@ -545,6 +553,7 @@ export default function EvmDApp() {
           switchChain,
           addToken,
           signMessage,
+          // decryptMessage,
           signTypedData,
           sendTransaction,
           otherRequests,
@@ -662,7 +671,7 @@ function ERC20Contact({ address }) {
             let hashDetail = await transfer({
               address,
               to: address,
-              amount: 123,
+              amount: 761,
             });
             console.log(
               "erc20 transfer:",
