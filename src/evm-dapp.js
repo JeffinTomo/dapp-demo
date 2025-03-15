@@ -306,20 +306,36 @@ export default function EvmDApp() {
 
   //https://docs.metamask.io/wallet/reference/json-rpc-methods/eth_decrypt/
   //https://viem.sh/docs/utilities/recoverTypedDataAddress#signature
+  const [encryptedMessage, setEncryptedMessage] = useState('');
+  const message3 = "mydoge support eth_encrypt/eth_decrypt";
+  const encryptMessage = async () => {
+    if (!address) {
+      alert("plase connect 1st");
+      return;
+    }
+    let encryptedMessage = await provider.request({
+      method: "eth_encrypt",
+      params: [message3, address],
+    });
+    setEncryptedMessage(encryptedMessage);
+    console.log('decryptMessage', encryptedMessage);
+    return res;
+  };
+
   const decryptMessage = async () => {
     if (!address) {
       alert("plase connect 1st");
       return;
     }
-    if (!signature) { 
-      alert("plase signMessage 1st");
+    if (!encryptedMessage) { 
+      alert("plase encryptMessage 1st");
       return;
     }
     let res = await provider.request({
       method: "eth_decrypt",
-      params: [signature, address],
+      params: [encryptedMessage, address],
     });
-    console.log('decryptMessage',signature, address, res);
+    console.log('decryptMessage', res === message3,encryptedMessage, address, res);
     return res;
   };
 
@@ -456,7 +472,8 @@ export default function EvmDApp() {
     "switchChain",
     "addToken",
     "signMessage",
-    // "decryptMessage",
+    "encryptMessage",
+    "decryptMessage",
     "signTypedData",
     "sendTransaction",
     "otherRequests",
@@ -553,7 +570,8 @@ export default function EvmDApp() {
           switchChain,
           addToken,
           signMessage,
-          // decryptMessage,
+          encryptMessage,
+          decryptMessage,
           signTypedData,
           sendTransaction,
           otherRequests,
