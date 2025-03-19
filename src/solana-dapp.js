@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import bs58 from "bs58";
 import {
   TransactionMessage,
@@ -8,11 +8,8 @@ import {
   Transaction,
 } from "@solana/web3.js";
 
-// const provider = window.phantom?.solana;
-const provider = window.mydoge?.solana;
 
 export default function SolanaDApp() {
-  const [connected, setConnected] = useState(false);
   const [address, setAddress] = useState("");
   const [signature, setSignature] = useState("");
   const [transaction, setTransaction] = useState("");
@@ -20,56 +17,177 @@ export default function SolanaDApp() {
 
   const connection = new Connection("https://api.devnet.solana.com/");
 
+  const provider = window.mydoge?.solana;
+  // const provider = window.phantom?.solana;
+
+  const [res, setRes] = useState({});
+
+  useEffect(() => {
+    setRes({});
+    // Store user's public key once they connect
+    provider.on("connect", (res) => {
+      console.log('dapp.on.connect', res);
+      setRes({
+          method: 'dapp.on.connect',
+        res
+      });
+    });
+
+    // Forget user's public key once they disconnect
+    provider.on("disconnect", (res) => {
+      console.log('dapp.on.disconnect', res);
+      setRes({
+          method: 'dapp.on.disconnect',
+        res
+      });
+    });
+  }, [provider]);
+  
   const connect = async () => {
-    if (!provider) return;
+    if (!provider) { 
+      alert('provider err');
+      return;
+    }
+    setRes({});
+    //{ onlyIfTrusted: true }
     try {
-      let { publicKey = "" } =
-        (await provider.connect({ onlyIfTrusted: true })) || {};
-      let address = publicKey?.toBase58();
-      console.log(publicKey.toString());
-      console.log(`Switched to account ${address}, publicKey: ${publicKey}`);
-      setConnected(true);
+      const res = await provider.connect() || {};
+      console.log('provider.connect', res);
+      setRes({
+        method: 'connect',
+        res
+      });
+      const { address, publicKey } = res;
+      
+      //todo: publicKey 的格式
+      setAddress(address || res);
+    } catch (err) {
+      console.error("connected error", err);
+    }
+  };
+
+  
+  const connectOnlyIfTrusted = async () => {
+    if (!provider) { 
+      alert('provider err');
+      return;
+    }
+    setRes({});
+    //{ onlyIfTrusted: true }
+    try {
+      const res = await provider.connect({ onlyIfTrusted: true }) || {};
+      setRes({
+        method: 'connect',
+        params: { onlyIfTrusted: true },
+        res
+      });
+      const { address, publicKey } = res;
+      
+      //todo: publicKey 的格式
       setAddress(address);
     } catch (err) {
-      setConnected(false);
       console.error("connected error", err);
     }
   };
 
   const connect2 = async () => {
-    if (!provider) return;
+    if (!provider) { 
+      alert('provider err');
+      return;
+    }
+    setRes({});
     try {
       let res = await provider.request({
         method: 'connect',
       });
-      let { publicKey = "" } = res || {};
+      setRes({
+        method: 'request.connect',
+        res
+      });
+      let { publicKey = "", address } = res || {};
       console.log(`Switched to account ${address}, publicKey: ${publicKey}`);
-      setConnected(true);
       setAddress(address);
     } catch (err) {
-      setConnected(false);
       console.error("connected error", err);
     }
   };
 
-  // const contractAddress = await provider.getAccount();
+  const disconnect = async () => {
+    if (!provider) { 
+      alert('provider err');
+      return;
+    }
+    setRes({});
+    try {
+      let res = await provider.disconnect();
+      setAddress('');
+      setRes({
+        method: 'disconnect',
+        res
+      });
+    } catch (err) {
+      console.error("disconnect error", err);
+    }
+  }
+
+  const getAccount = async () => {
+    // if (!address) { 
+    //   alert('please connect 1st');
+    //   return;
+    // };
+    setRes({});
+    try {
+      const res = await provider.request({
+        method: 'getAccount',
+      });
+      setRes({
+        method: 'getAccount',
+        params: '',
+        res
+      });
+      console.log('getAccount', res);
+    } catch (err) {
+      console.error("getAccount error", err);
+    }
+  };
+
+  const accountChanged = async () => { 
+    console.log('accountChanged reg ok');
+    provider.on("accountChanged", (res) => {
+      console.log('dapp.on.accountChanged linstener:', res);
+      setRes({
+        method: 'dapp.on.accountChanged',
+        res
+      });
+    });
+  }
 
   const signMessage = async () => {
-    // if (!connected) return;
+    if (!address) { 
+      alert('please connect 1st');
+      return;
+    };
+    setRes({});
     try {
       // uint8Array
       const message = `You can use uint8array to verify`;
       const encodedMessage = new TextEncoder().encode(message);
-      const signedMessage = await provider.signMessage(encodedMessage);
+
+      console.log(new TextDecoder().decode(encodedMessage), encodedMessage);
+      const signedMessage = await provider.signMessage(encodedMessage, "utf8");
       const signature = signedMessage?.signature;
       setSignature(signature);
-    } catch (e) {
-      alert(e);
+    } catch (err) {
+      console.error('signMessage', err);
     }
   };
 
   const signMessage2 = async () => {
-    // if (!connected) return;
+    if (!address) { 
+      alert('please connect 1st');
+      return;
+    };
+    setRes({});
     try {
       // uint8Array
       const message = `You can use uint8array to verify`;
@@ -82,8 +200,22 @@ export default function SolanaDApp() {
     }
   };
 
+  const signAndSendTransaction = async () => { }
+
+  const signAndSendAllTransactions = async () => { }
+
+  const signTransaction = async () => { }
+
+  const signAllTransactions = async () => { }
+  
+  const sendRawTransaction = async () => { }
+
   const signVersionedTransaction = async () => {
-    if (!provider) return;
+    if (!address) { 
+      alert('please connect 1st');
+      return;
+    };
+    setRes({});
 
     let minRent = await connection.getMinimumBalanceForRentExemption(0);
 
@@ -115,7 +247,11 @@ export default function SolanaDApp() {
   };
 
   const signLegacyTransaction = async () => {
-    if (!provider) return;
+    if (!address) { 
+      alert('please connect 1st');
+      return;
+    };
+    setRes({});
 
     const transaction = new Transaction().add(
       SystemProgram.transfer({
@@ -135,70 +271,127 @@ export default function SolanaDApp() {
     setSignedTransaction(JSON.stringify(signedTransaction));
   };
 
+  const getTransactionVersion = async () => { }
+  const getSignatureStatuses = async () => { }
+
   return (
     <div className="m-5 text-sm">
       <h2>Solana Dapp Demo</h2>
+      {address && <p>connected: { address }</p>}
 
-      <br />
+      <div className="mt-2">
+        <button onClick={connect} className="bg-[#000] text-[#fff] p-1 m-2">
+          connect
+        </button>
 
-      <button onClick={connect2} className="bg-[#000] text-[#fff] p-1 mb-2 mr-2">
-        connect2
-      </button>
-      <button onClick={connect} className="bg-[#000] text-[#fff] p-1 mb-2">
-        connect
-      </button>
-      <p className="bg-[#f5f5f5] border-1 p-5">
-        {connected ? "connected" : "not connected"}
-      </p>
-      {address && <p>地址：{address}</p>}
-      <br />
+        <button onClick={connectOnlyIfTrusted} className="bg-[#000] text-[#fff] p-1 m-2">
+          connectOnlyIfTrusted
+        </button>
 
-      <br />
+        <button onClick={connect2} className="bg-[#000] text-[#fff] p-1 m-2">
+          request.connect
+        </button>
 
-      <button
-        onClick={signMessage2}
-        className="bg-[#000] text-[#fff] p-1 mb-2 mr-2"
-      >
-        signMessage2
-      </button>
-      <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 mb-2">
-        signMessage
-      </button>
-      {signature && (
-        <div
-          style={{ width: "80%", wordBreak: "break-all" }}
-          className="bg-[#f5f5f5] border-1 p-5"
+        <button onClick={disconnect} className="bg-[#000] text-[#fff] p-1 m-2">
+          disconnect
+        </button>
+      </div>
+
+      <div className="mt-2">
+        <button onClick={accountChanged} className="bg-[#000] text-[#fff] p-1 m-2">
+          accountChanged
+        </button>
+        <button onClick={getAccount} className="bg-[#000] text-[#fff] p-1 m-2">
+          getAccount
+        </button>
+      </div>
+
+      <div className={ 'mt-2 ' + (address ? '' : 'opacity-40')}>
+        <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 m-2">
+          signMessage
+        </button>
+
+        <button
+          onClick={signMessage2}
+          className="bg-[#000] text-[#fff] p-1 m-2"
         >
-          签名： {signature}
-          <div>todo: verifyMessage</div>
+          request.signMessage
+        </button>
+
+        <p></p>
+
+        <button
+          onClick={signAndSendTransaction}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          signAndSendTransaction
+        </button>
+
+        <button
+          onClick={signAndSendAllTransactions}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          signAndSendAllTransactions
+        </button>
+
+        <button
+          onClick={signTransaction}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          signTransaction
+        </button>
+
+        <button
+          onClick={signAllTransactions}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          signAllTransactions
+        </button>
+                
+        <button
+          onClick={sendRawTransaction}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          sendRawTransaction
+        </button>
+
+        <p></p>
+
+        <button
+          onClick={signVersionedTransaction}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          signVersionedTransaction
+        </button>
+        <button
+          onClick={signLegacyTransaction}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          signLegacyTransaction
+        </button>
+      </div>
+
+      <div className={ 'mt-2 ' + (address ? '' : 'opacity-40')}>
+        <button
+          onClick={getSignatureStatuses}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          getSignatureStatuses
+        </button>
+
+        <button
+          onClick={getTransactionVersion}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          getTransactionVersion
+        </button>
+      </div>
+
+      {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
+        <div style={{ wordWrap: "break-word" }}>
+          {JSON.stringify(res, null, "\t")}
         </div>
-      )}
-      <br />
-
-      <br />
-      <button
-        onClick={signVersionedTransaction}
-        className="bg-[#000] text-[#fff] p-1 mb-2"
-      >
-        signVersionedTransaction
-      </button>
-      {transaction && <p>Versioned Transaction:{transaction}</p>}
-      <br />
-
-      <br />
-      <button
-        onClick={signLegacyTransaction}
-        className="bg-[#000] text-[#fff] p-1 mb-2"
-      >
-        signLegacyTransaction
-      </button>
-      {signedTransaction && (
-        <p className="bg-[#f5f5f5] border-1 p-5">
-          Legacy Transaction:{signedTransaction}
-        </p>
-      )}
-      <br />
-      <br />
+      </div>}
     </div>
   );
 }
