@@ -318,8 +318,8 @@ export default function EvmDApp() {
       params: [message3, address],
     });
     setEncryptedMessage(encryptedMessage);
-    console.log('decryptMessage', encryptedMessage);
-    return res;
+    console.log('encryptedMessage', encryptedMessage);
+    return JSON.stringify(encryptedMessage);
   };
 
   const decryptMessage = async () => {
@@ -508,7 +508,7 @@ export default function EvmDApp() {
         <div style={{ height: "1000px", border: "10px solid red" }}></div>
       </div>
       <h2 className="text-lg">
-        ETH DApp Demo，{" "}
+        ETH DApp Demo,{" "}
         <a
           className="text-blue-700"
           href="https://chromewebstore.google.com/detail/tomo-wallet/pfccjkejcgoppjnllalolplgogenfojk"

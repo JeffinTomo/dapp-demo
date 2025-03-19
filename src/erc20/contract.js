@@ -2,7 +2,7 @@ import { parseGwei, parseEther, toHex, erc20Abi } from "viem";
 
 import Web3 from "web3";
 
-let web3 = new Web3(window.mydoge.ethereum);
+let web3 = new Web3(window?.mydoge?.ethereum);
 let tokenAddress = "";
 let contractToken = null;
 
