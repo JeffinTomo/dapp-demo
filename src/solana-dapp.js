@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import bs58 from "bs58";
 import {
+  PublicKey,
   TransactionMessage,
   VersionedTransaction,
   SystemProgram,
@@ -58,6 +59,8 @@ export default function SolanaDApp() {
         res
       });
       const { address, publicKey } = res;
+      const address1 = publicKey ? publicKey.toString() : '';
+      console.log('connect', {address, address1}, res);
       
       //todo: publicKey 的格式
       setAddress(address || res);
@@ -153,11 +156,15 @@ export default function SolanaDApp() {
 
   const accountChanged = async () => { 
     console.log('accountChanged reg ok');
-    provider.on("accountChanged", (res) => {
-      console.log('dapp.on.accountChanged linstener:', res);
+    provider.on("accountChanged", (publicKey) => {
+      if (publicKey) {
+        console.log(`dapp.on.accountChanged linstener: ${publicKey.toBase58()}`, publicKey);
+      } else { 
+        console.log('social wallet, no publicKey');
+      }
       setRes({
         method: 'dapp.on.accountChanged',
-        res
+        res: publicKey
       });
     });
   }

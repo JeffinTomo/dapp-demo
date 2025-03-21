@@ -10,14 +10,14 @@ import {
 } from "react-router-dom";
 
 import EvmDapp from "./evm-dapp";
-import UnisatDapp from "./unisat-dapp";
+import DogeDapp from "./doge-dapp";
 import SolanaDapp from "./solana-dapp";
 
 // import { Buffer } from 'buffer';
 // window.Buffer = Buffer;
 
 function App() {
-  const chains = ["unisat", "evm", "solana"];
+  const chains = ["doge", "evm", "solana"];
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -44,7 +44,7 @@ function App() {
         <Routes>
           <Route exact path="/" element={<EvmDapp />} />
           <Route exact path="/evm" element={<EvmDapp />} />
-          <Route exact path="/unisat" element={<UnisatDapp />} />
+          <Route exact path="/doge" element={<DogeDapp />} />
           <Route exact path="/solana" element={<SolanaDapp />} />
         </Routes>
       </BrowserRouter>
