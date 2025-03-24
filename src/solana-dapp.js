@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import bs58 from "bs58";
 import {
   PublicKey,
+  AddressLookupTableProgram,
   TransactionMessage,
   VersionedTransaction,
   SystemProgram,
@@ -18,8 +19,8 @@ export default function SolanaDApp() {
 
   const connection = new Connection("https://api.devnet.solana.com/");
 
-  // const provider = window.mydoge?.solana;
-  const provider = window.phantom?.solana;
+  const provider = window.mydoge?.solana;
+  // const provider = window.phantom?.solana;
 
   const [res, setRes] = useState({});
 
@@ -56,7 +57,7 @@ export default function SolanaDApp() {
       });
       
       //todo: publicKey 的格式
-      setAddress(address1);
+      setAddress(address1 || address);
     } catch (err) {
       console.error("connected error", err);
     }
@@ -160,7 +161,7 @@ export default function SolanaDApp() {
       }
       setRes({
         method: 'dapp.on.accountChanged',
-        res: publicKey
+        res: {publicKey}
       });
     });
   }
@@ -176,10 +177,15 @@ export default function SolanaDApp() {
       const message = `You can use uint8array to verify`;
       const encodedMessage = new TextEncoder().encode(message);
 
-      console.log(new TextDecoder().decode(encodedMessage), encodedMessage);
       const signedMessage = await provider.signMessage(encodedMessage, "utf8");
+      console.log(new TextDecoder().decode(encodedMessage), encodedMessage, signedMessage);
+
       const signature = signedMessage?.signature;
       setSignature(signature);
+      setRes({
+        method: 'signMessage',
+        res: signedMessage
+      });
     } catch (err) {
       console.error('signMessage', err);
     }
@@ -193,25 +199,131 @@ export default function SolanaDApp() {
     setRes({});
     try {
       // uint8Array
-      const message = `You can use uint8array to verify`;
+      const message = `To avoid digital dognappers, sign below to authenticate with CryptoCorgis`;
+      const encodedMessage = new TextEncoder().encode(message);
+      
       const signedMessage = await provider.request({
-        method: 'signMessage2',
-        params: message
+        method: 'signMessage',
+        params: {
+          message: encodedMessage,
+          display: "hex",
+        }
+      });
+      console.log(message, signedMessage);
+      setRes({
+        method: 'request.signMessage',
+        res: signedMessage
       });
     } catch (e) {
-      alert(e);
+      console.error(e);
     }
   };
 
-  const signAndSendTransaction = async () => { }
+  const signAndSendTransaction = async () => { 
+    setRes({});
+    const tx = await createLegacyTx();
+    const { signature } = await provider.signAndSendTransaction(tx);
 
-  const signAndSendAllTransactions = async () => { }
+    console.log('signAndSendTransaction legacyTransaction', tx, signature);
+    addSigned(signature);
 
-  const signTransaction = async () => { }
+    setRes({
+      method: 'signAndSendTransaction',
+      type: 'legacyTransaction',
+      signature
+    });
 
-  const signAllTransactions = async () => { }
-  
-  const sendRawTransaction = async () => { }
+  }
+
+  const signAndSendTransaction2 = async () => { 
+    setRes({});
+    const tx = await createVersionedTx();
+    const { signature } = await provider.signAndSendTransaction(tx);
+
+    console.log('signAndSendTransaction versionedTransaction', tx, signature);
+    addSigned(signature);
+
+    setRes({
+      method: 'signAndSendTransaction',
+      type: 'versionedTransaction',
+      signature
+    });
+  }
+
+  const signAndSendTransaction3 = async () => { 
+    setRes({});
+
+    const publicKey = provider.publicKey;
+    
+    const recentSlot = await connection.getSlot();
+    const [lookupTableInst, lookupTableAddress] = AddressLookupTableProgram.createLookupTable({
+      authority: publicKey,
+      payer: publicKey,
+      recentSlot
+    });
+
+    // To create the Address Lookup Table on chain:
+    // send the `lookupTableInst` instruction in a transaction
+    const blockhash =  (await connection.getLatestBlockhash()).blockhash;
+    const lookupMessage = new TransactionMessage({
+      payerKey: publicKey,
+      recentBlockhash: blockhash,
+      instructions: [lookupTableInst],
+    }).compileToV0Message();
+
+    const lookupTransaction = new VersionedTransaction(lookupMessage);
+    const { signature } = await provider.signAndSendTransaction(lookupTransaction);
+
+    console.log('signAndSendTransaction VersionedTransaction(lookupMessage)', lookupTransaction, signature);
+    addSigned(signature);
+
+    setRes({
+      method: 'signAndSendTransaction.lookupTransaction',
+      type: 'VersionedTransaction(lookupMessage)',
+      lookupTransaction,
+      lookupMessage,
+      lookupTableAddress,
+      signature
+    });
+  }  
+
+  const signAndSendAllTransactions = async () => {
+    setRes({});
+    const transactions = [await createLegacyTx(), await createVersionedTx()];
+    const { signatures, publicKey } = await provider.signAndSendAllTransactions(transactions);
+
+    console.log('signAndSendTransaction list', transactions, publicKey, signatures);
+    addSigned(signatures);
+
+    setRes({
+      method: 'signAndSendAllTransactions',
+      transactions,
+      signatures,
+      publicKey
+    });
+  }
+
+  //not recommended
+  const signAllTransactions = async () => {
+    setRes({});
+    const transactions = [await createLegacyTx(), await createLegacyTx()];
+
+    // const messages = transactions.map(transaction => {
+    //     return bs58.encode(transaction.serializeMessage());
+    // });
+    // const signedTransactions = await provider.request({
+    //   method: "signAllTransactions",
+    //   params: { message: messages },
+    // });
+
+    const signedTransactions = await provider.signAllTransactions(transactions);
+
+    setRes({
+      method: 'signAllTransactions',
+      transactions,
+      signedTransactions
+    });
+  }
 
   const signVersionedTransaction = async () => {
     if (!address) { 
@@ -220,6 +332,51 @@ export default function SolanaDApp() {
     };
     setRes({});
 
+    const transactionV0 = await createVersionedTx();
+    const signedTransaction = await provider.signTransaction(transactionV0);
+
+    setRes({
+      method: 'signTransaction',
+      type: 'versionedTransaction',
+      signedTransaction,
+      transactionV0
+    });
+  };
+
+  const signLegacyTransaction = async () => {
+    if (!address) { 
+      alert('please connect 1st');
+      return;
+    };
+    setRes({});
+
+    const transaction = await createLegacyTx();
+    const signedTransaction =  await provider.signTransaction(transaction);
+    setRes({
+      method: 'signTransaction',
+      type: 'legacyTransaction',
+      transaction,
+      signedTransaction
+    });
+  };
+
+  async function createLegacyTx() { 
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+    const transaction = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: provider.publicKey, //payer
+        toPubkey: provider.publicKey, //toAccount
+        lamports: 100,
+      }),
+    );
+    transaction.feePayer = provider.publicKey;
+    transaction.recentBlockhash = blockhash;
+    transaction.lastValidBlockHeight = lastValidBlockHeight;
+
+    return transaction;
+  }
+
+  async function createVersionedTx() { 
     let minRent = await connection.getMinimumBalanceForRentExemption(0);
 
     // create array of instructions
@@ -231,9 +388,7 @@ export default function SolanaDApp() {
       }),
     ];
 
-    let blockhash = await connection
-      .getLatestBlockhash()
-      .then((res) => res.blockhash);
+    let blockhash = await connection.getLatestBlockhash().then((res) => res.blockhash);
 
     // create v0 compatible message
     const messageV0 = new TransactionMessage({
@@ -244,38 +399,28 @@ export default function SolanaDApp() {
 
     // make a versioned transaction
     const transactionV0 = new VersionedTransaction(messageV0);
+    return transactionV0;
+  }
 
-    const signedTransaction = await provider.signTransaction(transactionV0);
-    setTransaction(JSON.stringify(signedTransaction));
-  };
-
-  const signLegacyTransaction = async () => {
-    if (!address) { 
-      alert('please connect 1st');
+  function addSigned(sign) { 
+    window.addSigned = window.addSigned || {};
+    if (typeof sign === 'string') { 
+      window.addSigned[sign] = true;
       return;
-    };
-    setRes({});
+    }
+    sign.forEach((signItem) => { 
+      window.addSigned[signItem] = true;
+    });
+  }
 
-    const transaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: provider.publicKey, //payer
-        toPubkey: provider.publicKey, //toAccount
-        lamports: 100,
-      }),
-    );
-    transaction.feePayer = provider.publicKey;
-
-    const anyTransaction = transaction;
-    anyTransaction.recentBlockhash = (
-      await connection.getLatestBlockhash()
-    ).blockhash;
-
-    const signedTransaction =  await provider.signTransaction(transaction);
-    setSignedTransaction(JSON.stringify(signedTransaction));
-  };
-
-  const getTransactionVersion = async () => { }
-  const getSignatureStatuses = async () => { }
+  useEffect(() => {
+    const signedMap = window.addSigned || {};
+    for (var signature in signedMap) { 
+      connection.getSignatureStatus(signature).then((res) => {
+        console.log('getSignatureStatus:', signature, res);
+      });
+    }
+  }, [window.addSigned]);
 
   return (
     <div className="m-5 text-sm">
@@ -309,7 +454,7 @@ export default function SolanaDApp() {
         </button>
       </div>
 
-      <div className={ 'mt-2 ' + (address ? '' : 'opacity-40')}>
+      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}>
         <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 m-2">
           signMessage
         </button>
@@ -321,14 +466,11 @@ export default function SolanaDApp() {
           request.signMessage
         </button>
 
-        <p></p>
+        <div className="h-[30px]"></div>
 
-        <button
-          onClick={signAndSendTransaction}
-          className="bg-[#000] text-[#fff] p-1 m-2"
-        >
-          signAndSendTransaction
-        </button>
+        <button onClick={signAndSendTransaction} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction</button>
+        <button onClick={signAndSendTransaction2} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction.versionedTransaction</button>
+        <button onClick={signAndSendTransaction3} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction.lookupTransaction</button>
 
         <button
           onClick={signAndSendAllTransactions}
@@ -337,11 +479,19 @@ export default function SolanaDApp() {
           signAndSendAllTransactions
         </button>
 
+        <div className="h-[0px]"></div>
+
         <button
-          onClick={signTransaction}
+          onClick={signVersionedTransaction}
           className="bg-[#000] text-[#fff] p-1 m-2"
         >
-          signTransaction
+          signTransaction.versionedTransaction
+        </button>
+        <button
+          onClick={signLegacyTransaction}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          signTransaction.legacyTransaction
         </button>
 
         <button
@@ -349,44 +499,6 @@ export default function SolanaDApp() {
           className="bg-[#000] text-[#fff] p-1 m-2"
         >
           signAllTransactions
-        </button>
-                
-        <button
-          onClick={sendRawTransaction}
-          className="bg-[#000] text-[#fff] p-1 m-2"
-        >
-          sendRawTransaction
-        </button>
-
-        <p></p>
-
-        <button
-          onClick={signVersionedTransaction}
-          className="bg-[#000] text-[#fff] p-1 m-2"
-        >
-          signVersionedTransaction
-        </button>
-        <button
-          onClick={signLegacyTransaction}
-          className="bg-[#000] text-[#fff] p-1 m-2"
-        >
-          signLegacyTransaction
-        </button>
-      </div>
-
-      <div className={ 'mt-2 ' + (address ? '' : 'opacity-40')}>
-        <button
-          onClick={getSignatureStatuses}
-          className="bg-[#000] text-[#fff] p-1 m-2"
-        >
-          getSignatureStatuses
-        </button>
-
-        <button
-          onClick={getTransactionVersion}
-          className="bg-[#000] text-[#fff] p-1 m-2"
-        >
-          getTransactionVersion
         </button>
       </div>
 
