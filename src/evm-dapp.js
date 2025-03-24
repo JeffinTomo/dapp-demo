@@ -660,19 +660,26 @@ function ERC20Contact({ address }) {
               alert("plase connect 1st.");
               return;
             }
-            let hashDetail = await approve({
+            approve({
               address,
               amount: 10 * Math.ceil(Math.random() * 9),
-            });
-            console.log(
-              "erc20 approve:",
-              hashDetail.transactionHash,
-              hashDetail,
-            );
-            setData({
-              title: "erc20 approve",
-              hash: hashDetail.transactionHash,
-              hashDetail: getHashData(hashDetail),
+            }).then((hashDetail) => {
+              console.log(
+                "erc20 approve:",
+                hashDetail.transactionHash,
+                hashDetail,
+              );
+              setData({
+                title: "erc20 approve",
+                hash: hashDetail.transactionHash,
+                hashDetail: getHashData(hashDetail),
+              });
+            }).catch((err) => {
+              setData({
+                title: "erc20 approve",
+                err
+              });
+              console.error(err);
             });
           }}
         >
@@ -686,20 +693,27 @@ function ERC20Contact({ address }) {
               alert("plase connect 1st.");
               return;
             }
-            let hashDetail = await transfer({
+            await transfer({
               address,
               to: address,
               amount: 761,
-            });
-            console.log(
-              "erc20 transfer:",
-              hashDetail?.transactionHash,
-              hashDetail,
-            );
-            setData({
-              title: "erc20 transfer",
-              hash: hashDetail?.transactionHash,
-              hashDetail: getHashData(hashDetail),
+            }).then((hashDetail) => {
+              console.log(
+                "erc20 transfer:",
+                hashDetail?.transactionHash,
+                hashDetail,
+              );
+              setData({
+                title: "erc20 transfer",
+                hash: hashDetail?.transactionHash,
+                hashDetail: getHashData(hashDetail),
+              });
+            }).catch((err) => {
+              setData({
+                title: "erc20 transfer",
+                err,
+              });
+              console.error(err);
             });
           }}
         >
@@ -708,7 +722,7 @@ function ERC20Contact({ address }) {
       </div>
 
       {data.title && (
-        <pre className="bg-[#f5f5f5] border-1 p-5 mt-5">
+        <pre className={"bg-[#f5f5f5] border-1 p-5 mt-5" + (data.err ? ' text-red-500' : '')}>
           {JSON.stringify(data, null, "\t")}
         </pre>
       )}

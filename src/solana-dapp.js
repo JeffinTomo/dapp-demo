@@ -18,8 +18,8 @@ export default function SolanaDApp() {
 
   const connection = new Connection("https://api.devnet.solana.com/");
 
-  const provider = window.mydoge?.solana;
-  // const provider = window.phantom?.solana;
+  // const provider = window.mydoge?.solana;
+  const provider = window.phantom?.solana;
 
   const [res, setRes] = useState({});
 
@@ -28,19 +28,11 @@ export default function SolanaDApp() {
     // Store user's public key once they connect
     provider.on("connect", (res) => {
       console.log('dapp.on.connect', res);
-      setRes({
-          method: 'dapp.on.connect',
-        res
-      });
     });
 
     // Forget user's public key once they disconnect
     provider.on("disconnect", (res) => {
       console.log('dapp.on.disconnect', res);
-      setRes({
-          method: 'dapp.on.disconnect',
-        res
-      });
     });
   }, [provider]);
   
@@ -54,21 +46,21 @@ export default function SolanaDApp() {
     try {
       const res = await provider.connect() || {};
       console.log('provider.connect', res);
+      const { address, publicKey } = res;
+      const address1 = publicKey ? publicKey.toString() : '';
+      console.log('connect', { address, address1 }, res);
+      
       setRes({
         method: 'connect',
         res
       });
-      const { address, publicKey } = res;
-      const address1 = publicKey ? publicKey.toString() : '';
-      console.log('connect', {address, address1}, res);
       
       //todo: publicKey 的格式
-      setAddress(address || res);
+      setAddress(address1);
     } catch (err) {
       console.error("connected error", err);
     }
   };
-
   
   const connectOnlyIfTrusted = async () => {
     if (!provider) { 
@@ -79,15 +71,15 @@ export default function SolanaDApp() {
     //{ onlyIfTrusted: true }
     try {
       const res = await provider.connect({ onlyIfTrusted: true }) || {};
+      const { address, publicKey } = res;
+      const address1 = publicKey ? publicKey.toString() : '';
       setRes({
         method: 'connect',
         params: { onlyIfTrusted: true },
         res
-      });
-      const { address, publicKey } = res;
-      
+      });      
       //todo: publicKey 的格式
-      setAddress(address);
+      setAddress(address1);
     } catch (err) {
       console.error("connected error", err);
     }
@@ -103,13 +95,13 @@ export default function SolanaDApp() {
       let res = await provider.request({
         method: 'connect',
       });
+      const { address, publicKey } = res;
+      const address1 = publicKey ? publicKey.toString() : '';
       setRes({
         method: 'request.connect',
         res
       });
-      let { publicKey = "", address } = res || {};
-      console.log(`Switched to account ${address}, publicKey: ${publicKey}`);
-      setAddress(address);
+      setAddress(address1);
     } catch (err) {
       console.error("connected error", err);
     }
@@ -122,7 +114,8 @@ export default function SolanaDApp() {
     }
     setRes({});
     try {
-      let res = await provider.disconnect();
+      // const res = await provider.request({ method: "disconnect" });
+      const res = await provider.disconnect();
       setAddress('');
       setRes({
         method: 'disconnect',
@@ -143,11 +136,14 @@ export default function SolanaDApp() {
       const res = await provider.request({
         method: 'getAccount',
       });
+      const { address, publicKey } = res?.[0];
+      const address1 = publicKey ? publicKey.toString() : '';
       setRes({
         method: 'getAccount',
         params: '',
-        res
+        res: [address1]
       });
+      setAddress(address1);
       console.log('getAccount', res);
     } catch (err) {
       console.error("getAccount error", err);
@@ -395,9 +391,9 @@ export default function SolanaDApp() {
       </div>
 
       {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
-        <div style={{ wordWrap: "break-word" }}>
+        <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}
-        </div>
+        </pre>
       </div>}
     </div>
   );
