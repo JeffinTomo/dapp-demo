@@ -299,9 +299,12 @@ export default function SolanaDApp() {
   const signAndSendAllTransactions = async () => {
     setRes({});
     const transactions = [await createLegacyTx(), await createVersionedTx(), await createLookupTx()];
+
+
+    console.log('signAndSendTransaction list 1', transactions);
     const { signatures, publicKey } = await provider.signAndSendAllTransactions(transactions);
 
-    console.log('signAndSendTransaction list', transactions, publicKey, signatures);
+    console.log('signAndSendTransaction list 2', transactions, publicKey, signatures);
     addSignedData(signatures);
 
     setRes({
@@ -393,6 +396,17 @@ export default function SolanaDApp() {
     transaction.feePayer = provider.publicKey;
     transaction.recentBlockhash = blockhash;
     transaction.lastValidBlockHeight = lastValidBlockHeight;
+
+    const { data, keys, programId } = transaction.instructions?.[0] || {};
+
+    console.log('createLegacyTx', transaction, {
+      feePayer: transaction.feePayer.toString(),
+      programId: programId.toString(),
+      pubkey1: keys[0].pubkey.toString(),
+      pubkey2: keys[1].pubkey.toString(),
+      data1: new TextDecoder().decode(data),
+      data2: bs58.encode(data),
+    })
 
     return transaction;
   }

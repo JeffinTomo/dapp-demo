@@ -21,8 +21,8 @@ import {
 } from "./erc20/contract";
 
 //https://base.blockscout.com/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
-// const erc20ContractAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-const erc20ContractAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
+const erc20ContractAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+// const erc20ContractAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
 
 export default function EvmDApp() {
   const [providerName, setProviderName] = useState("mydoge.ethereum");
@@ -188,8 +188,6 @@ export default function EvmDApp() {
   };
 
   let exampleMessage = "Example message.Example";
-  // exampleMessage = exampleMessage.substring(0, 5000);
-  console.log(exampleMessage.length);
 
   const [signature, setSignature] = useState();
   const signMessage = async () => {
@@ -453,15 +451,6 @@ export default function EvmDApp() {
     }, 200 * index);
   };
 
-  useEffect(() => {
-    if (!address) {
-      return;
-    }
-
-    //init erc20 contract
-    init(provider, erc20ContractAddress);
-  }, [address]);
-
   const funcList = [
     "connect",
     "disconnect",
@@ -482,7 +471,7 @@ export default function EvmDApp() {
   return (
     <div
       id="evm-dapp"
-      className="rounded p-3 w-5/12 text-xs"
+      className="rounded p-3 text-xs"
       style={{ marginRight: "40px" }}
     >
       <div
@@ -607,7 +596,8 @@ export default function EvmDApp() {
         ))}
       </div>
 
-      <ERC20Contact address={address} />
+      {address && <ERC20Contact address={address} provider={provider} providerName={providerName} />}
+      <div className="h-[200px]"></div>
     </div>
   );
 }
@@ -625,13 +615,32 @@ function getHashData(hashDetail) {
   return data;
 }
 
-function ERC20Contact({ address }) {
+function ERC20Contact({ address, providerName, provider }) {
   const [data, setData] = useState({});
+
+  useEffect(() => {
+    //init erc20 contract
+    const contractToken = init(provider, erc20ContractAddress);
+
+    (async()=>{ 
+      const decimals = await contractToken.methods.decimals().call();
+      const name = await contractToken.methods.name().call();
+      const symbol = await contractToken.methods.symbol().call();
+      console.log('contract instance', contractToken, { decimals: Number(decimals), name, symbol });
+      setData({
+        title: 'contract info',
+        contractAddress: erc20ContractAddress,
+        decimals: Number(decimals),
+        name,
+        symbol,
+      });
+    })();
+  }, [address, provider, providerName]);
 
   return (
     <>
       <div className="mt-10">
-        <h2 className="mt-5 mb-2 text-lg">erc20</h2>
+        <h2 className="mt-5 mb-2 text-lg">erc20: { erc20ContractAddress }</h2>
         <button
           size="sm"
           className="border-1 rounded-5 bg-[#dedede] p-1 mr-5"
@@ -644,6 +653,7 @@ function ERC20Contact({ address }) {
             let limit = await allowance(address);
             console.log("erc20 allowance/balance:", { balance, limit });
             setData({
+              contractAddress: erc20ContractAddress,
               balance: balance.toString(),
               allowance: limit.toString(),
               title: "erc20 allowance/balance",
@@ -671,6 +681,7 @@ function ERC20Contact({ address }) {
               );
               setData({
                 title: "erc20 approve",
+                contractAddress: erc20ContractAddress,
                 hash: hashDetail.transactionHash,
                 hashDetail: getHashData(hashDetail),
               });
@@ -696,7 +707,7 @@ function ERC20Contact({ address }) {
             await transfer({
               address,
               to: address,
-              amount: 761,
+              amount: 0.01,
             }).then((hashDetail) => {
               console.log(
                 "erc20 transfer:",
@@ -705,6 +716,7 @@ function ERC20Contact({ address }) {
               );
               setData({
                 title: "erc20 transfer",
+                contractAddress: erc20ContractAddress,
                 hash: hashDetail?.transactionHash,
                 hashDetail: getHashData(hashDetail),
               });

@@ -1,4 +1,4 @@
-import { parseGwei, parseEther, toHex, erc20Abi } from "viem";
+import { parseGwei, parseEther, parseUnits, formatUnits, toHex, erc20Abi } from "viem";
 
 import Web3 from "web3";
 
@@ -11,40 +11,43 @@ const init = (provider, address) => {
   tokenAddress = address;
   contractToken = new web3.eth.Contract(erc20Abi, tokenAddress);
   console.log(contractToken.methods);
+  return contractToken;
 };
 
 const getBalance = async (address) => {
-  let balance = await contractToken.methods.balanceOf(address).call();
+  const balance = await contractToken.methods.balanceOf(address).call();
   return balance;
 };
 
 //decreaseAllowance
 //increaseAllowance
 const allowance = async (address) => {
-  let res = await contractToken.methods.allowance(address, tokenAddress).call();
+  const res = await contractToken.methods.allowance(address, tokenAddress).call();
   return res;
 };
 
 const increaseAllowance = async (address, amount) => {
-  let res = await contractToken.methods
+  const res = await contractToken.methods
     .increaseAllowance(address, amount)
     .call();
   return res;
 };
 
 const approve = async (data) => {
-  let { address, amount } = data;
-  let limit = parseEther(amount.toString());
-  let res = contractToken.methods.approve(tokenAddress, limit).send({
+  const decimals = await contractToken.methods.decimals().call();
+  const { address, amount } = data;
+  const limit = parseUnits(amount.toString(), Number(decimals));
+  const res = contractToken.methods.approve(tokenAddress, limit).send({
     from: address,
   });
   return res;
 };
 
 const transfer = async (data) => {
-  let { address, to, amount } = data;
-  let value = parseEther(amount.toString());
-  let res = contractToken.methods.transfer(to, value).send({
+  const decimals = await contractToken.methods.decimals().call();
+  const { address, to, amount } = data;
+  const value = parseUnits(amount.toString(), Number(decimals));
+  const res = contractToken.methods.transfer(to, value).send({
     from: address,
   });
   return res;
