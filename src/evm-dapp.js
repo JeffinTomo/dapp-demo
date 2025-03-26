@@ -26,7 +26,7 @@ const erc20ContractAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
 
 export default function EvmDApp() {
   const [providerName, setProviderName] = useState("mydoge.ethereum");
-  let provider = window.mydoge.ethereum;
+  let provider = window.mydoge?.ethereum;
   const web3 = new Web3(provider);
 
   const [currentInfo, setCurrentInfo] = useState({});

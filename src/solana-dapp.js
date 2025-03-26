@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import bs58 from "bs58";
+import BN from "bn.js";
 import {
   PublicKey,
   AddressLookupTableProgram,
@@ -8,8 +9,39 @@ import {
   SystemProgram,
   Connection,
   Transaction,
+  LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 
+function getBnString(bn) {
+  // const _bn = new BN(bn._bn.words, "le").maskn(bn._bn.length * 32);
+  return convertBNToPublicKey(bn).toString();
+}
+
+function convertBNToPublicKey(bnObject) {
+  try {
+    if (!bnObject || !bnObject._bn || !bnObject._bn.words) {
+      throw new Error('Invalid BN object');
+    }
+
+    // Convert words array to number array
+    const words = bnObject._bn.words;
+    const numbers = new Uint8Array(32);
+    
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      const offset = i * 4;
+      numbers[offset] = word & 255;
+      numbers[offset + 1] = (word >> 8) & 255;
+      numbers[offset + 2] = (word >> 16) & 255;
+      numbers[offset + 3] = (word >> 24) & 255;
+    }
+
+    return new PublicKey(numbers);
+  } catch (error) {
+    console.error('Error converting BN to PublicKey:', error);
+    return null;
+  }
+}
 
 export default function SolanaDApp() {
   const [address, setAddress] = useState("");
@@ -19,8 +51,7 @@ export default function SolanaDApp() {
 
   const connection = new Connection("https://api.devnet.solana.com/");
 
-  const provider = window.mydoge?.solana;
-  // const provider = window.phantom?.solana;
+  const [provider, setProvider] = useState(window.mydoge?.solana);
 
   const [res, setRes] = useState({});
 
@@ -49,7 +80,9 @@ export default function SolanaDApp() {
       console.log('provider.connect', res);
       const { address, publicKey } = res;
       const address1 = publicKey ? publicKey.toString() : '';
-      console.log('connect', { address, address1 }, res);
+      console.log('connect', { address, address1 }, res, getBnString({
+        _bn: publicKey._bn
+      }));
       
       setRes({
         method: 'connect',
@@ -137,8 +170,8 @@ export default function SolanaDApp() {
       const res = await provider.request({
         method: 'getAccount',
       });
-      const { address, publicKey } = res?.[0];
-      const address1 = publicKey ? publicKey.toString() : '';
+      const { address, publicKey } = res || {};
+      const address1 = publicKey ? publicKey.toString() : address;
       setRes({
         method: 'getAccount',
         params: '',
@@ -225,7 +258,7 @@ export default function SolanaDApp() {
     const { signature } = await provider.signAndSendTransaction(tx);
 
     console.log('signAndSendTransaction legacyTransaction', tx, signature);
-    addSigned(signature);
+    addSignedData(signature);
 
     setRes({
       method: 'signAndSendTransaction',
@@ -241,7 +274,7 @@ export default function SolanaDApp() {
     const { signature } = await provider.signAndSendTransaction(tx);
 
     console.log('signAndSendTransaction versionedTransaction', tx, signature);
-    addSigned(signature);
+    addSignedData(signature);
 
     setRes({
       method: 'signAndSendTransaction',
@@ -253,75 +286,29 @@ export default function SolanaDApp() {
   const signAndSendTransaction3 = async () => { 
     setRes({});
 
-    const publicKey = provider.publicKey;
-    
-    const recentSlot = await connection.getSlot();
-    const [lookupTableInst, lookupTableAddress] = AddressLookupTableProgram.createLookupTable({
-      authority: publicKey,
-      payer: publicKey,
-      recentSlot
-    });
-
-    // To create the Address Lookup Table on chain:
-    // send the `lookupTableInst` instruction in a transaction
-    const blockhash =  (await connection.getLatestBlockhash()).blockhash;
-    const lookupMessage = new TransactionMessage({
-      payerKey: publicKey,
-      recentBlockhash: blockhash,
-      instructions: [lookupTableInst],
-    }).compileToV0Message();
-
-    const lookupTransaction = new VersionedTransaction(lookupMessage);
-    const { signature } = await provider.signAndSendTransaction(lookupTransaction);
-
-    console.log('signAndSendTransaction VersionedTransaction(lookupMessage)', lookupTransaction, signature);
-    addSigned(signature);
+    const tx = await createLookupTx();
+    const { signature } = await provider.signAndSendTransaction(tx);
 
     setRes({
       method: 'signAndSendTransaction.lookupTransaction',
-      type: 'VersionedTransaction(lookupMessage)',
-      lookupTransaction,
-      lookupMessage,
-      lookupTableAddress,
+      type: 'lookupMessage',
       signature
     });
   }  
 
   const signAndSendAllTransactions = async () => {
     setRes({});
-    const transactions = [await createLegacyTx(), await createVersionedTx()];
+    const transactions = [await createLegacyTx(), await createVersionedTx(), await createLookupTx()];
     const { signatures, publicKey } = await provider.signAndSendAllTransactions(transactions);
 
     console.log('signAndSendTransaction list', transactions, publicKey, signatures);
-    addSigned(signatures);
+    addSignedData(signatures);
 
     setRes({
       method: 'signAndSendAllTransactions',
       transactions,
       signatures,
       publicKey
-    });
-  }
-
-  //not recommended
-  const signAllTransactions = async () => {
-    setRes({});
-    const transactions = [await createLegacyTx(), await createLegacyTx()];
-
-    // const messages = transactions.map(transaction => {
-    //     return bs58.encode(transaction.serializeMessage());
-    // });
-    // const signedTransactions = await provider.request({
-    //   method: "signAllTransactions",
-    //   params: { message: messages },
-    // });
-
-    const signedTransactions = await provider.signAllTransactions(transactions);
-
-    setRes({
-      method: 'signAllTransactions',
-      transactions,
-      signedTransactions
     });
   }
 
@@ -360,13 +347,47 @@ export default function SolanaDApp() {
     });
   };
 
+  const signLookupTransaction = async () => {
+    if (!address) { 
+      alert('please connect 1st');
+      return;
+    };
+    setRes({});
+
+    const transaction = await createLookupTx();
+    const signedTransaction =  await provider.signTransaction(transaction);
+    setRes({
+      method: 'signTransaction',
+      type: 'lookupTransaction',
+      transaction,
+      signedTransaction
+    });
+  };
+
+  //not recommended
+  const signAllTransactions = async () => {
+    setRes({});
+    const transactions = [await createLegacyTx(), await createVersionedTx(), await createLookupTx()];
+
+    const signedTransactions = await provider.signAllTransactions(transactions);
+
+    setRes({
+      method: 'signAllTransactions',
+      transactions,
+      signedTransactions
+    });
+  }
+
+  const toPubkey = new PublicKey('AKqmic16R22m7syDCJZXFH1ZtVYuWTszr511cKo7Zqpc');
+  const toPubkey2 = new PublicKey('HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd');
+  const toPubkey3 = new PublicKey('7q6PYSw2dCYfw74igJtDB4iodhCrGBvUg78TnScK6kZj');
   async function createLegacyTx() { 
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
     const transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: provider.publicKey, //payer
-        toPubkey: provider.publicKey, //toAccount
-        lamports: 100,
+        toPubkey, //toAccount
+        lamports: 0.11 * LAMPORTS_PER_SOL, //, https://solana-labs.github.io/solana-web3.js/variables/LAMPORTS_PER_SOL.html
       }),
     );
     transaction.feePayer = provider.publicKey;
@@ -377,14 +398,13 @@ export default function SolanaDApp() {
   }
 
   async function createVersionedTx() { 
-    let minRent = await connection.getMinimumBalanceForRentExemption(0);
-
+    // let minRent = await connection.getMinimumBalanceForRentExemption(0);
     // create array of instructions
     const instructions = [
       SystemProgram.transfer({
         fromPubkey: provider.publicKey,
-        toPubkey: provider.publicKey,
-        lamports: minRent,
+        toPubkey: toPubkey2,
+        lamports: 0.12 * LAMPORTS_PER_SOL,
       }),
     ];
 
@@ -402,7 +422,36 @@ export default function SolanaDApp() {
     return transactionV0;
   }
 
-  function addSigned(sign) { 
+  async function createLookupTx() { 
+    const publicKey = provider.publicKey;
+    
+    const recentSlot = await connection.getSlot();
+    const [lookupTableInst, lookupTableAddress] = AddressLookupTableProgram.createLookupTable({
+      authority: publicKey,
+      payer: publicKey,
+      recentSlot,
+    });
+
+    const transferInstruction = SystemProgram.transfer({
+      fromPubkey: publicKey,
+      toPubkey: toPubkey3,
+      lamports: 0.13 * LAMPORTS_PER_SOL,
+    });
+
+    // To create the Address Lookup Table on chain:
+    // send the `lookupTableInst` instruction in a transaction
+    const blockhash =  (await connection.getLatestBlockhash()).blockhash;
+    const lookupMessage = new TransactionMessage({
+      payerKey: publicKey,
+      recentBlockhash: blockhash,
+      instructions: [lookupTableInst, transferInstruction],
+    }).compileToV0Message();
+
+    const lookupTransaction = new VersionedTransaction(lookupMessage);
+    return lookupTransaction;
+  }
+
+  function addSignedData(sign) { 
     window.addSigned = window.addSigned || {};
     if (typeof sign === 'string') { 
       window.addSigned[sign] = true;
@@ -424,8 +473,34 @@ export default function SolanaDApp() {
 
   return (
     <div className="m-5 text-sm">
-      <h2>Solana Dapp Demo</h2>
-      {address && <p>connected: { address }</p>}
+      <div className="mt-2 bg-[#f5f5f5] p-2">
+        <h1>Solana Dapp Demo</h1>
+        <div>solana web3: <a className="text-[skyblue]" href="https://solana-labs.github.io/solana-web3.js/classes/Connection.html#getsignaturestatuses">https://solana-labs.github.io/solana-web3.js/classes/Connection.html#getsignaturestatuses</a></div>
+          {address && <p>connected: {address}</p>}
+          
+        current wallet: {provider.isPhantom ? 'phantom' : 'mydoge' } <br />
+        switch to:
+        <button onClick={() => {
+          const provider = window.mydoge?.solana;
+          if (!provider) {
+            window.open('https://qsg07xytt12z.sg.larksuite.com/wiki/I5ZDwtq6MiQQpWk9MRelFpjtg9b', '_blank');
+            return;
+          }
+          setProvider(provider);
+        }} className="bg-[#666] text-[#fff] p-1 m-2">
+          mydoge
+        </button>
+          <button onClick={() => {
+            const provider = window.phantom?.solana;
+            if (!provider) {
+              window.open('https://phantom.app/', '_blank');
+              return;
+            }
+            setProvider(provider);
+          }} className="bg-[#666] text-[#fff] p-1 m-2">
+            phantom
+          </button>
+      </div>
 
       <div className="mt-2">
         <button onClick={connect} className="bg-[#000] text-[#fff] p-1 m-2">
@@ -468,19 +543,19 @@ export default function SolanaDApp() {
 
         <div className="h-[30px]"></div>
 
-        <button onClick={signAndSendTransaction} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction</button>
+        <button onClick={signAndSendTransaction} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction.legacyTransaction</button>
         <button onClick={signAndSendTransaction2} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction.versionedTransaction</button>
         <button onClick={signAndSendTransaction3} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction.lookupTransaction</button>
-
-        <button
-          onClick={signAndSendAllTransactions}
-          className="bg-[#000] text-[#fff] p-1 m-2"
-        >
-          signAndSendAllTransactions
-        </button>
+        <button onClick={signAndSendAllTransactions} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendAllTransactions</button>
 
         <div className="h-[0px]"></div>
 
+        <button
+          onClick={signLegacyTransaction}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          signTransaction.legacyTransaction
+        </button>
         <button
           onClick={signVersionedTransaction}
           className="bg-[#000] text-[#fff] p-1 m-2"
@@ -488,10 +563,10 @@ export default function SolanaDApp() {
           signTransaction.versionedTransaction
         </button>
         <button
-          onClick={signLegacyTransaction}
+          onClick={signLookupTransaction}
           className="bg-[#000] text-[#fff] p-1 m-2"
         >
-          signTransaction.legacyTransaction
+          signTransaction.lookupTransaction
         </button>
 
         <button
@@ -503,6 +578,7 @@ export default function SolanaDApp() {
       </div>
 
       {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
+        <h2 className="text-lg mb-4">{provider.isPhantom ? 'phantom' : 'mydoge' }:</h2>
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}
         </pre>
