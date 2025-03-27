@@ -31,7 +31,7 @@ function App() {
   }
 
   return (
-    <div className="w-8/12">
+    <div className="w-12/12">
       <BrowserRouter>
         <div className="dapps bg-[#000] p-3 mb-4">
           {chains.map((chain, index) => (

@@ -6,10 +6,11 @@ import {
   AddressLookupTableProgram,
   TransactionMessage,
   VersionedTransaction,
+  Transaction,
   SystemProgram,
   Connection,
-  Transaction,
   LAMPORTS_PER_SOL,
+  clusterApiUrl
 } from "@solana/web3.js";
 
 function getBnString(bn) {
@@ -23,25 +24,30 @@ function convertBNToPublicKey(bnObject) {
       throw new Error('Invalid BN object');
     }
 
-    // Convert words array to number array
-    const words = bnObject._bn.words;
-    const numbers = new Uint8Array(32);
+    // 使用 BN.js 正确处理字节序
+    const bn = new BN(bnObject._bn.words, 'le')
+      .maskn(bnObject._bn.length * 32);
     
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-      const offset = i * 4;
-      numbers[offset] = word & 255;
-      numbers[offset + 1] = (word >> 8) & 255;
-      numbers[offset + 2] = (word >> 16) & 255;
-      numbers[offset + 3] = (word >> 24) & 255;
-    }
+    // 确保输出 32 字节
+    const bytes = bn.toArray('le', 32);
 
-    return new PublicKey(numbers);
+    return new PublicKey(bytes);
   } catch (error) {
     console.error('Error converting BN to PublicKey:', error);
     return null;
   }
 }
+
+const feePayer = {
+  _bn: {
+    negative: 0,
+    words: [12698622, 55839298, 46778959, 52368424, 64504752, 22437901, 5112798, 55787741, 65473656, 1662469, 0],
+    length: 10,
+    red: null,
+  },
+};
+const newP = convertBNToPublicKey(feePayer);
+console.log('convertBNToPublicKey getBnString', newP, newP.toString());
 
 export default function SolanaDApp() {
   const [address, setAddress] = useState("");
@@ -49,7 +55,8 @@ export default function SolanaDApp() {
   const [transaction, setTransaction] = useState("");
   const [signedTransaction, setSignedTransaction] = useState("");
 
-  const connection = new Connection("https://api.devnet.solana.com/");
+  const chainId = "mainnet-beta"; //mainnet-beta(===mainnet), testnet, devnet, localnet
+  const connection = new Connection(clusterApiUrl(chainId));
 
   const [provider, setProvider] = useState(window.mydoge?.solana);
 
@@ -80,9 +87,12 @@ export default function SolanaDApp() {
       console.log('provider.connect', res);
       const { address, publicKey } = res;
       const address1 = publicKey ? publicKey.toString() : '';
-      console.log('connect', { address, address1 }, res, getBnString({
-        _bn: publicKey._bn
-      }));
+
+      const address3 = getBnString({_bn: publicKey._bn});
+      if (address3 !== address1) { 
+        console.error('getBnString err:', address1, address3);
+      }
+      console.log('getBnString publicKey', publicKey, publicKey.toJSON());
       
       setRes({
         method: 'connect',
@@ -252,6 +262,34 @@ export default function SolanaDApp() {
     }
   };
 
+  const signIn = async () => {
+    if (!address) { 
+      alert('please connect 1st');
+      return;
+    };
+    setRes({});
+    try {
+      const params = {
+        domain: window.location.host,
+        statement: "Clicking Sign or Approve only means you have proved this wallet is owned by you. This request will not trigger any blockchain transaction or cost any gas fee.",
+        version: "1",
+        nonce: "oBbLoEldZs",
+        chainId,
+        issuedAt: new Date().toISOString(),
+        resources: ["https://example.com", "https://phantom.app/"],
+      };
+      const res = await provider.signIn(params);
+      console.log('signIn', params, res);
+      setRes({
+        method: 'signIn',
+        params,
+        res
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const signAndSendTransaction = async () => { 
     setRes({});
     const tx = await createLegacyTx();
@@ -384,6 +422,7 @@ export default function SolanaDApp() {
   const toPubkey = new PublicKey('AKqmic16R22m7syDCJZXFH1ZtVYuWTszr511cKo7Zqpc');
   const toPubkey2 = new PublicKey('HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd');
   const toPubkey3 = new PublicKey('7q6PYSw2dCYfw74igJtDB4iodhCrGBvUg78TnScK6kZj');
+
   async function createLegacyTx() { 
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
     const transaction = new Transaction().add(
@@ -490,9 +529,9 @@ export default function SolanaDApp() {
       <div className="mt-2 bg-[#f5f5f5] p-2">
         <h1>Solana Dapp Demo</h1>
         <div>solana web3: <a className="text-[skyblue]" href="https://solana-labs.github.io/solana-web3.js/classes/Connection.html#getsignaturestatuses">https://solana-labs.github.io/solana-web3.js/classes/Connection.html#getsignaturestatuses</a></div>
-          {address && <p>connected: {address}</p>}
+          {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
           
-        current wallet: {provider.isPhantom ? 'phantom' : 'mydoge' } <br />
+        current wallet: <span className="text-2xl text-[red]">{provider?.isPhantom ? 'phantom' : 'mydoge' }</span> <br />
         switch to:
         <button onClick={() => {
           const provider = window.mydoge?.solana;
@@ -553,6 +592,10 @@ export default function SolanaDApp() {
           className="bg-[#000] text-[#fff] p-1 m-2"
         >
           request.signMessage
+        </button>
+
+        <button onClick={signIn} className="bg-[#000] text-[#fff] p-1 m-2">
+          signIn
         </button>
 
         <div className="h-[30px]"></div>
