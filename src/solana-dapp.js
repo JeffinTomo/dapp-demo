@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import bs58 from "bs58";
 import BN from "bn.js";
+
+import { verify } from '@noble/ed25519';
+import { sha512 } from '@noble/hashes/sha512';
+import { hmac } from '@noble/hashes/hmac';
+import * as ed from '@noble/ed25519';
+
 import {
   PublicKey,
   AddressLookupTableProgram,
@@ -12,42 +18,9 @@ import {
   LAMPORTS_PER_SOL,
   clusterApiUrl
 } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID, createTransferInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 
-function getBnString(bn) {
-  // const _bn = new BN(bn._bn.words, "le").maskn(bn._bn.length * 32);
-  return convertBNToPublicKey(bn).toString();
-}
-
-function convertBNToPublicKey(bnObject) {
-  try {
-    if (!bnObject || !bnObject._bn || !bnObject._bn.words) {
-      throw new Error('Invalid BN object');
-    }
-
-    // 使用 BN.js 正确处理字节序
-    const bn = new BN(bnObject._bn.words, 'le')
-      .maskn(bnObject._bn.length * 32);
-    
-    // 确保输出 32 字节
-    const bytes = bn.toArray('le', 32);
-
-    return new PublicKey(bytes);
-  } catch (error) {
-    console.error('Error converting BN to PublicKey:', error);
-    return null;
-  }
-}
-
-const feePayer = {
-  _bn: {
-    negative: 0,
-    words: [12698622, 55839298, 46778959, 52368424, 64504752, 22437901, 5112798, 55787741, 65473656, 1662469, 0],
-    length: 10,
-    red: null,
-  },
-};
-const newP = convertBNToPublicKey(feePayer);
-console.log('convertBNToPublicKey getBnString', newP, newP.toString());
+ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
 
 export default function SolanaDApp() {
   const [address, setAddress] = useState("");
@@ -55,7 +28,7 @@ export default function SolanaDApp() {
   const [transaction, setTransaction] = useState("");
   const [signedTransaction, setSignedTransaction] = useState("");
 
-  const chainId = "mainnet-beta"; //mainnet-beta(===mainnet), testnet, devnet, localnet
+  const chainId = "devnet"; //mainnet-beta(===mainnet), testnet, devnet, localnet
   const connection = new Connection(clusterApiUrl(chainId));
 
   const [provider, setProvider] = useState(window.mydoge?.solana);
@@ -88,14 +61,11 @@ export default function SolanaDApp() {
       const { address, publicKey } = res;
       const address1 = publicKey ? publicKey.toString() : '';
 
-      const address3 = getBnString({_bn: publicKey._bn});
-      if (address3 !== address1) { 
-        console.error('getBnString err:', address1, address3);
-      }
-      console.log('getBnString publicKey', publicKey, publicKey.toJSON());
+      // console.log('getBnString publicKey', publicKey, publicKey.toJSON());
       
       setRes({
         method: 'connect',
+        chainId,
         res
       });
       
@@ -180,14 +150,10 @@ export default function SolanaDApp() {
       const res = await provider.request({
         method: 'getAccount',
       });
-      const { address, publicKey } = res || {};
-      const address1 = publicKey ? publicKey.toString() : address;
       setRes({
         method: 'getAccount',
-        params: '',
-        res: [address1]
+        res
       });
-      setAddress(address1);
       console.log('getAccount', res);
     } catch (err) {
       console.error("getAccount error", err);
@@ -209,6 +175,30 @@ export default function SolanaDApp() {
     });
   }
 
+  const verifySignature = async(result)  =>{
+    try {
+      const { signature, publicKey, message } = result;
+      
+      // 验证签名
+      /*
+      function verify(
+        signature: Hex, // returned by the `sign` function
+        message: Hex, // message that needs to be verified
+        publicKey: Hex // public (not private) key,
+        options = { zip215: true } // ZIP215 or RFC8032 verification type
+      ): boolean;
+      */
+      return await verify(
+        signature,
+        message,
+        publicKey
+      );
+    } catch (error) {
+      console.error('验证签名失败：', error);
+      return false;
+    }
+  }
+
   const signMessage = async () => {
     if (!address) { 
       alert('please connect 1st');
@@ -217,17 +207,33 @@ export default function SolanaDApp() {
     setRes({});
     try {
       // uint8Array
-      const message = `You can use uint8array to verify`;
+      const message = `To avoid digital dognappers, sign below to authenticate with CryptoCorgis`;
       const encodedMessage = new TextEncoder().encode(message);
 
-      const signedMessage = await provider.signMessage(encodedMessage, "utf8");
-      console.log(new TextDecoder().decode(encodedMessage), encodedMessage, signedMessage);
+      const res = await provider.signMessage(encodedMessage, "utf8");
+      console.log('signMessage req:', { message, encodedMessage });
+      console.log('signMessage res:', res);
 
-      const signature = signedMessage?.signature;
-      setSignature(signature);
+      const params = {
+        message: encodedMessage,
+        signature: res.signature,
+        publicKey: res.publicKey.toBytes()
+      };
+      console.log('signMessage check params:', params);
+
+      const checkResult = await verifySignature(params);
+      console.log('signMessage check result:', checkResult);
+      if (!checkResult) { 
+        console.error('signMessage check error', encodedMessage, res)
+      }
+
+
+      if (res?.signature) { 
+        setSignature(signature);
+      }
       setRes({
         method: 'signMessage',
-        res: signedMessage
+        res
       });
     } catch (err) {
       console.error('signMessage', err);
@@ -245,17 +251,32 @@ export default function SolanaDApp() {
       const message = `To avoid digital dognappers, sign below to authenticate with CryptoCorgis`;
       const encodedMessage = new TextEncoder().encode(message);
       
-      const signedMessage = await provider.request({
+      const res = await provider.request({
         method: 'signMessage',
         params: {
           message: encodedMessage,
           display: "hex",
         }
       });
-      console.log(message, signedMessage);
+
+      console.log('request.signMessage:', encodedMessage, res);
+      
+      const params = {
+        message: encodedMessage,
+        signature: res.signature,
+        publicKey: res.publicKey.toBytes()
+      };
+      console.log('request.signMessage check params:', params);
+
+      const checkResult = await verifySignature(params);
+      console.log('request.signMessage check result:', checkResult);
+      if (!checkResult) { 
+        console.error('signMessage error', encodedMessage, res)
+      }
+
       setRes({
         method: 'request.signMessage',
-        res: signedMessage
+        res
       });
     } catch (e) {
       console.error(e);
@@ -279,7 +300,13 @@ export default function SolanaDApp() {
         resources: ["https://example.com", "https://phantom.app/"],
       };
       const res = await provider.signIn(params);
-      console.log('signIn', params, res);
+      console.log('signIn', params, res, res.address.toString());
+      const checkResult = await verifySignature({
+        message: res.signedMessage,
+        signature: res.signature,
+        publicKey: res.address.toBytes()
+      });
+      console.log('signIn check result:', checkResult);
       setRes({
         method: 'signIn',
         params,
@@ -419,10 +446,115 @@ export default function SolanaDApp() {
     });
   }
 
+  const sendSolana = async () => { 
+    const balances = await connection.getMultipleAccountsInfo([address].map((addr) => new PublicKey(addr)));
+
+    setRes({
+      method: 'sendSolana',
+      balances
+    });
+    const params = {
+      from: address,
+      to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
+      amount: 0.123,
+      priorityFee: 4567,
+      chainId
+    };
+    const res = await provider.sendSolana(params);
+    setRes({
+      method: 'sendSolana',
+      params,
+      res
+    });
+  }
+
+  const sendSolana2 = async () => { 
+    const balances = await connection.getMultipleAccountsInfo([address].map((addr) => new PublicKey(addr)));
+
+    setRes({
+      method: 'sendSolana',
+      balances
+    });
+    const params = {
+      from: address,
+      to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
+      amount: 456789,
+      priorityFee: 1234,
+      chainId
+    };
+    const res = await provider.sendSolana(params);
+    setRes({
+      method: 'sendSolana',
+      params,
+      res
+    });
+  }
+
+  //https://solscan.io/token/4TBi66vi32S7J8X1A6eWfaLHYmUXu7CStcEmsJQdpump
+  const sendToken = async () => { 
+    const pubkey = new PublicKey(address);
+  
+    const accounts = await connection.getParsedTokenAccountsByOwner(pubkey, {
+      programId: TOKEN_PROGRAM_ID,
+    });
+    console.log('sendToken 1', accounts);
+  
+    const balances = accounts.value.map((account) => {
+      const parsedData = account.account.data;
+      const info = parsedData.parsed?.info;
+
+      console.log('sendToken 2', parsedData);
+  
+      return {
+        tokenAddress: info.mint,
+        balance: Number(info.tokenAmount.amount),
+        decimals: info.tokenAmount.decimals,
+      };
+    });
+
+    setRes({
+      method: 'sendToken',
+      balances
+    });
+    const params = {
+      tokenAddress: "CjPhweDMDSvr6eXNrszNZQwS8UBNPbiH38YpWJrhZLVe",
+      from: address,
+      to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
+      amount: 0.1234,
+      priorityFee: 456,
+      chainId
+    };
+    const res = await provider.sendToken(params);
+    setRes({
+      method: 'sendToken',
+      params,
+      res
+    });
+  }
+
+  const sendToken2 = async () => { 
+    const params = {
+      tokenAddress: "CjPhweDMDSvr6eXNrszNZQwS8UBNPbiH38YpWJrhZLVe",
+      from: address,
+      to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
+      amount: 234,
+      priorityFee: 123,
+      chainId
+    };
+    const res = await provider.sendToken(params);
+    setRes({
+      method: 'sendToken',
+      params,
+      res
+    });
+  }
+
+
   const toPubkey = new PublicKey('AKqmic16R22m7syDCJZXFH1ZtVYuWTszr511cKo7Zqpc');
   const toPubkey2 = new PublicKey('HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd');
   const toPubkey3 = new PublicKey('7q6PYSw2dCYfw74igJtDB4iodhCrGBvUg78TnScK6kZj');
 
+  //https://solana.com/zh/docs/tokens/basics/transfer-tokens#typescript
   async function createLegacyTx() { 
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
     const transaction = new Transaction().add(
@@ -472,6 +604,7 @@ export default function SolanaDApp() {
 
     // make a versioned transaction
     const transactionV0 = new VersionedTransaction(messageV0);
+    console.log('createVersionedTx', transactionV0, messageV0);
     return transactionV0;
   }
 
@@ -600,6 +733,36 @@ export default function SolanaDApp() {
 
         <div className="h-[30px]"></div>
 
+        <button
+          onClick={sendSolana}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          sendSolana
+        </button> 
+
+        <button
+          onClick={sendSolana2}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          sendSolana(over balance)
+        </button>
+
+        <button
+          onClick={sendToken}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          sendToken
+        </button> 
+
+        <button
+          onClick={sendToken2}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          sendToken(over balance)
+        </button> 
+
+        <div className="h-[30px]"></div>
+
         <button onClick={signAndSendTransaction} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction.legacyTransaction</button>
         <button onClick={signAndSendTransaction2} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction.versionedTransaction</button>
         <button onClick={signAndSendTransaction3} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction.lookupTransaction</button>
@@ -631,7 +794,7 @@ export default function SolanaDApp() {
           className="bg-[#000] text-[#fff] p-1 m-2"
         >
           signAllTransactions
-        </button>
+        </button>       
       </div>
 
       {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">

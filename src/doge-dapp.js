@@ -83,7 +83,7 @@ export default function UnisatDApp() {
   ];
 
   return (
-    <div className="p-3 w-5/12  text-xs">
+    <div className="p-3 w-11/12  text-xs">
       <h2>Doge DApp Demo</h2>
       <div className="mb-2 bg-gray-400 p-4 text-xs">
         provider = window.{providerName};
