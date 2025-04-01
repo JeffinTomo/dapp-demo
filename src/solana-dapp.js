@@ -16,7 +16,8 @@ import {
   SystemProgram,
   Connection,
   LAMPORTS_PER_SOL,
-  clusterApiUrl
+  clusterApiUrl,
+  sendAndConfirmRawTransaction
 } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, createTransferInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 
@@ -31,7 +32,8 @@ export default function SolanaDApp() {
   const chainId = "devnet"; //mainnet-beta(===mainnet), testnet, devnet, localnet
   const connection = new Connection(clusterApiUrl(chainId));
 
-  const [provider, setProvider] = useState(window.mydoge?.solana);
+  const [providerName, setProviderName] = useState('mydoge');
+  const [provider, setProvider] = useState(window[providerName]?.solana);
 
   const [res, setRes] = useState({});
 
@@ -175,7 +177,7 @@ export default function SolanaDApp() {
     });
   }
 
-  const verifySignature = async(result)  =>{
+  const verifySignature = async(result) =>{
     try {
       const { signature, publicKey, message } = result;
       
@@ -199,6 +201,14 @@ export default function SolanaDApp() {
     }
   }
 
+  const uint8ArrayToHex = (bytes, withPrefix = false) => {
+    const hex = Array.from(bytes)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+      
+    return withPrefix ? `0x${hex}` : hex;
+  }
+
   const signMessage = async () => {
     if (!address) { 
       alert('please connect 1st');
@@ -217,8 +227,10 @@ export default function SolanaDApp() {
       const params = {
         message: encodedMessage,
         signature: res.signature,
-        publicKey: res.publicKey.toBytes()
+        publicKey: res.publicKey.toBytes(),
+        address: res.publicKey.toString()
       };
+      console.log('signMessage check 1:', uint8ArrayToHex(res.signature), uint8ArrayToHex(encodedMessage));
       console.log('signMessage check params:', params);
 
       const checkResult = await verifySignature(params);
@@ -549,6 +561,52 @@ export default function SolanaDApp() {
     });
   }
 
+  const sendSignedTx = async () => {
+    const signedTx = "7DQ4JxKhz8YttxmH6PwdM7Yzi2PWhkWSJu9BbLMdiuzdH9SRjboHsikwfkmHTQXb2R1C5XTZ1qyDziFY1VeXiz47pSWgvmeg2xiknqoDhcPvuKxKa4VCLPMXFdK986DhMU29S8u7GxCRogCuxee8Ww4xievxAPPrEqaRJDNv91vBQXJMyV1wbfuhKv6NA6UTdDJAXXzTYCoFZf67dak6sjErT9vQVhcsdjB6hVvVpBgVrTh5tswuSV5ej4cs3sV6zF7rJmLgE7RrpfjJHK1GrRSKsYkxv4ukXH4kk9gi3UBKCXe5zyEqWKUs";
+    
+    const connection = new Connection(clusterApiUrl(chainId));
+  
+    // const rawTransaction = Buffer.from(bs58.decode(signedTx));
+    let rawTransaction;
+    try {
+      const hexBuffer = Buffer.from(signedTx, "hex");
+      VersionedTransaction.deserialize(hexBuffer);
+      rawTransaction = hexBuffer;
+    } catch (error) {
+      const base58Buffer = Buffer.from(bs58.decode(signedTx));
+      VersionedTransaction.deserialize(base58Buffer);
+      rawTransaction = base58Buffer;
+    }
+  
+    console.log("solana.sendSignedTx 1", chainId, signedTx, rawTransaction);
+    const transaction = VersionedTransaction.deserialize(rawTransaction);
+    if (!transaction.signatures || transaction.signatures.length === 0) {
+      throw new Error("lack of sign");
+    }
+  
+    const simulation = await connection.simulateTransaction(transaction, {
+      sigVerify: true,
+      commitment: "confirmed",
+    });
+    console.log("solana.sendSignedTx 2", transaction, simulation);
+    if (simulation.value.err) {
+      console.error(simulation);
+      throw new Error(`simulation failed: ${simulation.value.err}`);
+    }
+  
+    const confirmationStrategy = {
+      commitment: "confirmed",
+      preflightCommitment: "confirmed",
+      skipPreflight: false,
+      maxRetries: 3,
+    };
+    const signature = await sendAndConfirmRawTransaction(connection, rawTransaction, confirmationStrategy);
+  
+    console.log("solana.sendSignedTx 3", confirmationStrategy, signature, rawTransaction);
+  
+    return { signature };
+  };
+
 
   const toPubkey = new PublicKey('AKqmic16R22m7syDCJZXFH1ZtVYuWTszr511cKo7Zqpc');
   const toPubkey2 = new PublicKey('HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd');
@@ -664,7 +722,7 @@ export default function SolanaDApp() {
         <div>solana web3: <a className="text-[skyblue]" href="https://solana-labs.github.io/solana-web3.js/classes/Connection.html#getsignaturestatuses">https://solana-labs.github.io/solana-web3.js/classes/Connection.html#getsignaturestatuses</a></div>
           {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
           
-        current wallet: <span className="text-2xl text-[red]">{provider?.isPhantom ? 'phantom' : 'mydoge' }</span> <br />
+        current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
         switch to:
         <button onClick={() => {
           const provider = window.mydoge?.solana;
@@ -673,19 +731,43 @@ export default function SolanaDApp() {
             return;
           }
           setProvider(provider);
+          setProviderName('mydoge');
         }} className="bg-[#666] text-[#fff] p-1 m-2">
           mydoge
         </button>
-          <button onClick={() => {
-            const provider = window.phantom?.solana;
-            if (!provider) {
-              window.open('https://phantom.app/', '_blank');
-              return;
-            }
-            setProvider(provider);
-          }} className="bg-[#666] text-[#fff] p-1 m-2">
-            phantom
-          </button>
+        <button onClick={() => {
+          const provider = window.phantom?.solana;
+          if (!provider) {
+            window.open('https://phantom.app/', '_blank');
+            return;
+          }
+          setProvider(provider);
+          setProviderName('phantom');
+        }} className="bg-[#666] text-[#fff] p-1 m-2">
+          phantom
+        </button>
+        <button onClick={() => {
+          const provider = window.okxwallet?.solana;
+          if (!provider) {
+            window.open('https://web3.okx.com/zh-hans/build/docs/sdks/web-detect-okx-wallet', '_blank');
+            return;
+          }
+          setProvider(provider);
+          setProviderName('okxwallet');
+        }} className="bg-[#666] text-[#fff] p-1 m-2">
+          okxwallet
+        </button>
+        <button onClick={() => {
+          const provider = window.bitkeep?.solana;
+          if (!provider) {
+            window.open('https://phantom.app/', '_blank');
+            return;
+          }
+          setProvider(provider);
+          setProviderName('bitget');
+        }} className="bg-[#666] text-[#fff] p-1 m-2">
+          bitget
+        </button>
       </div>
 
       <div className="mt-2">
@@ -729,6 +811,10 @@ export default function SolanaDApp() {
 
         <button onClick={signIn} className="bg-[#000] text-[#fff] p-1 m-2">
           signIn
+        </button>
+
+        <button onClick={sendSignedTx} className="bg-[#000] text-[#fff] p-1 m-2">
+          sendSignedTx
         </button>
 
         <div className="h-[30px]"></div>
