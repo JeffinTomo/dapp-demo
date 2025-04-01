@@ -245,6 +245,7 @@ export default function SolanaDApp() {
       }
       setRes({
         method: 'signMessage',
+        checkResult,
         res
       });
     } catch (err) {
@@ -288,6 +289,7 @@ export default function SolanaDApp() {
 
       setRes({
         method: 'request.signMessage',
+        checkResult,
         res
       });
     } catch (e) {
