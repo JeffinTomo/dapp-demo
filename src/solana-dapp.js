@@ -762,7 +762,7 @@ export default function SolanaDApp() {
         <button onClick={() => {
           const provider = window.bitkeep?.solana;
           if (!provider) {
-            window.open('https://phantom.app/', '_blank');
+            window.open('https://web3.bitget.com/zh-CN/wallet-download', '_blank');
             return;
           }
           setProvider(provider);
@@ -886,7 +886,7 @@ export default function SolanaDApp() {
       </div>
 
       {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
-        <h2 className="text-lg mb-4">{provider.isPhantom ? 'phantom' : 'mydoge' }:</h2>
+        <h2 className="text-lg mb-4">{ providerName }:</h2>
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}
         </pre>
