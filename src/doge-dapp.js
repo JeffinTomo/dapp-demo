@@ -60,7 +60,7 @@ export default function DogeDApp() {
         res
       });
     } catch (err) {
-      console.error("connected error", err);
+      console.error("getConnectionStatus error", err);
     }
   };
   
@@ -78,7 +78,7 @@ export default function DogeDApp() {
         res
       });
     } catch (err) {
-      console.error("connected error", err);
+      console.error("requestAccounts error", err);
     }
   };
 
@@ -132,7 +132,7 @@ export default function DogeDApp() {
         res
       });      
     } catch (err) {
-      console.error("connected error", err);
+      console.error("getBalance error", err);
     }
   };
 
@@ -207,7 +207,32 @@ export default function DogeDApp() {
     }
     setRes({});
     try {
-      const signature = await provider.requestSignedMessage(message, "");
+      const signature = await provider.requestSignedMessage({
+        message,
+        type: "bip322-simple",
+      });
+      setSignature(signature);
+      setRes({
+        method: 'requestSignedMessage',
+        message,
+        signature
+      });
+    } catch (err) {
+      console.error('requestSignedMessage', err);
+    }
+  };
+
+  const requestSignedMessageBip322Simple = async () => {
+    if (!provider) { 
+      alert('provider err');
+      return;
+    }
+    setRes({});
+    try {
+      const signature = await provider.requestSignedMessage({
+        message,
+        type: "bip322-simple",
+      });
       setSignature(signature);
       setRes({
         method: 'requestSignedMessage',
@@ -252,12 +277,11 @@ export default function DogeDApp() {
       });
       setTxId(res.txid);
       setRes({
-        method: 'requestAccounts',
+        method: 'requestTransaction',
         res
       });      
-      setAddress(res.address);
     } catch (err) {
-      console.error("connected error", err);
+      console.error("requestTransaction error", err);
     }
   };
   
@@ -509,6 +533,11 @@ export default function DogeDApp() {
           requestSignedMessage
         </button> 
 
+        <button onClick={requestSignedMessageBip322Simple} className="bg-[#000] text-[#fff] p-1 m-2">
+          requestSignedMessageBip322Simple
+        </button> 
+        
+
         <button onClick={requestDecryptedMessage} className="bg-[#000] text-[#fff] p-1 m-2">
           ?requestDecryptedMessage
         </button>
@@ -555,7 +584,7 @@ export default function DogeDApp() {
       </div>
 
       {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
-        <h2 className="text-lg mb-4">{ providerName }:</h2>
+        <h2 className="text-lg mb-4">{providerName}.{res.method}:</h2>
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}
         </pre>
