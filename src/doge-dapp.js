@@ -209,7 +209,7 @@ export default function DogeDApp() {
     try {
       const signature = await provider.requestSignedMessage({
         message,
-        type: "bip322-simple",
+        type: "",
       });
       setSignature(signature);
       setRes({
@@ -229,13 +229,15 @@ export default function DogeDApp() {
     }
     setRes({});
     try {
+      const type = "bip322-simple";
       const signature = await provider.requestSignedMessage({
         message,
-        type: "bip322-simple",
+        type,
       });
       setSignature(signature);
       setRes({
         method: 'requestSignedMessage',
+        type,
         message,
         signature
       });
@@ -467,7 +469,7 @@ export default function DogeDApp() {
 
   return (
     <div className="m-5 text-sm">
-      <div className="mt-2 bg-[#f5f5f5] p-2">
+      <div className="mt-0 bg-[#f5f5f5] p-2">
         <h1>Solana Dapp Demo</h1>
         <div>
           <a href="https://mydoge-com.github.io/mydogemask/" target="_blank" rel="noopener noreferrer">
@@ -510,7 +512,7 @@ export default function DogeDApp() {
         </button>
       </div>
 
-      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}>
+      <div className={ 'mt-0 ' + (address ? '' : 'opacity-40')}>
         <button onClick={getAccounts} className="bg-[#000] text-[#fff] p-1 m-2">
           getAccounts
         </button>
@@ -520,7 +522,7 @@ export default function DogeDApp() {
         </button>
       </div>
 
-      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}>
+      <div className={ 'mt-0 ' + (address ? '' : 'opacity-40')}>
         <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 m-2">
           signMessage
         </button> 
@@ -538,19 +540,19 @@ export default function DogeDApp() {
         </button> 
         
 
-        <button onClick={requestDecryptedMessage} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={requestDecryptedMessage} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
           ?requestDecryptedMessage
         </button>
       </div>
 
-      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}>
-        <button onClick={requestPsbt} className="bg-[#000] text-[#fff] p-1 m-2">
-          requestPsbt
+      <div className={ 'mt-0 ' + (address ? '' : 'opacity-40')}>
+        <button onClick={requestPsbt} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
+          ?requestPsbt
         </button> 
 
-        <button onClick={requestPsbts} className="bg-[#000] text-[#fff] p-1 m-2">
+        {/* <button onClick={requestPsbts} className="bg-[#000] text-[#fff] p-1 m-2">
           requestPsbts
-        </button> 
+        </button>  */}
 
         <button onClick={requestTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
           requestTransaction
@@ -561,7 +563,7 @@ export default function DogeDApp() {
         </button> 
       </div>
 
-      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}>
+      <div className={ 'mt-0 ' + (address ? '' : 'opacity-40')}>
         <button onClick={getDRC20Balance} className="bg-[#000] text-[#fff] p-1 m-2">
           getDRC20Balance
         </button> 
@@ -570,16 +572,16 @@ export default function DogeDApp() {
           getTransferableDRC20
         </button> 
 
-        <button onClick={requestAvailableDRC20Transaction} className="bg-[#000] text-[#fff] p-1 m-2">
-          requestAvailableDRC20Transaction
+        <button onClick={requestAvailableDRC20Transaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
+          ?requestAvailableDRC20Transaction
         </button>  
 
-        <button onClick={requestInscriptionTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
-          requestInscriptionTransaction
+        <button onClick={requestInscriptionTransaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
+          ?requestInscriptionTransaction
         </button> 
 
-        <button onClick={requestInscriptionMintTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
-          requestInscriptionMintTransaction
+        <button onClick={requestInscriptionMintTransaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
+          ?requestInscriptionMintTransaction
         </button> 
       </div>
 
