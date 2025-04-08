@@ -11,6 +11,7 @@
     "@unisat/wallet-utils": "^1.0.0",
     "ajv": "^8.14.0",
     "axios": "^1.7.9",
+    "bitcoinjs-lib": "^6.1.7",
     "browser-passworder": "^2.0.3",
     "bs58": "^6.0.0",
     "buffer": "^6.0.3",
@@ -30,6 +31,7 @@
     "redux": "4.2.0",
     "redux-promise": "0.6.0",
     "redux-thunk": "2.4.1",
+    "satoshi-bitcoin": "^1.0.5",
     "svg": "0.1.0",
     "throttle-debounce": "5.0.0",
     "tslib": "^2.7.0",
@@ -42,13 +44,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "-eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest",
-      "plugin:react-hooks/recommended"
-    ]
   },
   "browserslist": {
     "production": [

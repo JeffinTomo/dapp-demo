@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createDogePsbt, getUtxos } from "./utils";
 
 const recipientAddress = "D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF";
 
@@ -77,6 +78,7 @@ export default function DogeDApp() {
         method: 'requestAccounts',
         res
       });
+      setAddress(res.address);
     } catch (err) {
       console.error("requestAccounts error", err);
     }
@@ -200,6 +202,7 @@ export default function DogeDApp() {
       console.error('signMessage', err);
     }
   };
+
   const requestSignedMessage = async () => {
     if (!provider) { 
       alert('provider err');
@@ -356,9 +359,15 @@ export default function DogeDApp() {
     }
     setRes({});
     try {
+      const utxos = await getUtxos(address, "", [], "spendable");
+      if (utxos.length === 0) { 
+        alert('no utxos');
+        return;
+      }
+      console.log('utxos', utxos);
       const res = await provider.requestAvailableDRC20Transaction({
         ticker,
-        amount: 123
+        amount: 1
       });
       setRes({
         method: 'requestAvailableDRC20Transaction',
@@ -384,7 +393,6 @@ export default function DogeDApp() {
       });
       setRes({
         method: 'requestInscriptionTransaction',
-        ticker,
         res
       });
       setTxId(res.txid);
@@ -420,7 +428,7 @@ export default function DogeDApp() {
     } catch (err) {
       console.error("requestInscriptionTransaction error", err);
     }
-  };
+  }; 
 
   const requestPsbt = async () => {
     if (!provider) { 
@@ -428,15 +436,37 @@ export default function DogeDApp() {
       return;
     }
     setRes({});
+    
+    const utxos = await getUtxos(address, "", [], "spendable");
+    if (utxos.length === 0) { 
+      alert('no utxos');
+      return;
+    }
+    // console.log('utxos', utxos); 
+    const psbtHex = await createDogePsbt({
+      inputs: [
+        {
+          address,
+          amount: 1,
+          txid: utxos[0].txid,
+          vout: utxos[0].vout
+        },
+      ],
+      outputs: [
+        {
+          address,
+          amount: 1,
+        },
+      ],
+    });
+    
     try {
       const res = await provider.requestPsbt({
-        rawTx: "",
-        indexes: 1,
-        signOnly: true, // Optionally return the signed transaction instead of broadcasting
+        rawTx: psbtHex,
+        signOnly: false, // Optionally return the signed transaction instead of broadcasting
       });
       setRes({
         method: 'requestPsbt',
-        ticker,
         res
       });      
     } catch (err) {
@@ -444,25 +474,49 @@ export default function DogeDApp() {
     }
   };
 
-  const requestPsbts = async () => {
+  const requestPsbtSignOnly = async () => {
     if (!provider) { 
       alert('provider err');
       return;
     }
     setRes({});
+    
+    const utxos = await getUtxos(address, "", [], "spendable");
+    if (utxos.length === 0) { 
+      alert('no utxos');
+      return;
+    }
+    // console.log('utxos', utxos); 
+    const psbtHex = await createDogePsbt({
+      inputs: [
+        {
+          address,
+          amount: 1,
+          txid: utxos[0].txid,
+          vout: utxos[0].vout
+        },
+      ],
+      outputs: [
+        {
+          address,
+          amount: 1,
+        },
+      ],
+    });
+    // console.log('psbtHex', psbtHex);
+    
     try {
-      const res = await provider.requestPsbts({
-        rawTx: "",
-        indexes: 1,
+      const res = await provider.requestPsbt({
+        rawTx: psbtHex,
         signOnly: true, // Optionally return the signed transaction instead of broadcasting
       });
       setRes({
-        method: 'requestPsbts',
-        ticker,
+        method: 'requestPsbt',
+        psbt: psbtHex,
         res
       });      
     } catch (err) {
-      console.error("requestPsbts error", err);
+      console.error("requestPsbt error", err);
     }
   };
 
@@ -546,16 +600,20 @@ export default function DogeDApp() {
       </div>
 
       <div className={ 'mt-0 ' + (address ? '' : 'opacity-40')}>
-        <button onClick={requestPsbt} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
+        <button onClick={requestPsbt} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
           ?requestPsbt
+        </button> 
+
+        <button onClick={requestPsbtSignOnly} className="bg-[#000] text-[#fff] p-1 m-2">
+          requestPsbt.signOnly
         </button> 
 
         {/* <button onClick={requestPsbts} className="bg-[#000] text-[#fff] p-1 m-2">
           requestPsbts
         </button>  */}
 
-        <button onClick={requestTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
-          requestTransaction
+        <button onClick={requestTransaction} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
+          ?requestTransaction
         </button> 
 
         <button onClick={getTransactionStatus} className="bg-[#000] text-[#fff] p-1 m-2">
@@ -572,15 +630,15 @@ export default function DogeDApp() {
           getTransferableDRC20
         </button> 
 
-        <button onClick={requestAvailableDRC20Transaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
+        <button onClick={requestAvailableDRC20Transaction} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
           ?requestAvailableDRC20Transaction
         </button>  
 
-        <button onClick={requestInscriptionTransaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
+        <button onClick={requestInscriptionTransaction} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
           ?requestInscriptionTransaction
         </button> 
 
-        <button onClick={requestInscriptionMintTransaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
+        <button onClick={requestInscriptionMintTransaction} className="hidden bg-[#000] text-[#fff] p-1 m-2">
           ?requestInscriptionMintTransaction
         </button> 
       </div>

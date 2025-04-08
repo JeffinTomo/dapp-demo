@@ -9,12 +9,13 @@ import {
   useParams,
 } from "react-router-dom";
 
-import EvmDapp from "./evm-dapp";
-import DogeDapp from "./doge-dapp";
-import SolanaDapp from "./solana-dapp";
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
 
-// import { Buffer } from 'buffer';
-// window.Buffer = Buffer;
+import EvmDapp from "./evm-dapp";
+const DogeDapp = React.lazy(() => import("./doge-dapp"));
+const SolanaDapp = React.lazy(() => import("./solana-dapp"));
+
 
 function App() {
   const chains = ["doge", "evm", "solana"];
