@@ -1,5 +1,6 @@
 import axios from "axios";
 import { payments, Psbt } from "bitcoinjs-lib";
+import * as bitcoin from 'bitcoinjs-lib';
 import sb from "satoshi-bitcoin";
 
 // interface CreatePsbtParams {
@@ -71,36 +72,94 @@ export async function getUtxos(address, cursor, result, filter, tx ) {
   // }
 }
 
-export async function createDogePsbt(params) {
+//https://bitcoinjs.github.io/bitcoinjs-lib/classes/Psbt.html
+export async function createDogePsbt({
+  signerAddress,
+  amount,
+  fee
+}) {
+  const changeAddress = signerAddress;
+  const psbt = new bitcoin.Psbt({ network });
+
+  psbt.setMaximumFeeRate(100000000);
+  const utxos = (
+    await mydoge.get('/wallet/info', {
+      params: { route: `utxo/${signerAddress}` },
+    })
+  ).data.sort((a, b) => {
+    const aValue = Number(a.value);
+    const bValue = Number(b.value);
+    return bValue > aValue ? 1 : bValue < aValue ? -1 : a.height - b.height;
+  });
+
+  if (utxos.length < 2) {
+    throw new Error('need at least 2 utxos for address 2');
+  }
+
+  if (sb.toBitcoin(Number(utxos[1].value)) < amount + fee) {
+    throw new Error('not enough funds to cover amount and fee');
+  }
+
+  const index1 = utxos[0].vout;
+  const index2 = utxos[1].vout;
+  const index3 = utxos[2].vout;
+  const tx1 = await mydoge.get('/wallet/info', {
+    params: { route: `tx/${utxos[0].txid}` },
+  });
+  const tx2 = await mydoge.get('/wallet/info', {
+    params: { route: `tx/${utxos[1].txid}` },
+  });
+  const tx3 = await mydoge.get('/wallet/info', {
+    params: { route: `tx/${utxos[2].txid}` },
+  });
+  const value1 = sb.toBitcoin(tx1.data.vout[index1].value);
+  const value2 = sb.toBitcoin(tx2.data.vout[index2].value);
+  const value3 = sb.toBitcoin(tx3.data.vout[index3].value);
+
+  const change = Math.trunc(
+    sb.toSatoshi(value1 + value2 + value3 - amount - fee)
+  );
+
+  // Add Inputs
+  psbt.addInput({
+    hash: tx1.data.txid,
+    index: index1,
+    nonWitnessUtxo: Buffer.from(tx1.data.hex, 'hex'),
+  });
+  psbt.addInput({
+    hash: tx2.data.txid,
+    index: index2,
+    nonWitnessUtxo: Buffer.from(tx2.data.hex, 'hex'),
+  });
+  psbt.addInput({
+    hash: tx3.data.txid,
+    index: index3,
+    nonWitnessUtxo: Buffer.from(tx3.data.hex, 'hex'),
+  });
+
+  // Add outputs
+  psbt.addOutput({
+    address: signerAddress,
+    value: sb.toSatoshi(amount),
+  });
+  psbt.addOutput({
+    address: changeAddress,
+    value: change,
+  });
+
+  // Return base64 encoded PSBT instead of hex
+  console.log(psbt.toBase64());
+  return base64ToHex(psbt.toBase64());
+}
+
+const PSBT_MAGIC_BYTES = Buffer.from([0x70, 0x73, 0x62, 0x74, 0xff]);
+export function base64ToHex(base64) {
   try {
-    const psbt = new Psbt({ network });
-
-    for (const input of params.inputs) {
-      const p2pkhOutput = payments.p2pkh({
-        address: input.address,
-        network
-      }).output;
-
-      psbt.addInput({
-        hash: input.txid,
-        index: input.vout,
-        witnessUtxo: {
-          script: Buffer.from(p2pkhOutput || '', 'hex'),
-          value: Number(input.amount)
-        }
-      });
-    }
-
-    for (const output of params.outputs) {
-      psbt.addOutput({
-        address: output.address,
-        value: Number(output.amount)
-      });
-    }
-
-    return psbt.toHex();
+    const buffer = Buffer.from(base64, "base64");
+    // const bufferF =  Buffer.concat([PSBT_MAGIC_BYTES, buffer]);
+    return buffer.toString("hex");
   } catch (error) {
-    console.error('Create PSBT failed:', error);
+    console.error("PSBT base64 to hex failed:", error);
     throw error;
   }
 }

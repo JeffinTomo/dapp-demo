@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { createDogePsbt, getUtxos } from "./utils";
+import { getUtxos, createDogePsbt } from "./utils";
 
 //jeff soical: D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF
 const recipientAddress = "D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF";
-const ticker = "dbit"; //paca
+const ticker = "dall"; //paca/dbit/dall
 
 export default function DogeDApp() {
   const [address, setAddress] = useState("");
@@ -11,21 +11,21 @@ export default function DogeDApp() {
   const [txId, setTxId] = useState("");
 
   const [providerName, setProviderName] = useState('mydoge');
-  const [provider, setProvider] = useState(window[providerName]?.doge);
+  const [provider, setProvider] = useState(window[providerName] ? window[providerName]?.doge : window.doge);
 
   const [res, setRes] = useState({});
 
   useEffect(() => {
     setRes({});
     // Store user's public key once they connect
-    provider.on("connect", (res) => {
-      console.log('dapp.on.connect', res);
-    });
+    // provider.on("connect", (res) => {
+    //   console.log('dapp.on.connect', res);
+    // });
 
     // Forget user's public key once they disconnect
-    provider.on("disconnect", (res) => {
-      console.log('dapp.on.disconnect', res);
-    });
+    // provider.on("disconnect", (res) => {
+    //   console.log('dapp.on.disconnect', res);
+    // });
   }, [provider]);
   
   const connect = async () => {
@@ -216,11 +216,11 @@ export default function DogeDApp() {
         message,
         type: "",
       });
-      setSignature(signature);
+      setSignature(signature.signedMessage);
       setRes({
         method: 'requestSignedMessage',
         message,
-        signature
+        res: signature
       });
     } catch (err) {
       console.error('requestSignedMessage', err);
@@ -258,7 +258,9 @@ export default function DogeDApp() {
     }
     setRes({});
     try {
-      const res = await provider.requestDecryptedMessage(signature, "");
+      const res = await provider.requestDecryptedMessage({
+        message: signature
+      });
       setRes({
         method: 'requestDecryptedMessage',
         message,
@@ -280,7 +282,7 @@ export default function DogeDApp() {
     try {
       const res = await provider.requestTransaction({
         recipientAddress,
-        dogeAmount: 0.09,
+        dogeAmount: 0.02,
       });
       setTxId(res.txid);
       setRes({
@@ -366,8 +368,15 @@ export default function DogeDApp() {
       console.log('utxos', utxos);
       const res = await provider.requestAvailableDRC20Transaction({
         ticker,
-        amount: 1
+        amount: 1000
       });
+      /*
+      "res": {
+          "txId": "ad8b6ce280f783546981003916e9c9324f9555a8f49720326727e24e75df1ab0",
+          "ticker": "dbit",
+          "amount": 1000
+        }
+      */
       setRes({
         method: 'requestAvailableDRC20Transaction',
         ticker,
@@ -385,10 +394,19 @@ export default function DogeDApp() {
     }
     setRes({});
     try {
+      const { inscriptions = [] } = await provider.getTransferableDRC20({
+        ticker
+      });
+      //inscriptions: [{ "amount": "1000", "location": "68f08b2ad7dfd26192685e04a7038223fa0259e0878e1b636776104c1535bb9f:0:0" }],
+      if (inscriptions.length === 0) { 
+        alert('no inscription');
+        return;
+      }
+      const { location } = inscriptions[0];
       const res = await provider.requestInscriptionTransaction({
-        location: '18d83f35060323a20e158805805e217b3ab7d849d5a1131f0ed8eba3a31c39a7:0:0', 
+        location, 
         recipientAddress,
-        feeRate: 10
+        // feeRate: 10
       });
       setRes({
         method: 'requestInscriptionTransaction',
@@ -435,34 +453,18 @@ export default function DogeDApp() {
       return;
     }
     setRes({});
-    
-    //spendable
-    const utxos = await getUtxos(address, "", [], "spendable");
-    if (utxos.length === 0) {
-      alert('no utxos');
-      return;
-    }
-    console.log('utxos', utxos); 
+     
     const psbtHex = await createDogePsbt({
-      inputs: [
-        {
-          address,
-          amount: utxos[0].outputValue,
-          txid: utxos[0].txid,
-          vout: utxos[0].vout
-        },
-      ],
-      outputs: [
-        {
-          address,
-          amount: 546,
-        },
-      ],
+      signerAddress: address,
+      amount: 0.0001,
+      fee: 0.0001
     });
+    console.log('psbtHex', psbtHex);
     
     try {
       const res = await provider.requestPsbt({
         rawTx: psbtHex,
+        indexes: [0,1,2],
         signOnly: false, // Optionally return the signed transaction instead of broadcasting
       });
       setRes({
@@ -482,33 +484,18 @@ export default function DogeDApp() {
     }
     setRes({});
     
-    const utxos = await getUtxos(address, "", [], "spendable");
-    if (utxos.length === 0) { 
-      alert('no utxos');
-      return;
-    }
-    // console.log('utxos', utxos); 
-    const psbtHex = await createDogePsbt({
-      inputs: [
-        {
-          address,
-          amount: utxos[0].outputValue,
-          txid: utxos[0].txid,
-          vout: utxos[0].vout
-        },
-      ],
-      outputs: [
-        {
-          address,
-          amount: 546,
-        },
-      ],
-    });
-    // console.log('psbtHex', psbtHex);
     
+    const psbtHex = await createDogePsbt({
+      signerAddress: address,
+      amount: 0.0001,
+      fee: 0.0001
+    });
+    
+    console.log('psbtHex', psbtHex);
     try {
       const res = await provider.requestPsbt({
         rawTx: psbtHex,
+        indexes: [0,1,2],
         signOnly: true, // Optionally return the signed transaction instead of broadcasting
       });
       setRes({
@@ -531,11 +518,12 @@ export default function DogeDApp() {
           </a></li>
           <li>signed tx send: <a href="https://explorer.coinex.com/doge/tool/broadcast" target="_blank" rel="noopener noreferrer">https://explorer.coinex.com/doge/tool/broadcast</a></li>
           <li>dogechain explorder: <a href="https://dogechain.info/" target="_blank" rel="noopener noreferrer">https://dogechain.info/</a></li>
+          <li>psbt parse: <a href="https://btclib-tools.giacomocaironi.dev/psbt/" target="_blank" rel="noopener noreferrer">https://btclib-tools.giacomocaironi.dev/psbt/</a></li>
         </ol>
 
           {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
           
-        current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
+        {/* current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
         
         switch to:
         <button onClick={() => {
@@ -548,7 +536,7 @@ export default function DogeDApp() {
           setProviderName('mydoge');
         }} className="bg-[#666] text-[#fff] p-1 m-2">
           mydoge
-        </button>
+        </button> */}
       </div>
 
       <div className="mt-2">
@@ -556,7 +544,7 @@ export default function DogeDApp() {
           connect
         </button>
 
-        <button onClick={requestAccounts} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={requestAccounts} className="bg-[#000] hidden text-[#fff] p-1 m-2">
           requestAccounts
         </button>
 
@@ -570,7 +558,7 @@ export default function DogeDApp() {
       </div>
 
       <div className={ 'mt-0 ' + (address ? '' : 'opacity-40')}>
-        <button onClick={getAccounts} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={getAccounts} className="bg-[#000] hidden text-[#fff] p-1 m-2">
           getAccounts
         </button>
 
@@ -580,11 +568,11 @@ export default function DogeDApp() {
       </div>
 
       <div className={ 'mt-0 ' + (address ? '' : 'opacity-40')}>
-        <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={signMessage} className="bg-[#000] hidden text-[#fff] p-1 m-2">
           signMessage
         </button> 
 
-        <button onClick={signMessageBip322Simple} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={signMessageBip322Simple} className="bg-[#000] hidden text-[#fff] p-1 m-2">
           signMessageBip322Simple
         </button> 
 
@@ -592,7 +580,7 @@ export default function DogeDApp() {
           requestSignedMessage
         </button> 
 
-        <button onClick={requestSignedMessageBip322Simple} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={requestSignedMessageBip322Simple} className="bg-[#000] hidden text-[#fff] p-1 m-2">
           requestSignedMessageBip322Simple
         </button> 
         
@@ -615,8 +603,8 @@ export default function DogeDApp() {
           requestPsbts
         </button>  */}
 
-        <button onClick={requestTransaction} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
-          ?requestTransaction
+        <button onClick={requestTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+          requestTransaction
         </button> 
       </div>
 
