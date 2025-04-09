@@ -73,35 +73,32 @@ export async function getUtxos(address, cursor, result, filter, tx ) {
 
 export async function createDogePsbt(params) {
   try {
-    // 1. 初始化 PSBT
     const psbt = new Psbt({ network });
 
-    // 2. 添加输入
     for (const input of params.inputs) {
+      const p2pkhOutput = payments.p2pkh({
+        address: input.address,
+        network
+      }).output;
+
       psbt.addInput({
         hash: input.txid,
         index: input.vout,
         witnessUtxo: {
-          script: payments.p2pkh({
-            address: input.address,
-            network
-          }).output,
-          value: input.amount
+          script: Buffer.from(p2pkhOutput || '', 'hex'),
+          value: Number(input.amount)
         }
       });
     }
 
-    // 3. 添加输出
     for (const output of params.outputs) {
       psbt.addOutput({
         address: output.address,
-        value: output.amount
+        value: Number(output.amount)
       });
     }
 
-    // 4. 序列化 PSBT
     return psbt.toHex();
-
   } catch (error) {
     console.error('Create PSBT failed:', error);
     throw error;

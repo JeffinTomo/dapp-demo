@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createDogePsbt, getUtxos } from "./utils";
 
+//jeff soical: D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF
 const recipientAddress = "D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF";
 
 export default function DogeDApp() {
@@ -278,7 +279,7 @@ export default function DogeDApp() {
     try {
       const res = await provider.requestTransaction({
         recipientAddress,
-        dogeAmount: 0.1,
+        dogeAmount: 0.16,
       });
       setTxId(res.txid);
       setRes({
@@ -437,17 +438,18 @@ export default function DogeDApp() {
     }
     setRes({});
     
-    const utxos = await getUtxos(address, "", [], "spendable");
-    if (utxos.length === 0) { 
+    //spendable
+    const utxos = await getUtxos(address, "", [], "");
+    if (utxos.length === 0) {
       alert('no utxos');
       return;
     }
-    // console.log('utxos', utxos); 
+    console.log('utxos', utxos); 
     const psbtHex = await createDogePsbt({
       inputs: [
         {
           address,
-          amount: 1,
+          amount: utxos[0].outputValue,
           txid: utxos[0].txid,
           vout: utxos[0].vout
         },
@@ -455,7 +457,7 @@ export default function DogeDApp() {
       outputs: [
         {
           address,
-          amount: 1,
+          amount: 546,
         },
       ],
     });
@@ -467,6 +469,7 @@ export default function DogeDApp() {
       });
       setRes({
         method: 'requestPsbt',
+        psbt: psbtHex,
         res
       });      
     } catch (err) {
@@ -481,7 +484,7 @@ export default function DogeDApp() {
     }
     setRes({});
     
-    const utxos = await getUtxos(address, "", [], "spendable");
+    const utxos = await getUtxos(address, "", [], "");
     if (utxos.length === 0) { 
       alert('no utxos');
       return;
@@ -491,7 +494,7 @@ export default function DogeDApp() {
       inputs: [
         {
           address,
-          amount: 1,
+          amount: utxos[0].outputValue,
           txid: utxos[0].txid,
           vout: utxos[0].vout
         },
@@ -499,7 +502,7 @@ export default function DogeDApp() {
       outputs: [
         {
           address,
-          amount: 1,
+          amount: 546,
         },
       ],
     });
@@ -520,17 +523,19 @@ export default function DogeDApp() {
     }
   };
 
-
   return (
     <div className="m-5 text-sm">
       <div className="mt-0 bg-[#f5f5f5] p-2">
         <h1>Solana Dapp Demo</h1>
-        <div>
-          <a href="https://mydoge-com.github.io/mydogemask/" target="_blank" rel="noopener noreferrer">
+        <ol className="mt-4">
+          <li>mydoge api doc: <a href="https://mydoge-com.github.io/mydogemask/" target="_blank" rel="noopener noreferrer">
             https://mydoge-com.github.io/mydogemask/
-          </a>
-        </div>
-        {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
+          </a></li>
+          <li>signed tx send: <a href="https://explorer.coinex.com/doge/tool/broadcast" target="_blank" rel="noopener noreferrer">https://explorer.coinex.com/doge/tool/broadcast</a></li>
+          <li>dogechain explorder: <a href="https://dogechain.info/" target="_blank" rel="noopener noreferrer">https://dogechain.info/</a></li>
+        </ol>
+
+          {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
           
         current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
         
@@ -594,8 +599,8 @@ export default function DogeDApp() {
         </button> 
         
 
-        <button onClick={requestDecryptedMessage} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
-          ?requestDecryptedMessage
+        <button onClick={requestDecryptedMessage} className="bg-[#000] opacity-20 text-[#fff] p-1 m-2">
+          <del>requestDecryptedMessage</del>
         </button>
       </div>
 
@@ -604,7 +609,7 @@ export default function DogeDApp() {
           ?requestPsbt
         </button> 
 
-        <button onClick={requestPsbtSignOnly} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={requestPsbtSignOnly} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
           requestPsbt.signOnly
         </button> 
 
@@ -615,13 +620,13 @@ export default function DogeDApp() {
         <button onClick={requestTransaction} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
           ?requestTransaction
         </button> 
+      </div>
 
+      <div className={'mt-0 ' + (address ? '' : 'opacity-40')}>
         <button onClick={getTransactionStatus} className="bg-[#000] text-[#fff] p-1 m-2">
           getTransactionStatus
         </button> 
-      </div>
 
-      <div className={ 'mt-0 ' + (address ? '' : 'opacity-40')}>
         <button onClick={getDRC20Balance} className="bg-[#000] text-[#fff] p-1 m-2">
           getDRC20Balance
         </button> 
@@ -629,6 +634,8 @@ export default function DogeDApp() {
         <button onClick={getTransferableDRC20} className="bg-[#000] text-[#fff] p-1 m-2">
           getTransferableDRC20
         </button> 
+
+        <div></div>
 
         <button onClick={requestAvailableDRC20Transaction} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
           ?requestAvailableDRC20Transaction
