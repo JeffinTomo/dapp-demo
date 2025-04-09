@@ -3,6 +3,7 @@ import { createDogePsbt, getUtxos } from "./utils";
 
 //jeff soical: D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF
 const recipientAddress = "D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF";
+const ticker = "dbit"; //paca
 
 export default function DogeDApp() {
   const [address, setAddress] = useState("");
@@ -279,7 +280,7 @@ export default function DogeDApp() {
     try {
       const res = await provider.requestTransaction({
         recipientAddress,
-        dogeAmount: 0.16,
+        dogeAmount: 0.09,
       });
       setTxId(res.txid);
       setRes({
@@ -310,9 +311,6 @@ export default function DogeDApp() {
     }
   };
 
-
-  const ticker = "dall";
-  const limit = 1000;
   const getDRC20Balance = async () => {
     if (!provider) { 
       alert('provider err');
@@ -439,7 +437,7 @@ export default function DogeDApp() {
     setRes({});
     
     //spendable
-    const utxos = await getUtxos(address, "", [], "");
+    const utxos = await getUtxos(address, "", [], "spendable");
     if (utxos.length === 0) {
       alert('no utxos');
       return;
@@ -484,7 +482,7 @@ export default function DogeDApp() {
     }
     setRes({});
     
-    const utxos = await getUtxos(address, "", [], "");
+    const utxos = await getUtxos(address, "", [], "spendable");
     if (utxos.length === 0) { 
       alert('no utxos');
       return;
