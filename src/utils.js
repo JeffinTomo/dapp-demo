@@ -148,6 +148,7 @@ export async function createDogePsbt({
   });
 
   // Return base64 encoded PSBT instead of hex
+  console.log(psbt);
   console.log(psbt.toHex());
   console.log(psbt.toBase64());
   console.log(base64ToHex(psbt.toBase64()));
