@@ -464,7 +464,7 @@ export default function DogeDApp() {
     try {
       const res = await provider.requestPsbt({
         rawTx: psbtHex,
-        indexes: [0,1,2],
+        indexes: [0,1],
         signOnly: false, // Optionally return the signed transaction instead of broadcasting
       });
       setRes({
@@ -495,7 +495,7 @@ export default function DogeDApp() {
     try {
       const res = await provider.requestPsbt({
         rawTx: psbtHex,
-        indexes: [0,1,2],
+        indexes: [0,1],
         signOnly: true, // Optionally return the signed transaction instead of broadcasting
       });
       setRes({
@@ -518,7 +518,8 @@ export default function DogeDApp() {
           </a></li>
           <li>signed tx send: <a href="https://explorer.coinex.com/doge/tool/broadcast" target="_blank" rel="noopener noreferrer">https://explorer.coinex.com/doge/tool/broadcast</a></li>
           <li>dogechain explorder: <a href="https://dogechain.info/" target="_blank" rel="noopener noreferrer">https://dogechain.info/</a></li>
-          <li>psbt parse: <a href="https://btclib-tools.giacomocaironi.dev/psbt/" target="_blank" rel="noopener noreferrer">https://btclib-tools.giacomocaironi.dev/psbt/</a></li>
+          <li>btc psbt parse: <a href="https://btclib-tools.giacomocaironi.dev/psbt/" target="_blank" rel="noopener noreferrer">https://btclib-tools.giacomocaironi.dev/psbt/</a></li>
+          <li>doge psbt parse: <a href="https://www.opreturn.net/tools/decode_rawtx/" target="_blank" rel="noopener noreferrer">https://www.opreturn.net/tools/decode_rawtx/</a></li>
         </ol>
 
           {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}

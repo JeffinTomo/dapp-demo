@@ -102,22 +102,22 @@ export async function createDogePsbt({
 
   const index1 = utxos[0].vout;
   const index2 = utxos[1].vout;
-  const index3 = utxos[2].vout;
+  // const index3 = utxos[2].vout;
   const tx1 = await mydoge.get('/wallet/info', {
     params: { route: `tx/${utxos[0].txid}` },
   });
   const tx2 = await mydoge.get('/wallet/info', {
     params: { route: `tx/${utxos[1].txid}` },
   });
-  const tx3 = await mydoge.get('/wallet/info', {
-    params: { route: `tx/${utxos[2].txid}` },
-  });
+  // const tx3 = await mydoge.get('/wallet/info', {
+  //   params: { route: `tx/${utxos[2].txid}` },
+  // });
   const value1 = sb.toBitcoin(tx1.data.vout[index1].value);
   const value2 = sb.toBitcoin(tx2.data.vout[index2].value);
-  const value3 = sb.toBitcoin(tx3.data.vout[index3].value);
+  // const value3 = sb.toBitcoin(tx3.data.vout[index3].value);
 
   const change = Math.trunc(
-    sb.toSatoshi(value1 + value2 + value3 - amount - fee)
+    sb.toSatoshi(value1 + value2 - amount - fee)
   );
 
   // Add Inputs
@@ -131,11 +131,11 @@ export async function createDogePsbt({
     index: index2,
     nonWitnessUtxo: Buffer.from(tx2.data.hex, 'hex'),
   });
-  psbt.addInput({
-    hash: tx3.data.txid,
-    index: index3,
-    nonWitnessUtxo: Buffer.from(tx3.data.hex, 'hex'),
-  });
+  // psbt.addInput({
+  //   hash: tx3.data.txid,
+  //   index: index3,
+  //   nonWitnessUtxo: Buffer.from(tx3.data.hex, 'hex'),
+  // });
 
   // Add outputs
   psbt.addOutput({
@@ -148,8 +148,14 @@ export async function createDogePsbt({
   });
 
   // Return base64 encoded PSBT instead of hex
+  console.log(psbt.toHex());
   console.log(psbt.toBase64());
-  return base64ToHex(psbt.toBase64());
+  console.log(base64ToHex(psbt.toBase64()));
+  // const psbtHex = psbt.toHex();
+  // if (psbtHex.indexOf("70736274ff") !== 0) { 
+  //   return "70736274ff" + psbtHex;
+  // }
+  return psbt.toHex();
 }
 
 const PSBT_MAGIC_BYTES = Buffer.from([0x70, 0x73, 0x62, 0x74, 0xff]);
