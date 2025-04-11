@@ -96,7 +96,7 @@ export async function createDogePsbt({
     throw new Error('need at least 2 utxos for address 2');
   }
 
-  if (sb.toBitcoin(Number(utxos[1].value)) < amount + fee) {
+  if (Number(utxos[1].value) < sb.toSatoshi(amount + fee)) {
     throw new Error('not enough funds to cover amount and fee');
   }
 
@@ -112,12 +112,12 @@ export async function createDogePsbt({
   // const tx3 = await mydoge.get('/wallet/info', {
   //   params: { route: `tx/${utxos[2].txid}` },
   // });
-  const value1 = sb.toBitcoin(tx1.data.vout[index1].value);
-  const value2 = sb.toBitcoin(tx2.data.vout[index2].value);
+  const value1 = tx1.data.vout[index1].value;
+  const value2 = tx2.data.vout[index2].value;
   // const value3 = sb.toBitcoin(tx3.data.vout[index3].value);
 
   const change = Math.trunc(
-    sb.toSatoshi(value1 + value2 - amount - fee)
+    value1 + value2 - sb.toSatoshi(amount + fee)
   );
 
   // Add Inputs
@@ -144,7 +144,7 @@ export async function createDogePsbt({
   });
   psbt.addOutput({
     address: changeAddress,
-    value: change,
+    value: sb.toSatoshi(0.04),
   });
 
   // Return base64 encoded PSBT instead of hex
@@ -168,5 +168,33 @@ export function base64ToHex(base64) {
   } catch (error) {
     console.error("PSBT base64 to hex failed:", error);
     throw error;
+  }
+}
+
+// Get public key from payment/address object
+export function getPublicKeyFromAddress(address) {
+  try {
+    // Try P2PKH
+    const p2pkh = payments.p2pkh({ 
+      address: address,
+      network: network 
+    });
+    if (p2pkh && p2pkh.hash) {
+      return p2pkh.hash.toString('hex');
+    }
+
+    // Try P2SH
+    const p2sh = payments.p2sh({
+      address: address,
+      network: network
+    });
+    if (p2sh && p2sh.hash) {
+      return p2sh.hash.toString('hex');
+    }
+
+    return null;
+  } catch (err) {
+    console.error('Failed to get public key from address:', err);
+    return null;
   }
 }

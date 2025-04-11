@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getUtxos, createDogePsbt } from "./utils";
+import { getUtxos, createDogePsbt, getPublicKeyFromAddress } from "./utils";
 
 //jeff soical: D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF
 const recipientAddress = "D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF";
@@ -39,6 +39,7 @@ export default function DogeDApp() {
       const res = await provider.connect() || {};
       
       setAddress(res.address);
+      console.log(getPublicKeyFromAddress(res.address));
       
       setRes({
         method: 'connect',
