@@ -5,26 +5,8 @@ export default function ShopDApp() {
   const provider = window.mydoge?.[providerName];
 
   const [res, setRes] = useState({});
-  
-  const connect = async () => {
-    if (!provider) { 
-      alert('provider err');
-      return;
-    }
-    setRes({});
-    //{ onlyIfTrusted: true }
-    try {
-      const res = await provider.connect({params: "connect"}) || {};      
-      setRes({
-        method: 'connect',
-        res
-      });
-    } catch (err) {
-      console.error("connected error", err);
-    }
-  };
 
-  const welcome = async () => {
+  const welcomeDialog = async () => {
     if (!provider) { 
       alert('provider err');
       return;
@@ -32,7 +14,7 @@ export default function ShopDApp() {
     setRes({});
     //{ onlyIfTrusted: true }
     try {
-      const res = await provider.welcome({
+      const res = await provider.welcomeDialog({
         rewardPercent: "8%"
       });
       setRes({
@@ -44,7 +26,7 @@ export default function ShopDApp() {
     }
   };
 
-  const addToCart = async () => {
+  const addToCartDialog = async () => {
     if (!provider) { 
       alert('provider err');
       return;
@@ -52,8 +34,7 @@ export default function ShopDApp() {
     setRes({});
     //{ onlyIfTrusted: true }
     try {
-      const res = await provider.addToCart({
-        rewardPercent: "8%"
+      const res = await provider.addToCartDialog({
       });
       setRes({
         method: 'addToCart',
@@ -64,7 +45,7 @@ export default function ShopDApp() {
     }
   };
   
-  const rewardEstimated = async () => {
+  const rewardEstimatedDialog = async () => {
     if (!provider) { 
       alert('provider err');
       return;
@@ -72,10 +53,9 @@ export default function ShopDApp() {
     setRes({});
     //{ onlyIfTrusted: true }
     try {
-      const res = await provider.rewardEstimated({
-        reward: "12.07",
-        totalInCart: "$340.35",
-        rewardPercent: "8%"
+      const res = await provider.rewardEstimatedDialog({
+        reward: Math.floor(Math.random()*9876)/100,
+        totalInCart: "$" + (Math.floor(Math.random()*9876)/100 + 1000),
       });
       setRes({
         method: 'rewardEstimated',
@@ -86,16 +66,16 @@ export default function ShopDApp() {
     }
   };
 
-  const rewardClaimed = async () => {
+  const rewardClaimedDialog = async () => {
     if (!provider) { 
       alert('provider err');
       return;
     }
     setRes({});
     try {
-      const res = await provider.rewardClaimed({
-        reward: "12.07",
-        claimedRecord: "https://www.walmart.com/?reward-done"
+      const res = await provider.rewardClaimedDialog({
+        reward: Math.floor(Math.random()*9876)/100,
+        claimedRecord: "https://www.walmart.com/?reward-done?r=" + Math.random()
       });
       setRes({
         method: 'rewardClaimed',
@@ -117,33 +97,29 @@ export default function ShopDApp() {
       </div>
 
       <div className="mt-2">
-        <button onClick={connect} className="bg-[#000] hidden text-[#fff] p-1 m-2">
-          connect
+        <button onClick={welcomeDialog} className="bg-[#000] text-[#fff] p-1 m-2">
+          welcomeDialog
         </button>
 
-        <button onClick={welcome} className="bg-[#000] text-[#fff] p-1 m-2">
-          welcome
+        <button onClick={addToCartDialog} className="bg-[#000] text-[#fff] p-1 m-2">
+          addToCartDialog
         </button>
 
-        <button onClick={addToCart} className="bg-[#000] text-[#fff] p-1 m-2">
-          addToCart
+        <button onClick={rewardEstimatedDialog} className="bg-[#000] text-[#fff] p-1 m-2">
+          rewardEstimatedDialog
         </button>
 
-        <button onClick={rewardEstimated} className="bg-[#000] text-[#fff] p-1 m-2">
-          rewardEstimated
-        </button>
-
-        <button onClick={rewardClaimed} className="bg-[#000] text-[#fff] p-1 m-2">
-          rewardClaimed
+        <button onClick={rewardClaimedDialog} className="bg-[#000] text-[#fff] p-1 m-2">
+          rewardClaimedDialog
         </button>
       </div>
 
-      {/* {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
+      {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
         <h2 className="text-lg mb-4">{providerName}.{res.method}:</h2>
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}
         </pre>
-      </div>} */}
+      </div>}
     </div>
   );
 }
