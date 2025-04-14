@@ -46,6 +46,7 @@ const approve = async (data) => {
 const transfer = async (data) => {
   const decimals = await contractToken.methods.decimals().call();
   const { address, to, amount } = data;
+  console.log('transfer', data);
   const value = parseUnits(amount.toString(), Number(decimals));
   const res = contractToken.methods.transfer(to, value).send({
     from: address,

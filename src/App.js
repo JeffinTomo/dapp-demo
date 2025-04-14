@@ -15,7 +15,7 @@ window.Buffer = Buffer;
 import EvmDapp from "./evm-dapp";
 const DogeDapp = React.lazy(() => import("./doge-dapp"));
 const SolanaDapp = React.lazy(() => import("./solana-dapp"));
-const ShopDApp = React.lazy(() => import("./shop-dapp"));
+import ShopDApp from "./shop-dapp";
 
 
 function App() {
@@ -33,6 +33,7 @@ function App() {
   }
 
   return (
+    <Suspense>
     <div className="w-12/12">
       <BrowserRouter>
         <div className="dapps bg-[#000] p-3 mb-4">
@@ -51,7 +52,8 @@ function App() {
           <Route exact path="/shop" element={<ShopDApp />} />
         </Routes>
       </BrowserRouter>
-    </div>
+      </div>
+    </Suspense>
   );
 }
 

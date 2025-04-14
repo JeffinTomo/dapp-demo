@@ -21,8 +21,8 @@ import {
 } from "./erc20/contract";
 
 //https://base.blockscout.com/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
-const erc20ContractAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-// const erc20ContractAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
+// const erc20ContractAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+const erc20ContractAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
 
 export default function EvmDApp() {
   const [providerName, setProviderName] = useState("mydoge.ethereum");
@@ -44,24 +44,21 @@ export default function EvmDApp() {
   };
 
   const disconnect = async () => {
-    if (!provider.disconnect) {
-      try {
-        // Request to revoke permissions
-        let result = await ethereum.request({
-          method: "wallet_revokePermissions",
-          params: [
-            {
-              eth_accounts: {}, // Revoke access to accounts
-            },
-          ],
-        });
+    try {
+      // Request to revoke permissions
+      let result = await ethereum.request({
+        method: "wallet_revokePermissions",
+        params: [
+          {
+            eth_accounts: {}, // Revoke access to accounts
+          },
+        ],
+      });
 
-        console.log("Permissions revoked:", result);
-        return result;
-      } catch (error) {
-        console.error("Error revoking permissions:", error);
-      }
-      return;
+      console.log("Permissions revoked:", result);
+      return result;
+    } catch (error) {
+      console.error("Error revoking permissions:", error);
     }
     let res = await provider.disconnect();
     console.log("res", res);
@@ -207,8 +204,8 @@ export default function EvmDApp() {
         message: exampleMessage,
         signature: sign,
       };
-      let isValid = await verifyMessage(pramas);
-      console.log("verify SignedMessage", isValid, pramas);
+      // let isValid = await verifyMessage(pramas);
+      // console.log("verify SignedMessage", isValid, pramas);
       return pramas;
     } catch (err) {
       console.error(err);
@@ -330,7 +327,7 @@ export default function EvmDApp() {
       return;
     }
     let res = await provider.request({
-      method: "eth_decrypt",
+      method: "eth_decrypt", 
       params: [encryptedMessage, address],
     });
     console.log('decryptMessage', res === message3,encryptedMessage, address, res);
@@ -430,7 +427,16 @@ export default function EvmDApp() {
             method: m,
             params: methods[m] || [],
           });
-          console.log("evm.request", m, methods[m], res);
+          console.log("evm.request", {
+            method: m,
+            params: methods[m],
+            res
+          });
+          setRes({
+            method: m,
+            params: methods[m],
+            res
+          })
         } catch (err) {
           console.error("evm.request", m, methods[m], res);
         }
@@ -574,8 +580,8 @@ export default function EvmDApp() {
                 try {
                   func().then((res) => {
                     setCurrentInfo({
-                      "function name": func.name,
-                      "function returns": res,
+                      "method": func.name,
+                      res,
                     });
                   });
                 } catch (e) {
@@ -588,11 +594,12 @@ export default function EvmDApp() {
           </div>
         ))}
       </div>
+
       <div className="bg-[#f5f5f5] border-1 p-5">
         {Object.keys(currentInfo).map((k) => (
-          <div key={k} style={{ wordWrap: "break-word" }}>
-            {k}: {JSON.stringify(currentInfo[k]) || res}
-          </div>
+          <pre key={k} style={{ wordWrap: "break-word" }}>
+            {k}: {JSON.stringify(currentInfo[k] || res, null, "\t")}
+          </pre>
         ))}
       </div>
 
@@ -619,10 +626,15 @@ function ERC20Contact({ address, providerName, provider }) {
   const [data, setData] = useState({});
 
   useEffect(() => {
-    //init erc20 contract
-    const contractToken = init(provider, erc20ContractAddress);
-
     (async()=>{ 
+      const chainId = await provider.request({ method: "eth_chainId" });
+      if (chainId !== "0x2105") { 
+        return;
+      }
+      
+      //init erc20 contract
+      const contractToken = init(provider, erc20ContractAddress);
+
       const decimals = await contractToken.methods.decimals().call();
       const name = await contractToken.methods.name().call();
       const symbol = await contractToken.methods.symbol().call();
@@ -707,7 +719,7 @@ function ERC20Contact({ address, providerName, provider }) {
             await transfer({
               address,
               to: address,
-              amount: 0.01,
+              amount: 1,
             }).then((hashDetail) => {
               console.log(
                 "erc20 transfer:",

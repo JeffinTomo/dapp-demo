@@ -61,18 +61,21 @@ export default function SolanaDApp() {
       const res = await provider.connect() || {};
       console.log('provider.connect', res);
       const { address, publicKey } = res;
-      const address1 = publicKey ? publicKey.toString() : '';
+      const address1 = publicKey ? publicKey.toString() : address.toString();
 
       // console.log('getBnString publicKey', publicKey, publicKey.toJSON());
       
       setRes({
         method: 'connect',
         chainId,
-        res
+        res: {
+          publicKey: publicKey ? publicKey.toString(): publicKey,
+          address: address1
+        }
       });
       
       //todo: publicKey 的格式
-      setAddress(address1 || address);
+      setAddress(address1);
     } catch (err) {
       console.error("connected error", err);
     }
@@ -88,11 +91,14 @@ export default function SolanaDApp() {
     try {
       const res = await provider.connect({ onlyIfTrusted: true }) || {};
       const { address, publicKey } = res;
-      const address1 = publicKey ? publicKey.toString() : '';
+      const address1 = publicKey ? publicKey.toString() : address.toString();
       setRes({
         method: 'connect',
         params: { onlyIfTrusted: true },
-        res
+        res: {
+          publicKey: publicKey ? publicKey.toString(): publicKey,
+          address: address1
+        }
       });      
       //todo: publicKey 的格式
       setAddress(address1);
@@ -112,10 +118,13 @@ export default function SolanaDApp() {
         method: 'connect',
       });
       const { address, publicKey } = res;
-      const address1 = publicKey ? publicKey.toString() : '';
+      const address1 = publicKey ? publicKey.toString() : address.toString();
       setRes({
         method: 'request.connect',
-        res
+        res: {
+          publicKey: publicKey ? publicKey.toString(): publicKey,
+          address: address1
+        }
       });
       setAddress(address1);
     } catch (err) {
@@ -227,8 +236,8 @@ export default function SolanaDApp() {
       const params = {
         message: encodedMessage,
         signature: res.signature,
-        publicKey: res.publicKey.toBytes(),
-        address: res.publicKey.toString()
+        publicKey: res.publicKey ? res.publicKey.toBytes() : "",
+        address: res.publicKey ? res.publicKey.toBytes() : ""
       };
       console.log('signMessage check 1:', uint8ArrayToHex(res.signature), uint8ArrayToHex(encodedMessage));
       console.log('signMessage check params:', params);
@@ -277,7 +286,7 @@ export default function SolanaDApp() {
       const params = {
         message: encodedMessage,
         signature: res.signature,
-        publicKey: res.publicKey.toBytes()
+        publicKey: res.publicKey ? res.publicKey.toBytes() : ""
       };
       console.log('request.signMessage check params:', params);
 
