@@ -539,7 +539,7 @@ export default function SolanaDApp() {
       tokenAddress,
       from: address,
       to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
-      amount: 1,
+      amount: 1234,
       // priorityFee: 456,
       chainId
     };
@@ -557,7 +557,7 @@ export default function SolanaDApp() {
       tokenAddress,
       from: address,
       to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
-      amount: 123456789,
+      amount: 12345678910,
       // priorityFee: 123,
       chainId
     };
