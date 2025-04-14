@@ -23,14 +23,18 @@ import { TOKEN_PROGRAM_ID, createTransferInstruction, getAssociatedTokenAddress 
 
 ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
 
+//goon
+const tokenAddress = "2w2MAmvLgYxpMFRy4QjByUN47bsgH3dNXU9rgFuhyssd";
 export default function SolanaDApp() {
   const [address, setAddress] = useState("");
   const [signature, setSignature] = useState("");
   const [transaction, setTransaction] = useState("");
   const [signedTransaction, setSignedTransaction] = useState("");
 
-  const chainId = "devnet"; //mainnet-beta(===mainnet), testnet, devnet, localnet
-  const connection = new Connection(clusterApiUrl(chainId));
+  const chainId = "mainnet-beta"; //mainnet-beta(===mainnet), testnet, devnet, localnet
+  // const rpcUrl = "https://rpc.ankr.com/solana_devnet/09a1e396618f8c01633e1e33608f9437a67c22ffc7410b97349e908fa05da38f";
+  const rpcUrl = "https://rpc.ankr.com/solana/c2d7e8a3db5dce62e202db3d28cca25e74da5028abbf20764e2961918ba34dfc";
+  const connection = new Connection(rpcUrl, {});
 
   const [providerName, setProviderName] = useState('mydoge');
   const [provider, setProvider] = useState(window[providerName]?.solana);
@@ -60,6 +64,7 @@ export default function SolanaDApp() {
     try {
       const res = await provider.connect() || {};
       console.log('provider.connect', res);
+
       const { address, publicKey } = res;
       const address1 = publicKey ? publicKey.toString() : address.toString();
 
@@ -68,10 +73,7 @@ export default function SolanaDApp() {
       setRes({
         method: 'connect',
         chainId,
-        res: {
-          publicKey: publicKey ? publicKey.toString(): publicKey,
-          address: address1
-        }
+        res
       });
       
       //todo: publicKey 的格式
@@ -90,18 +92,11 @@ export default function SolanaDApp() {
     //{ onlyIfTrusted: true }
     try {
       const res = await provider.connect({ onlyIfTrusted: true }) || {};
-      const { address, publicKey } = res;
-      const address1 = publicKey ? publicKey.toString() : address.toString();
       setRes({
         method: 'connect',
         params: { onlyIfTrusted: true },
-        res: {
-          publicKey: publicKey ? publicKey.toString(): publicKey,
-          address: address1
-        }
+        res
       });      
-      //todo: publicKey 的格式
-      setAddress(address1);
     } catch (err) {
       console.error("connected error", err);
     }
@@ -117,16 +112,10 @@ export default function SolanaDApp() {
       let res = await provider.request({
         method: 'connect',
       });
-      const { address, publicKey } = res;
-      const address1 = publicKey ? publicKey.toString() : address.toString();
       setRes({
         method: 'request.connect',
-        res: {
-          publicKey: publicKey ? publicKey.toString(): publicKey,
-          address: address1
-        }
+        res
       });
-      setAddress(address1);
     } catch (err) {
       console.error("connected error", err);
     }
@@ -318,7 +307,6 @@ export default function SolanaDApp() {
         statement: "Clicking Sign or Approve only means you have proved this wallet is owned by you. This request will not trigger any blockchain transaction or cost any gas fee.",
         version: "1",
         nonce: "oBbLoEldZs",
-        chainId,
         issuedAt: new Date().toISOString(),
         resources: ["https://example.com", "https://phantom.app/"],
       };
@@ -347,7 +335,7 @@ export default function SolanaDApp() {
 
     console.log('signAndSendTransaction legacyTransaction', tx, signature);
     addSignedData(signature);
-
+    
     setRes({
       method: 'signAndSendTransaction',
       type: 'legacyTransaction',
@@ -376,6 +364,7 @@ export default function SolanaDApp() {
 
     const tx = await createLookupTx();
     const { signature } = await provider.signAndSendTransaction(tx);
+    addSignedData(signature);
 
     setRes({
       method: 'signAndSendTransaction.lookupTransaction',
@@ -479,11 +468,12 @@ export default function SolanaDApp() {
     const params = {
       from: address,
       to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
-      amount: 0.123,
-      priorityFee: 4567,
+      amount: 0.001,
+      // priorityFee: 4567,
       chainId
     };
     const res = await provider.sendSolana(params);
+    addSignedData(res.signature);
     setRes({
       method: 'sendSolana',
       params,
@@ -501,11 +491,13 @@ export default function SolanaDApp() {
     const params = {
       from: address,
       to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
-      amount: 456789,
-      priorityFee: 1234,
+      amount: 123456789,
+      // priorityFee: 1234,
       chainId
     };
     const res = await provider.sendSolana(params);
+    addSignedData(res.signature);
+    addSignedData(signature);
     setRes({
       method: 'sendSolana',
       params,
@@ -522,17 +514,21 @@ export default function SolanaDApp() {
     });
     console.log('sendToken 1', accounts);
   
-    const balances = accounts.value.map((account) => {
+    const balances = {};
+    accounts.value.map((account) => {
       const parsedData = account.account.data;
       const info = parsedData.parsed?.info;
 
       console.log('sendToken 2', parsedData);
   
-      return {
+      const balance = Number(info.tokenAmount.amount);
+      if (balance > 0) { 
+        balances[info.mint] =  {
         tokenAddress: info.mint,
-        balance: Number(info.tokenAmount.amount),
+        balance,
         decimals: info.tokenAmount.decimals,
       };
+      }
     });
 
     setRes({
@@ -540,14 +536,15 @@ export default function SolanaDApp() {
       balances
     });
     const params = {
-      tokenAddress: "CjPhweDMDSvr6eXNrszNZQwS8UBNPbiH38YpWJrhZLVe",
+      tokenAddress,
       from: address,
       to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
-      amount: 0.1234,
-      priorityFee: 456,
+      amount: 1,
+      // priorityFee: 456,
       chainId
     };
     const res = await provider.sendToken(params);
+    addSignedData(res.signature);
     setRes({
       method: 'sendToken',
       params,
@@ -557,14 +554,15 @@ export default function SolanaDApp() {
 
   const sendToken2 = async () => { 
     const params = {
-      tokenAddress: "CjPhweDMDSvr6eXNrszNZQwS8UBNPbiH38YpWJrhZLVe",
+      tokenAddress,
       from: address,
       to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
-      amount: 234,
-      priorityFee: 123,
+      amount: 123456789,
+      // priorityFee: 123,
       chainId
     };
     const res = await provider.sendToken(params);
+    addSignedData(res.signature);
     setRes({
       method: 'sendToken',
       params,
@@ -574,8 +572,6 @@ export default function SolanaDApp() {
 
   const sendSignedTx = async () => {
     const signedTx = "7DQ4JxKhz8YttxmH6PwdM7Yzi2PWhkWSJu9BbLMdiuzdH9SRjboHsikwfkmHTQXb2R1C5XTZ1qyDziFY1VeXiz47pSWgvmeg2xiknqoDhcPvuKxKa4VCLPMXFdK986DhMU29S8u7GxCRogCuxee8Ww4xievxAPPrEqaRJDNv91vBQXJMyV1wbfuhKv6NA6UTdDJAXXzTYCoFZf67dak6sjErT9vQVhcsdjB6hVvVpBgVrTh5tswuSV5ej4cs3sV6zF7rJmLgE7RrpfjJHK1GrRSKsYkxv4ukXH4kk9gi3UBKCXe5zyEqWKUs";
-    
-    const connection = new Connection(clusterApiUrl(chainId));
   
     // const rawTransaction = Buffer.from(bs58.decode(signedTx));
     let rawTransaction;
@@ -706,15 +702,16 @@ export default function SolanaDApp() {
     return lookupTransaction;
   }
 
-  function addSignedData(sign) { 
+  function openTxDetail (signature) { 
+    window.open(`https://explorer.solana.com/tx/${signature}?cluster=${chainId}`);
+  }
+  function addSignedData(signature) {
+    signature = bs58.encode(signature);
+    openTxDetail(signature);
     window.addSigned = window.addSigned || {};
-    if (typeof sign === 'string') { 
-      window.addSigned[sign] = true;
-      return;
+    if (typeof signature === 'string') { 
+      window.addSigned[signature] = true;
     }
-    sign.forEach((signItem) => { 
-      window.addSigned[signItem] = true;
-    });
   }
 
   useEffect(() => {
@@ -824,9 +821,9 @@ export default function SolanaDApp() {
           signIn
         </button>
 
-        <button onClick={sendSignedTx} className="bg-[#000] text-[#fff] p-1 m-2">
+        {/* <button onClick={sendSignedTx} className="bg-[#000] text-[#fff] p-1 m-2">
           sendSignedTx
-        </button>
+        </button> */}
 
         <div className="h-[30px]"></div>
 
@@ -860,35 +857,35 @@ export default function SolanaDApp() {
 
         <div className="h-[30px]"></div>
 
-        <button onClick={signAndSendTransaction} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction.legacyTransaction</button>
-        <button onClick={signAndSendTransaction2} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction.versionedTransaction</button>
-        <button onClick={signAndSendTransaction3} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendTransaction.lookupTransaction</button>
-        <button onClick={signAndSendAllTransactions} className="bg-[#000] text-[#fff] p-1 m-2">signAndSendAllTransactions</button>
+        <button onClick={signAndSendTransaction} className="bg-[#000] hidden text-[#fff] p-1 m-2">signAndSendTransaction.legacyTransaction</button>
+        <button onClick={signAndSendTransaction2} className="bg-[#000] hidden text-[#fff] p-1 m-2">signAndSendTransaction.versionedTransaction</button>
+        <button onClick={signAndSendTransaction3} className="bg-[#000] hidden text-[#fff] p-1 m-2">signAndSendTransaction.lookupTransaction</button>
+        <button onClick={signAndSendAllTransactions} className="bg-[#000] hidden text-[#fff] p-1 m-2">signAndSendAllTransactions</button>
 
         <div className="h-[0px]"></div>
 
         <button
           onClick={signLegacyTransaction}
-          className="bg-[#000] text-[#fff] p-1 m-2"
+          className="bg-[#000] text-[#fff] p-1 m-2 hidden"
         >
           signTransaction.legacyTransaction
         </button>
         <button
           onClick={signVersionedTransaction}
-          className="bg-[#000] text-[#fff] p-1 m-2"
+          className="bg-[#000] text-[#fff] p-1 m-2 hidden"
         >
           signTransaction.versionedTransaction
         </button>
         <button
           onClick={signLookupTransaction}
-          className="bg-[#000] text-[#fff] p-1 m-2"
+          className="bg-[#000] text-[#fff] p-1 m-2 hidden"
         >
           signTransaction.lookupTransaction
         </button>
 
         <button
           onClick={signAllTransactions}
-          className="bg-[#000] text-[#fff] p-1 m-2"
+          className="bg-[#000] text-[#fff] p-1 m-2 hidden"
         >
           signAllTransactions
         </button>       
