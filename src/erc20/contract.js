@@ -10,7 +10,7 @@ const init = (provider, address) => {
   web3 = new Web3(provider);
   tokenAddress = address;
   contractToken = new web3.eth.Contract(erc20Abi, tokenAddress);
-  console.log(contractToken.methods);
+  // console.log(contractToken.methods);
   return contractToken;
 };
 

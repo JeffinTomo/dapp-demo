@@ -29,8 +29,7 @@ export default function EvmDApp() {
   let provider = window.mydoge?.ethereum;
   const web3 = new Web3(provider);
 
-  const [currentInfo, setCurrentInfo] = useState({});
-  const [res, setRes] = useState("");
+  const [res, setRes] = useState({});
   const [address, setAddress] = useState("");
 
   //not connect
@@ -38,25 +37,30 @@ export default function EvmDApp() {
     let res = (await provider.request({ method: "eth_requestAccounts" })) || [];
     // let res = (await provider.connect()) || [];
     // let res = (await provider.enable()) || [];
-    console.log("res", res);
+    // console.log("res", res);
     setAddress(res[0]);
-    return res;
+    setRes({
+      method: "connect/eth_requestAccounts",
+      res
+    });
   };
 
   const disconnect = async () => {
     try {
       // Request to revoke permissions
-      let result = await ethereum.request({
-        method: "wallet_revokePermissions",
-        params: [
-          {
-            eth_accounts: {}, // Revoke access to accounts
-          },
-        ],
+      const res = await provider.disconnect();
+      // const res = await ethereum.request({
+      //   method: "wallet_revokePermissions",
+      //   params: [
+      //     {
+      //       eth_accounts: {}, // Revoke access to accounts
+      //     },
+      //   ],
+      // });
+      setRes({
+        method: "disconnect",
+        res
       });
-
-      console.log("Permissions revoked:", result);
-      return result;
     } catch (error) {
       console.error("Error revoking permissions:", error);
     }
@@ -70,21 +74,42 @@ export default function EvmDApp() {
       alert("plase connect 1st");
       return;
     }
+    setRes({
+      method: "accountsChanged",
+      res: "waiting for switch"
+    });
     provider.on("accountsChanged", (res) => {
       console.log("dapp accountsChanged", res);
-      setRes("accountsChanged:" + JSON.stringify(res));
+      setRes({
+        method: "accountsChanged",
+        res
+      });
     });
   };
 
-  const getChainId = () => provider.request({ method: "eth_chainId" });
+  const getChainId = async() => {
+    const res = await provider.request({ method: "eth_chainId" });
+    setRes({
+      method: "getChainId/eth_chainId",
+      res
+    });
+    return res;
+  }
   const onChainChanged = async () => {
     if (!address) {
       alert("plase connect 1st");
       return;
     }
+    setRes({
+      method: "onChainChanged",
+      res: "waiting for switch"
+    });
     provider.on("chainChanged", (chainId) => {
       console.log("dapp chain changed id:", chainId);
-      setRes("chainChanged:" + JSON.stringify({ chainId }));
+      setRes({
+        method: "chainChanged",
+        res: chainId
+      });
     });
   };
 
@@ -128,12 +153,15 @@ export default function EvmDApp() {
       alert("plase connect 1st");
       return;
     }
-    let res = await provider.request({
+    const res = await provider.request({
       method: "wallet_addEthereumChain",
       params: [chainInfo2],
     });
     console.log("addChain", res);
-    return res;
+    setRes({
+      method: "wallet_addEthereumChain",
+      res,
+    });
   };
 
   const switchChain = async () => {
@@ -141,23 +169,27 @@ export default function EvmDApp() {
       alert("plase connect 1st");
       return;
     }
-    let currentChainId = await getChainId();
+    const currentChainId = await getChainId();
     // let currentChainId = provider.chainId;
     let chainId = "0x1";
     if (currentChainId === chainId) {
       chainId = "0x2105";
     }
     // chainId = "0x1b58"; for bitget
-    try {
+    // try {
       let res = await provider.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId }],
       });
-      console.log("switchChain", chainId, res);
-      return res;
-    } catch (switchError) {
-      console.log(switchError);
-    }
+      console.log("wallet_switchEthereumChain", res);
+        
+      setRes({
+        method: "wallet_switchEthereumChain",
+        res,
+      });
+    // } catch (switchError) {
+    //   console.log(switchError);
+    // }
   };
 
   //https://docs.metamask.io/wallet/reference/json-rpc-methods/wallet_watchasset/
@@ -178,9 +210,13 @@ export default function EvmDApp() {
       },
     };
 
-    return await provider.request({
+    const res= await provider.request({
       method: "wallet_watchAsset",
       params: customTokenInfo,
+    });
+    setRes({
+      method: "wallet_watchAsset",
+      res,
     });
   };
 
@@ -198,6 +234,12 @@ export default function EvmDApp() {
         params: [exampleMessage, address],
       });
       setSignature(sign);
+
+      setRes({
+        method: "personal_sign",
+        message: exampleMessage,
+        res: sign,
+      });
 
       let pramas = {
         address,
@@ -260,17 +302,24 @@ export default function EvmDApp() {
         "Hello, Bob! I think that it's extraordinarily important that we in computer science keep fun in computing. When it started out, it was an awful lot of fun. Of course, the paying customers got shafted every now and then, and after a while we began to take their complaints seriously. We began to feel as if we really were responsible for the successful, error-free perfect use of these machines. I don't think we are. I think we're responsible for stretching them, setting them off in new directions, and keeping fun in the house. I hope the field of computer science never loses its sense of fun.",
     };
 
+    const params = [
+      address,
+      {
+        types,
+        primaryType: "Mail",
+        domain,
+        message,
+      },
+    ];
     let signature = await provider.request({
       method: "eth_signTypedData_v4",
-      params: [
-        address,
-        {
-          types,
-          primaryType: "Mail",
-          domain,
-          message,
-        },
-      ],
+      params,
+    });
+
+    setRes({
+      method: "eth_signTypedData_v4",
+      message: params,
+      res: signature,
     });
 
     const addressRecovered = await recoverTypedDataAddress({
@@ -312,6 +361,13 @@ export default function EvmDApp() {
       method: "eth_encrypt",
       params: [message3, address],
     });
+
+    setRes({
+      method: "eth_encrypt",
+      message: message3,
+      res: encryptedMessage,
+    });
+
     setEncryptedMessage(encryptedMessage);
     console.log('encryptedMessage', encryptedMessage);
     return JSON.stringify(encryptedMessage);
@@ -329,6 +385,12 @@ export default function EvmDApp() {
     let res = await provider.request({
       method: "eth_decrypt", 
       params: [encryptedMessage, address],
+    });
+
+    setRes({
+      method: "eth_decrypt",
+      message: encryptedMessage,
+      res,
     });
     console.log('decryptMessage', res === message3,encryptedMessage, address, res);
     return res;
@@ -364,6 +426,13 @@ export default function EvmDApp() {
     let txHash = await provider.request({
       method: "eth_sendTransaction",
       params: [transactionParameters],
+    });
+    console.log("sendTransaction back:", txHash);
+
+    setRes({
+      method: "eth_sendTransaction",
+      tx: transactionParameters,
+      res: txHash,
     });
 
     return {
@@ -575,15 +644,9 @@ export default function EvmDApp() {
             <button
               size="sm"
               className="border-1 rounded-5 bg-[#dedede] p-1"
-              onClick={() => {
-                setCurrentInfo({});
+              onClick={async() => {
                 try {
-                  func().then((res) => {
-                    setCurrentInfo({
-                      "method": func.name,
-                      res,
-                    });
-                  });
+                  await func();
                 } catch (e) {
                   console.error(e);
                 }
@@ -596,11 +659,9 @@ export default function EvmDApp() {
       </div>
 
       <div className="bg-[#f5f5f5] border-1 p-5">
-        {Object.keys(currentInfo).map((k) => (
-          <pre key={k} style={{ wordWrap: "break-word" }}>
-            {k}: {JSON.stringify(currentInfo[k] || res, null, "\t")}
-          </pre>
-        ))}
+        <pre style={{ wordWrap: "break-word" }}>
+          {JSON.stringify(res, null, "\t")}
+        </pre>
       </div>
 
       {address && <ERC20Contact address={address} provider={provider} providerName={providerName} />}
@@ -638,7 +699,7 @@ function ERC20Contact({ address, providerName, provider }) {
       const decimals = await contractToken.methods.decimals().call();
       const name = await contractToken.methods.name().call();
       const symbol = await contractToken.methods.symbol().call();
-      console.log('contract instance', contractToken, { decimals: Number(decimals), name, symbol });
+      // console.log('contract instance', contractToken, { decimals: Number(decimals), name, symbol });
       setData({
         title: 'contract info',
         contractAddress: erc20ContractAddress,
@@ -663,7 +724,6 @@ function ERC20Contact({ address, providerName, provider }) {
             }
             let balance = await getBalance(address);
             let limit = await allowance(address);
-            console.log("erc20 allowance/balance:", { balance, limit });
             setData({
               contractAddress: erc20ContractAddress,
               balance: balance.toString(),
