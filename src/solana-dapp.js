@@ -467,7 +467,7 @@ export default function SolanaDApp() {
     });
     const params = {
       from: address,
-      to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
+      to: address,
       amount: 0.001,
       // priorityFee: 4567,
       chainId
@@ -490,7 +490,7 @@ export default function SolanaDApp() {
     });
     const params = {
       from: address,
-      to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
+      to: address,
       amount: 123456789,
       // priorityFee: 1234,
       chainId
@@ -538,7 +538,7 @@ export default function SolanaDApp() {
     const params = {
       tokenAddress,
       from: address,
-      to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
+      to: address,
       amount: 1234,
       // priorityFee: 456,
       chainId
@@ -556,7 +556,7 @@ export default function SolanaDApp() {
     const params = {
       tokenAddress,
       from: address,
-      to: "HceqDsbSEXu7XV2i4WDDZ3wv6TQH5NXz4c2YYPQxBUd",
+      to: address,
       amount: 12345678910,
       // priorityFee: 123,
       chainId
