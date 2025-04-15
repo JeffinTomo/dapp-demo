@@ -25,16 +25,16 @@ ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
 
 //goon
 const tokenAddress = "2w2MAmvLgYxpMFRy4QjByUN47bsgH3dNXU9rgFuhyssd";
+
 export default function SolanaDApp() {
   const [address, setAddress] = useState("");
   const [signature, setSignature] = useState("");
   const [transaction, setTransaction] = useState("");
   const [signedTransaction, setSignedTransaction] = useState("");
 
-  const chainId = "mainnet-beta"; //mainnet-beta(===mainnet), testnet, devnet, localnet
-  // const rpcUrl = "https://rpc.ankr.com/solana_devnet/09a1e396618f8c01633e1e33608f9437a67c22ffc7410b97349e908fa05da38f";
+  const network = "mainnet-beta";
   const rpcUrl = "https://rpc.ankr.com/solana/c2d7e8a3db5dce62e202db3d28cca25e74da5028abbf20764e2961918ba34dfc";
-  const connection = new Connection(rpcUrl, {});
+  const connection = new Connection(rpcUrl);
 
   const [providerName, setProviderName] = useState('mydoge');
   const [provider, setProvider] = useState(window[providerName]?.solana);
@@ -72,7 +72,6 @@ export default function SolanaDApp() {
       
       setRes({
         method: 'connect',
-        chainId,
         res
       });
       
@@ -470,7 +469,6 @@ export default function SolanaDApp() {
       to: address,
       amount: 0.001,
       // priorityFee: 4567,
-      chainId
     };
     const res = await provider.sendSolana(params);
     addSignedData(res.signature);
@@ -493,7 +491,6 @@ export default function SolanaDApp() {
       to: address,
       amount: 123456789,
       // priorityFee: 1234,
-      chainId
     };
     const res = await provider.sendSolana(params);
     addSignedData(res.signature);
@@ -541,7 +538,6 @@ export default function SolanaDApp() {
       to: address,
       amount: 1234,
       // priorityFee: 456,
-      chainId
     };
     const res = await provider.sendToken(params);
     addSignedData(res.signature);
@@ -559,7 +555,6 @@ export default function SolanaDApp() {
       to: address,
       amount: 12345678910,
       // priorityFee: 123,
-      chainId
     };
     const res = await provider.sendToken(params);
     addSignedData(res.signature);
@@ -585,7 +580,7 @@ export default function SolanaDApp() {
       rawTransaction = base58Buffer;
     }
   
-    console.log("solana.sendSignedTx 1", chainId, signedTx, rawTransaction);
+    console.log("solana.sendSignedTx 1", signedTx, rawTransaction);
     const transaction = VersionedTransaction.deserialize(rawTransaction);
     if (!transaction.signatures || transaction.signatures.length === 0) {
       throw new Error("lack of sign");
@@ -703,7 +698,7 @@ export default function SolanaDApp() {
   }
 
   function openTxDetail (signature) { 
-    window.open(`https://explorer.solana.com/tx/${signature}?cluster=${chainId}`);
+    window.open(`https://explorer.solana.com/tx/${signature}?cluster=${network}`);
   }
   function addSignedData(signature) {
     signature = bs58.encode(signature);
