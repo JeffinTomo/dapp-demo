@@ -653,8 +653,8 @@ export default function DogeDApp() {
           requestAvailableDRC20Transaction
         </button>  
 
-        <button onClick={requestInscriptionTransaction} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
-          ?requestInscriptionTransaction
+        <button onClick={requestInscriptionTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+          requestInscriptionTransaction
         </button> 
 
         <button onClick={requestInscriptionMintTransaction} className="hidden bg-[#000] text-[#fff] p-1 m-2">
