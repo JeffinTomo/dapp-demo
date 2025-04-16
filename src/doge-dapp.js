@@ -2,16 +2,19 @@ import React, { useState, useEffect } from "react";
 import { getUtxos, createDogePsbt, getPublicKeyFromAddress } from "./utils";
 
 //jeff soical: D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF
-const recipientAddress = "D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF";
-const ticker = "dall"; //paca/dbit/dall
 
 export default function DogeDApp() {
   const [address, setAddress] = useState("");
+  const [recipientAddress, setRecipientAddress] = useState("D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF");
   const [signature, setSignature] = useState("");
   const [txId, setTxId] = useState("");
 
   const [providerName, setProviderName] = useState('mydoge');
   const [provider, setProvider] = useState(window[providerName] ? window[providerName]?.doge : window.doge);
+
+
+  const [ticker, setTicker] = useState('dbit');
+  const tickers = ["paca", "dbit", "dall", "AINFT"];
 
   const [res, setRes] = useState({});
 
@@ -39,7 +42,9 @@ export default function DogeDApp() {
       const res = await provider.connect() || {};
       
       setAddress(res.address);
-      console.log(getPublicKeyFromAddress(res.address));
+      setRecipientAddress(res.address);
+
+      // console.log(getPublicKeyFromAddress(res.address));
       
       setRes({
         method: 'connect',
@@ -362,6 +367,7 @@ export default function DogeDApp() {
     setRes({});
     try {
       const utxos = await getUtxos(address, "", [], "spendable");
+      console.log(utxos);
       if (utxos.length === 0) { 
         alert('no utxos');
         return;
@@ -369,20 +375,21 @@ export default function DogeDApp() {
       console.log('utxos', utxos);
       const res = await provider.requestAvailableDRC20Transaction({
         ticker,
-        amount: 1000
+        amount: 50000000
       });
       /*
       "res": {
-          "txId": "ad8b6ce280f783546981003916e9c9324f9555a8f49720326727e24e75df1ab0",
+          "txId": "f9e1c597fd889481a6e79e7943875953f6ce6669c875e0e7bac5450b1333a28d",
           "ticker": "dbit",
-          "amount": 1000
+          "amount": 50000000
         }
       */
       setRes({
         method: 'requestAvailableDRC20Transaction',
         ticker,
         res
-      });      
+      });     
+      setTxId(res.txId || "");
     } catch (err) {
       console.error("requestAvailableDRC20Transaction error", err);
     }
@@ -406,7 +413,7 @@ export default function DogeDApp() {
       const { location } = inscriptions[0];
       const res = await provider.requestInscriptionTransaction({
         location, 
-        recipientAddress,
+        recipientAddress: "DBWyotC9oeCBSV3RHRUm2ME1wVujhMGHYi",
         // feeRate: 10
       });
       setRes({
@@ -455,11 +462,13 @@ export default function DogeDApp() {
     }
     setRes({});
      
-    const psbtHex = await createDogePsbt({
-      signerAddress: address,
-      amount: 0.0001,
-      fee: 0.0001
-    });
+    // const psbtHex = await createDogePsbt({
+    //   senderAddress: address,
+    //   amount: 0.0001,
+    //   fee: 0.0001
+    // });
+
+    const psbtHex = "0100000002a89fc101c3d59017311a9c42deb5383569fa162bc6090dd8be9c914255538d3b0000000000ffffffff20a855ec9caf366d35c243746441fab68920f14f8709dbb0a9e16310a0bfe0680200000000ffffffff02a0860100000000001976a91445f449957cd4bee6f2aa9b2b5147f951b70bbdb888ac5800de02000000001976a914ac93a9d2be33c373df356098dbb4b3351c0c429888ac00000000";
     console.log('psbtHex', psbtHex);
     
     try {
@@ -486,13 +495,16 @@ export default function DogeDApp() {
     setRes({});
     
     
-    const psbtHex = await createDogePsbt({
-      signerAddress: address,
-      amount: 0.0001,
-      fee: 0.0001
-    });
+    // const psbtHex = await createDogePsbt({
+    //   senderAddress: address,
+    //   amount: 0.0001,
+    //   fee: 0.0001
+    // });
     
+
+    const psbtHex = "0100000002de4a7ed3e87dd21f851cbe9559b6c09b3795344740861f0933821f69573cb25b0000000000ffffffff9593995df3f9934e519910c37e3fcb4538ca1e01671893f6bc1c2d4d8cc7eee60200000000ffffffff02a0860100000000001976a91445f449957cd4bee6f2aa9b2b5147f951b70bbdb888ac4cb6c701000000001976a914ac93a9d2be33c373df356098dbb4b3351c0c429888ac00000000";
     console.log('psbtHex', psbtHex);
+
     try {
       const res = await provider.requestPsbt({
         rawTx: psbtHex,
@@ -512,7 +524,7 @@ export default function DogeDApp() {
   return (
     <div className="m-5 text-sm">
       <div className="mt-0 bg-[#f5f5f5] p-2">
-        <h1>Solana Dapp Demo</h1>
+        <h1>Doge Dapp Demo</h1>
         <ol className="mt-4">
           <li>mydoge api doc: <a href="https://mydoge-com.github.io/mydogemask/" target="_blank" rel="noopener noreferrer">
             https://mydoge-com.github.io/mydogemask/
@@ -539,6 +551,18 @@ export default function DogeDApp() {
         }} className="bg-[#666] text-[#fff] p-1 m-2">
           mydoge
         </button> */}
+      </div>
+
+      <div className="mt-2 bg-[#f5f5f5] pl-4">
+        Ticker Select <select
+          value={ticker}
+          onChange={(e) => setTicker(e.target.value)}
+          className="bg-[#000] text-[#fff] p-1 m-2"
+        >
+          {tickers.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
       </div>
 
       <div className="mt-2">
@@ -625,8 +649,8 @@ export default function DogeDApp() {
 
         <div></div>
 
-        <button onClick={requestAvailableDRC20Transaction} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
-          ?requestAvailableDRC20Transaction
+        <button onClick={requestAvailableDRC20Transaction} className="bg-[#000] text-[#fff] p-1 m-2">
+          requestAvailableDRC20Transaction
         </button>  
 
         <button onClick={requestInscriptionTransaction} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
