@@ -622,7 +622,7 @@ export default function DogeDApp() {
         </button> 
 
         <button onClick={requestPsbtSignOnly} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
-          requestPsbt.signOnly
+          ?requestPsbt.signOnly
         </button> 
 
         {/* <button onClick={requestPsbts} className="bg-[#000] text-[#fff] p-1 m-2">
