@@ -886,20 +886,20 @@ export default function SolanaDApp() {
         </button>
         <button
           onClick={signVersionedTransaction}
-          className="bg-[#000] text-[#fff] p-1 m-2"
+          className="bg-[#000] text-[#fff] p-1 m-2 opacity-40"
         >
           signTransaction.versionedTransaction
         </button>
         <button
           onClick={signLookupTransaction}
-          className="bg-[#000] text-[#fff] p-1 m-2"
+          className="bg-[#000] text-[#fff] p-1 m-2 opacity-40"
         >
           signTransaction.lookupTransaction
         </button>
 
         <button
           onClick={signAllTransactions}
-          className="bg-[#000] text-[#fff] p-1 m-2"
+          className="bg-[#000] text-[#fff] p-1 m-2 opacity-40"
         >
           signAllTransactions
         </button>       
