@@ -421,8 +421,8 @@ export default function SolanaDApp() {
     setRes({
       method: 'signTransaction',
       type: 'versionedTransaction',
+      rawTransaction: txToHex(transactionV0),
       signedTransaction,
-      transactionV0
     });
   };
 
@@ -440,10 +440,8 @@ export default function SolanaDApp() {
     setRes({
       method: 'signTransaction',
       type: 'legacyTransaction',
-      signedTransaction: {
-        id: signedTransaction.toString(),
-        value: signedTransaction
-      }
+      rawTransaction: txToHex(transaction),
+      signedTransaction
     });
   };
 
@@ -459,10 +457,8 @@ export default function SolanaDApp() {
     setRes({
       method: 'signTransaction',
       type: 'lookupTransaction',
-      signedTransaction: {
-        id: signedTransaction.toString(),
-        value: signedTransaction
-      }
+      rawTransaction: txToHex(transaction),
+      signedTransaction
     });
   };
 
@@ -475,7 +471,7 @@ export default function SolanaDApp() {
 
     setRes({
       method: 'signAllTransactions',
-      transactions,
+      rawTransaction: [txToHex(transactions[0]),txToHex(transactions[1]),txToHex(transactions[2])],
       signedTransactions
     });
   }
