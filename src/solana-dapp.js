@@ -906,7 +906,7 @@ export default function SolanaDApp() {
       </div>
 
       {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
-        <h2 className="text-lg mb-4">{ providerName }:</h2>
+        <h2 className="text-lg mb-4">{ providerName }: {res.method}</h2>
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}
         </pre>
