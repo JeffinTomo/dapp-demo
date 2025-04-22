@@ -643,7 +643,7 @@ export default function EvmDApp() {
           <div key={index}>
             <button
               size="sm"
-              className="border-1 rounded-5 bg-[#dedede] p-1"
+              className={"border-1 rounded-5 bg-[#000] text-[#fff] p-1" + (funcList[index] !== "connect" && address === "" ? " opacity-40" : "")}
               onClick={async() => {
                 try {
                   await func();
