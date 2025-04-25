@@ -83,7 +83,7 @@ export default function SolanaDApp() {
       const { address, publicKey } = res;
       const address1 = publicKey ? publicKey.toString() : address.toString();
       setFromPubkey(publicKey || new PublicKey(address));
-      // console.log('getBnString publicKey', publicKey, publicKey.toJSON());
+      // console.log('connect publicKey', publicKey, publicKey.toString());
       
       setRes({
         method: 'connect',
@@ -194,6 +194,8 @@ export default function SolanaDApp() {
     try {
       const { signature, publicKey, message } = result;
       
+      console.log('验证签名失败：1', { signature, publicKey, message });
+
       // 验证签名
       /*
       function verify(
@@ -203,11 +205,7 @@ export default function SolanaDApp() {
         options = { zip215: true } // ZIP215 or RFC8032 verification type
       ): boolean;
       */
-      return await verify(
-        signature,
-        message,
-        publicKey
-      );
+      return await verify(signature, message, publicKey);
     } catch (error) {
       console.error('验证签名失败：', error);
       return false;
@@ -326,13 +324,15 @@ export default function SolanaDApp() {
         resources: ["https://example.com", "https://phantom.app/"],
       };
       const res = await provider.signIn(params);
-      console.log('signIn', params, res, res.address.toString());
-      const checkResult = await verifySignature({
-        message: res.signedMessage,
-        signature: res.signature,
-        publicKey: res.address.toBytes()
-      });
-      console.log('signIn check result:', checkResult);
+
+      // console.log('signIn', params, res);
+      // const checkResult = await verifySignature({
+      //   message: res.signedMessage,
+      //   signature: res.signature,
+      //   publicKey: res.publicKey
+      // });
+      // console.log('signIn check result:', checkResult);
+      
       setRes({
         method: 'signIn',
         params,
