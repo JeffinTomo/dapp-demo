@@ -174,3 +174,30 @@ export function getPublicKeyFromAddress(address) {
     return null;
   }
 }
+
+
+export function formatSmallNumber(num, precision = 4) {
+    if (num === 0) return "0";
+    
+    // Convert to string and remove scientific notation
+    let str = num.toString();
+    if (str.includes('e')) {
+        str = num.toFixed(20);
+    }
+    
+    // Remove trailing zeros after decimal
+    str = str.replace(/\.?0+$/, '');
+    
+    // Find the position of first non-zero digit after decimal
+    let firstNonZero = str.match(/[1-9]/);
+    let zeroCount = firstNonZero ? firstNonZero.index - 1 : 0;
+    
+    // If there's only one zero after decimal, return as is
+    if (zeroCount <= 1) return str;
+    
+    // Format with curly braces notation
+    let beforeZeros = str.substring(0, 2); // "0."
+  let afterZeros = str.substring(zeroCount + 1, zeroCount + 1 + precision);
+    
+    return `${beforeZeros}{${zeroCount - 1}}${afterZeros}`;
+}

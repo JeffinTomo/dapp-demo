@@ -52,6 +52,10 @@ export default function DogeDApp() {
       });
     } catch (err) {
       console.error("connected error", err);
+      setRes({
+        method: 'connect',
+        err
+      });
     }
   };
 
@@ -70,6 +74,10 @@ export default function DogeDApp() {
       });
     } catch (err) {
       console.error("getConnectionStatus error", err);
+      setRes({
+        method: 'getConnectionStatus',
+        err
+      });
     }
   };
   
@@ -89,6 +97,10 @@ export default function DogeDApp() {
       setAddress(res.address);
     } catch (err) {
       console.error("requestAccounts error", err);
+      setRes({
+        method: 'requestAccounts',
+        err
+      });
     }
   };
 
@@ -108,6 +120,10 @@ export default function DogeDApp() {
       });
     } catch (err) {
       console.error("disconnect error", err);
+      setRes({
+        method: 'disconnect',
+        err
+      });
     }
   }
 
@@ -125,6 +141,10 @@ export default function DogeDApp() {
       });
     } catch (err) {
       console.error("getAccount error", err);
+      setRes({
+        method: 'getAccounts',
+        err
+      });
     }
   };
 
@@ -143,6 +163,10 @@ export default function DogeDApp() {
       });      
     } catch (err) {
       console.error("getBalance error", err);
+      setRes({
+        method: 'getBalance',
+        err
+      });
     }
   };
 
@@ -165,6 +189,10 @@ export default function DogeDApp() {
         publicKey
       );
     } catch (error) {
+      setRes({
+        method: 'verifySignature',
+        err
+      });
       console.error('验证签名失败：', error);
       return false;
     }
@@ -187,6 +215,10 @@ export default function DogeDApp() {
       });
     } catch (err) {
       console.error('signMessage', err);
+      setRes({
+        method: 'signMessage',
+        err
+      });
     }
   };
 
@@ -208,6 +240,10 @@ export default function DogeDApp() {
       });
     } catch (err) {
       console.error('signMessage', err);
+      setRes({
+        method: 'signMessage',
+        err
+      });
     }
   };
 
@@ -230,6 +266,10 @@ export default function DogeDApp() {
       });
     } catch (err) {
       console.error('requestSignedMessage', err);
+      setRes({
+        method: 'requestSignedMessage',
+        err
+      });
     }
   };
 
@@ -254,6 +294,10 @@ export default function DogeDApp() {
       });
     } catch (err) {
       console.error('requestSignedMessage', err);
+      setRes({
+        method: 'requestSignedMessage',
+        err
+      });
     }
   };
 
@@ -275,6 +319,10 @@ export default function DogeDApp() {
       });
     } catch (err) {
       console.error('requestDecryptedMessage', err);
+      setRes({
+        method: 'requestDecryptedMessage',
+        err
+      });
     }
   }
   
@@ -297,6 +345,10 @@ export default function DogeDApp() {
       });      
     } catch (err) {
       console.error("requestTransaction error", err);
+      setRes({
+        method: 'requestTransaction',
+        err
+      });
     }
   };
   
@@ -316,6 +368,10 @@ export default function DogeDApp() {
       });      
     } catch (err) {
       console.error("getTransactionStatus error", err);
+      setRes({
+        method: 'getTransactionStatus',
+        err
+      });
     }
   };
 
@@ -336,6 +392,10 @@ export default function DogeDApp() {
       });      
     } catch (err) {
       console.error("getDRC20Balance error", err);
+      setRes({
+        method: 'getDRC20Balance',
+        err
+      });
     }
   };
 
@@ -356,6 +416,10 @@ export default function DogeDApp() {
       });      
     } catch (err) {
       console.error("getTransferableDRC20 error", err);
+      setRes({
+        method: 'getTransferableDRC20',
+        err
+      });
     }
   };
 
@@ -392,6 +456,10 @@ export default function DogeDApp() {
       setTxId(res.txId || "");
     } catch (err) {
       console.error("requestAvailableDRC20Transaction error", err);
+      setRes({
+        method: 'requestAvailableDRC20Transaction',
+        err
+      });
     }
   };
 
@@ -423,6 +491,10 @@ export default function DogeDApp() {
       setTxId(res.txid);
     } catch (err) {
       console.error("requestInscriptionTransaction error", err);
+      setRes({
+        method: 'requestInscriptionTransaction',
+        err
+      });
     }
   };
 
@@ -452,6 +524,10 @@ export default function DogeDApp() {
       setTxId(res.txid);  
     } catch (err) {
       console.error("requestInscriptionTransaction error", err);
+      setRes({
+        method: 'requestInscriptionTransaction',
+        err
+      });
     }
   }; 
 
@@ -484,6 +560,10 @@ export default function DogeDApp() {
       });      
     } catch (err) {
       console.error("requestPsbt error", err);
+      setRes({
+        method: 'requestPsbt',
+        err
+      });
     }
   };
 
@@ -518,6 +598,10 @@ export default function DogeDApp() {
       });      
     } catch (err) {
       console.error("requestPsbt error", err);
+      setRes({
+        method: 'requestPsbt',
+        err
+      });
     }
   };
 
@@ -662,7 +746,7 @@ export default function DogeDApp() {
         </button> 
       </div>
 
-      {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
+      {res.method && <div className={"bg-[#f5f5f5] border-1 p-5 mt-4 text-xs" + (res.err ? ' border-[red]' : '')}>
         <h2 className="text-lg mb-4">{providerName}.{res.method}:</h2>
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}

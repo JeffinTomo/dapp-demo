@@ -508,8 +508,12 @@ export default function EvmDApp() {
           })
         } catch (err) {
           console.error("evm.request", m, methods[m], res);
+          setRes({
+            method: m,
+            error: err,
+          })
         }
-      }, index * 200);
+      }, index * 500);
     }
 
     setTimeout(async () => {
@@ -645,10 +649,15 @@ export default function EvmDApp() {
               size="sm"
               className={"border-1 rounded-5 bg-[#000] text-[#fff] p-1" + (funcList[index] !== "connect" && address === "" ? " opacity-40" : "")}
               onClick={async() => {
+                setRes({})
                 try {
                   await func();
                 } catch (e) {
                   console.error(e);
+                  setRes({
+                    method: funcList[index],
+                    error: e,
+                  })
                 }
               }}
             >
@@ -658,7 +667,7 @@ export default function EvmDApp() {
         ))}
       </div>
 
-      <div className="bg-[#f5f5f5] border-1 p-5">
+      <div className={"bg-[#f5f5f5] border-1 p-5" +  ((res.err || res.error) ? ' border-[red]' : '')}>
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}
         </pre>
