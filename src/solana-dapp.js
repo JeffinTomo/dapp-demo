@@ -238,8 +238,8 @@ export default function SolanaDApp() {
       const params = {
         message: encodedMessage,
         signature: res.signature,
-        publicKey: res.publicKey ? res.publicKey.toBytes() : "",
-        address: res.publicKey ? res.publicKey.toBytes() : ""
+        publicKey: res.publicKey ? res.publicKey.toBytes() : new PublicKey(address),
+        address: res.publicKey ? res.publicKey.toBytes() : new PublicKey(address)
       };
       console.log('signMessage check 1:', uint8ArrayToHex(res.signature), uint8ArrayToHex(encodedMessage));
       console.log('signMessage check params:', params);
