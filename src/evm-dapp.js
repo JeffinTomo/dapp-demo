@@ -202,7 +202,7 @@ export default function EvmDApp() {
     const customTokenInfo = {
       type: "ERC20",
       options: {
-        address: "0x3B86Ad95859b6AB773f55f8d94B4b9d443EE931f",
+        address: "0xB6fe221Fe9EeF5aBa221c348bA20A1Bf5e73624c",
         symbol: "USDS",
         name: "USDS",
         decimals: 18,
@@ -251,6 +251,10 @@ export default function EvmDApp() {
       return pramas;
     } catch (err) {
       console.error(err);
+      setRes({
+        method: "personal_sign",
+        err,
+      });
       return `Error: ${err.message}`;
     }
   };
@@ -653,7 +657,7 @@ export default function EvmDApp() {
                 try {
                   await func();
                 } catch (e) {
-                  console.error(e);
+                  console.error(funcList[index], e);
                   setRes({
                     method: funcList[index],
                     error: e,
