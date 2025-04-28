@@ -194,7 +194,7 @@ export default function SolanaDApp() {
     try {
       const { signature, publicKey, message } = result;
       
-      console.log('验证签名失败：1', { signature, publicKey, message });
+      console.log('验证签名 params：1', { signature, publicKey, message });
 
       // 验证签名
       /*
@@ -207,7 +207,7 @@ export default function SolanaDApp() {
       */
       return await verify(signature, message, publicKey);
     } catch (error) {
-      console.error('验证签名失败：', error);
+      console.error('验证签名 res：', error);
       return false;
     }
   }
@@ -238,8 +238,8 @@ export default function SolanaDApp() {
       const params = {
         message: encodedMessage,
         signature: res.signature,
-        publicKey: res.publicKey ? res.publicKey.toBytes() : new PublicKey(address),
-        address: res.publicKey ? res.publicKey.toBytes() : new PublicKey(address)
+        publicKey: res.publicKey ? res.publicKey.toBytes() : new PublicKey(address).toBytes(),
+        address: res.publicKey ? res.publicKey.toBytes() : new PublicKey(address).toBytes()
       };
       console.log('signMessage check 1:', uint8ArrayToHex(res.signature), uint8ArrayToHex(encodedMessage));
       console.log('signMessage check params:', params);
