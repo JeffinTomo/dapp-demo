@@ -179,7 +179,7 @@ export default function SolanaDApp() {
     console.log('accountChanged reg ok');
     provider.on("accountChanged", (publicKey) => {
       if (publicKey) {
-        console.log(`dapp.on.accountChanged linstener: ${publicKey.toBase58()}`, publicKey);
+        console.log(`dapp.on.accountChanged: ${publicKey.toBase58()}`, Math.random());
       } else { 
         console.log('social wallet, no publicKey');
       }
@@ -569,7 +569,7 @@ export default function SolanaDApp() {
       tokenAddress,
       from: address,
       to: address,
-      amount: 1234,
+      amount: 1,
       // priorityFee: 456,
     };
     const res = await provider.sendToken(params);
