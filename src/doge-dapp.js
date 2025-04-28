@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getUtxos, createDogePsbt, getPublicKeyFromAddress } from "./utils";
+import { getUtxos, createDogePsbt } from "./utils";
 
 //jeff soical: D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF
 
@@ -43,8 +43,6 @@ export default function DogeDApp() {
       
       setAddress(res.address);
       setRecipientAddress(res.address);
-
-      // console.log(getPublicKeyFromAddress(res.address));
       
       setRes({
         method: 'connect',
@@ -538,13 +536,11 @@ export default function DogeDApp() {
     }
     setRes({});
      
-    // const psbtHex = await createDogePsbt({
-    //   senderAddress: address,
-    //   amount: 0.0001,
-    //   fee: 0.0001
-    // });
+    const psbtHex = await createDogePsbt({
+      senderAddress: address
+    });
 
-    const psbtHex = "0100000002a89fc101c3d59017311a9c42deb5383569fa162bc6090dd8be9c914255538d3b0000000000ffffffff20a855ec9caf366d35c243746441fab68920f14f8709dbb0a9e16310a0bfe0680200000000ffffffff02a0860100000000001976a91445f449957cd4bee6f2aa9b2b5147f951b70bbdb888ac5800de02000000001976a914ac93a9d2be33c373df356098dbb4b3351c0c429888ac00000000";
+    // const psbtHex = "0100000002a89fc101c3d59017311a9c42deb5383569fa162bc6090dd8be9c914255538d3b0000000000ffffffff20a855ec9caf366d35c243746441fab68920f14f8709dbb0a9e16310a0bfe0680200000000ffffffff02a0860100000000001976a91445f449957cd4bee6f2aa9b2b5147f951b70bbdb888ac5800de02000000001976a914ac93a9d2be33c373df356098dbb4b3351c0c429888ac00000000";
     console.log('psbtHex', psbtHex);
     
     try {
@@ -575,14 +571,14 @@ export default function DogeDApp() {
     setRes({});
     
     
-    // const psbtHex = await createDogePsbt({
-    //   senderAddress: address,
-    //   amount: 0.0001,
-    //   fee: 0.0001
-    // });
+    const psbtHex = await createDogePsbt({
+      senderAddress: address,
+      amount: 0.0001,
+      fee: 0.0001
+    });
     
 
-    const psbtHex = "0100000002de4a7ed3e87dd21f851cbe9559b6c09b3795344740861f0933821f69573cb25b0000000000ffffffff9593995df3f9934e519910c37e3fcb4538ca1e01671893f6bc1c2d4d8cc7eee60200000000ffffffff02a0860100000000001976a91445f449957cd4bee6f2aa9b2b5147f951b70bbdb888ac4cb6c701000000001976a914ac93a9d2be33c373df356098dbb4b3351c0c429888ac00000000";
+    // const psbtHex = "0100000002de4a7ed3e87dd21f851cbe9559b6c09b3795344740861f0933821f69573cb25b0000000000ffffffff9593995df3f9934e519910c37e3fcb4538ca1e01671893f6bc1c2d4d8cc7eee60200000000ffffffff02a0860100000000001976a91445f449957cd4bee6f2aa9b2b5147f951b70bbdb888ac4cb6c701000000001976a914ac93a9d2be33c373df356098dbb4b3351c0c429888ac00000000";
     console.log('psbtHex', psbtHex);
 
     try {

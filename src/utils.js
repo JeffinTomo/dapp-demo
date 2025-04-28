@@ -3,32 +3,18 @@ import { payments, Psbt } from "bitcoinjs-lib";
 import * as bitcoin from 'bitcoinjs-lib';
 import sb from "satoshi-bitcoin";
 
-// interface CreatePsbtParams {
-//   inputs: Array<{
-//     txid: string;
-//     vout: number;
-//     amount: number;  // in satoshis
-//     address: string;
-//   }>;
-//   outputs: Array<{
-//     address: string;
-//     amount: number;  // in satoshis
-//   }>;
-//   feeRate?: number;  // satoshis per byte
-// }
 
-const network = {
-  messagePrefix: "\x19Dogecoin Signed Message:\n",
-  bech32: "dc",
-  bip44: 3,
+const DOGE_NETWORK = {
+  messagePrefix: '\x19Dogecoin Signed Message:\n',
+  bech32: 'doge',
   bip32: {
     public: 0x02facafd,
-    private: 0x02fac398,
+    private: 0x02fac398
   },
   pubKeyHash: 0x1e,
   scriptHash: 0x16,
-  wif: 0x9e,
-};
+  wif: 0x9e
+}
 
 
 const MYDOGE_BASE_URL = "https://api.mydoge.com";
@@ -72,67 +58,64 @@ export async function getUtxos(address, cursor, result, filter, tx ) {
   // }
 }
 
+
+export async function getTxDetail(txId) {
+  if (!txId) {
+    return {};
+  }
+  const path = `/tx/${txId}`;
+  const api = `${MYDOGE_BASE_URL}/wallet/info?route=` + encodeURIComponent(path);
+
+  const res = await mydoge.get(api);
+
+  return res.data || {};
+}
+
 //https://bitcoinjs.github.io/bitcoinjs-lib/classes/Psbt.html
 export async function createDogePsbt({
-  senderAddress,
-  amount,
-  fee
+  senderAddress
 }) {
+  const psbt = new bitcoin.Psbt({ network: DOGE_NETWORK });
 
-  const utxos = (
+
+  let utxos = (
     await mydoge.get('/wallet/info', {
       params: { route: `utxo/${senderAddress}` },
     })
-  ).data.sort((a, b) => {
-    const aValue = Number(a.value);
-    const bValue = Number(b.value);
-    return bValue > aValue ? 1 : bValue < aValue ? -1 : a.height - b.height;
-  });
+  ).data || [];
 
   if (utxos.length < 1) {
     throw new Error('need at least 1 utxos');
   }
 
-  if (Number(utxos[1].value) < sb.toSatoshi(amount + fee)) {
-    throw new Error('not enough funds to cover amount and fee');
-  }
-
-  const vout1 = utxos[0].vout;
-  
-  const tx1 = await mydoge.get('/wallet/info', {
-    params: { route: `tx/${utxos[0].txid}` },
+  utxos = utxos.sort((a, b) => {
+    const aValue = Number(a.value);
+    const bValue = Number(b.value);
+    return bValue < aValue ? 1 : bValue < aValue ? -1 : a.height - b.height;
   });
-  const value1 = tx1.data.vout[index1].value;
-
-  const change = Math.trunc(
-    value1 - sb.toSatoshi(amount + fee)
-  );
 
 
-  const params = {
-    address: signerAddress,
-    inputs: [
-      {
-        txId: tx1.data.txid,
-        vOut: vout1,
-        amount: value1,
-        nonWitnessUtxo: Buffer.from(tx1.data.hex, 'hex'),
-        address,
-      },
-    ],
-    outputs: [
-      {
-        address,
-        amount: sb.toSatoshi(amount),
-      },
-      {
-        address,
-        amount: change,
-      },
-    ],
-  };
-  const psbtBase64 = DogecoinUtils.buildPsbtToBase64(params);
-  return psbtBase64;
+  const utxo = utxos[0];
+  const { txid, vout, value } = utxo;
+  const utxoDetail = await getTxDetail(txid);
+  console.log('utxos', utxos, utxoDetail);
+  // Add input
+  psbt.addInput({
+    hash: txid,
+    index: vout,
+    nonWitnessUtxo: Buffer.from(utxoDetail.hex, 'hex'),
+  });
+
+  // Add output
+  psbt.addOutput({
+    address: senderAddress,
+    value: value - 546,
+  })
+
+  // Get PSBT hex
+  const psbtHex = psbt.toHex();
+  return psbtHex;
+  return `0x70736274${psbtHex}`;
 }
 
 const PSBT_MAGIC_BYTES = Buffer.from([0x70, 0x73, 0x62, 0x74, 0xff]);
