@@ -194,7 +194,7 @@ export default function SolanaDApp() {
     try {
       const { signature, publicKey, message } = result;
       
-      console.log('验证签名 params：1', { signature, publicKey, message });
+      console.log('验证签名 params：1', { signature, publicKey, message }, new TextDecoder().decode(message));
 
       // 验证签名
       /*
@@ -236,7 +236,7 @@ export default function SolanaDApp() {
       console.log('signMessage res:', res);
 
       const params = {
-        message: encodedMessage,
+        message: new TextEncoder().encode(res.message),
         signature: res.signature,
         publicKey: res.publicKey ? res.publicKey.toBytes() : new PublicKey(address).toBytes(),
         address: res.publicKey ? res.publicKey.toBytes() : new PublicKey(address).toBytes()
@@ -286,9 +286,9 @@ export default function SolanaDApp() {
       console.log('request.signMessage:', encodedMessage, res);
       
       const params = {
-        message: encodedMessage,
+        message: new TextEncoder().encode(res.message),
         signature: res.signature,
-        publicKey: res.publicKey ? res.publicKey.toBytes() : ""
+        publicKey: res.publicKey ? res.publicKey.toBytes() : new PublicKey(address).toBytes()
       };
       console.log('request.signMessage check params:', params);
 
@@ -325,13 +325,13 @@ export default function SolanaDApp() {
       };
       const res = await provider.signIn(params);
 
-      // console.log('signIn', params, res);
-      // const checkResult = await verifySignature({
-      //   message: res.signedMessage,
-      //   signature: res.signature,
-      //   publicKey: res.publicKey
-      // });
-      // console.log('signIn check result:', checkResult);
+      console.log('signIn', params, res);
+      const checkResult = await verifySignature({
+        message: res.signedMessage,
+        signature: res.signature,
+        publicKey: res.publicKey ? res.publicKey.toBytes() : new PublicKey(address).toBytes()
+      });
+      console.log('signIn check result:', checkResult);
       
       setRes({
         method: 'signIn',
