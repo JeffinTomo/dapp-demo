@@ -15,11 +15,12 @@ window.Buffer = Buffer;
 import EvmDapp from "./evm-dapp";
 const DogeDapp = React.lazy(() => import("./doge-dapp"));
 const SolanaDapp = React.lazy(() => import("./solana-dapp"));
+const TronDapp = React.lazy(() => import("./tron-dapp"));
 import ShopDApp from "./shop-dapp";
 
 
 function App() {
-  const chains = ["doge", "evm", "solana", "shop"];
+  const chains = ["doge", "evm", "solana", "shop", "tron"];
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -50,6 +51,7 @@ function App() {
           <Route exact path="/doge" element={<DogeDapp />} />
           <Route exact path="/solana" element={<SolanaDapp />} />
           <Route exact path="/shop" element={<ShopDApp />} />
+          <Route exact path="/tron" element={<TronDapp />} />
         </Routes>
       </BrowserRouter>
       </div>

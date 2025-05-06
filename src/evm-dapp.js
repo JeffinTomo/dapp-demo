@@ -24,6 +24,9 @@ import {
 // const erc20ContractAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const erc20ContractAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
 
+//risk token
+// const erc20ContractAddress = "0xcdE172dc5ffC46D228838446c57C1227e0B82049";
+
 export default function EvmDApp() {
   const [providerName, setProviderName] = useState("mydoge.ethereum");
   let provider = window.mydoge?.ethereum;
