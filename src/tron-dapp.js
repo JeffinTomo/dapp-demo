@@ -90,7 +90,7 @@ export default function TronDApp() {
       alert('no address');
     }
 
-    const tx = await tronweb.transactionBuilder.sendTrx(toAddress, 10, fromAddress); // Step1
+    const tx = await tronWeb.transactionBuilder.sendTrx(toAddress, 10, fromAddress); // Step1
     try {
       const signedTx = await tronWeb.trx.sign(tx); // Step2
       await tronWeb.trx.sendRawTransaction(signedTx); // Step3
@@ -193,7 +193,10 @@ export default function TronDApp() {
           sendRawTransaction
         </button>
         <button onClick={sendRawTransaction2} className="bg-[#000] text-[#fff] p-1 m-2">
-          General Transfer
+          sendRawTransaction2
+        </button>
+        <button onClick={stake2} className="bg-[#000] text-[#fff] p-1 m-2">
+          stake2.0
         </button>
       </div>
 
