@@ -568,7 +568,7 @@ export default function SolanaDApp() {
     const params = {
       tokenAddress,
       from: address,
-      to: address,
+      to: "4956gKpc5a8ouur8HdYi3JvdQSUq762YdgKFA37FJ41N",
       amount: 1,
       // priorityFee: 456,
     };

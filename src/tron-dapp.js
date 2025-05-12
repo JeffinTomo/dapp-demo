@@ -5,7 +5,7 @@ import BN from "bn.js";
 export default function TronDApp() {
   const [address, setAddress] = useState("");
 
-  const [providerName, setProviderName] = useState('');
+  const [providerName, setProviderName] = useState('mydoge');
   const [provider, setProvider] = useState(providerName ? window[providerName]?.tronLink : window.tronLink);
 
   const [res, setRes] = useState({});
@@ -18,22 +18,60 @@ export default function TronDApp() {
         method: "tron_requestAccounts",
         ready: true
       });
+      console.log("tron_requestAccounts.ready=true: ", provider.tronWeb);
     } else {
       const res = await provider.request({ method: 'tron_requestAccounts' });
       if (res.code === 200) {
-        tronWeb = tronLink.tronWeb;
+        tronWeb = provider.tronWeb;
       }
       setRes({
         method: "tron_requestAccounts",
         res
       });
+      console.log("tron_requestAccounts.ready = false: ", provider.tronWeb);
     }
     setAddress(tronWeb?.defaultAddress?.base58);
     return tronWeb;
   }
 
-  async function disconnect() { 
+  async function connect() { 
+    setRes();
+    if (!provider) { 
+      alert('provider err');
+      return;
+    }
 
+    if (!provider.connect) { 
+      alert('no connect function');
+      return;
+    }
+
+    const res = await provider.connect();
+    setRes({
+      method: "provider.connect",
+      res
+    });
+    console.log("provider.connect: ", provider.tronWeb);
+  }
+
+  async function disconnect() { 
+    setRes();
+    if (!provider) { 
+      alert('provider err');
+      return;
+    }
+
+    if (!provider.disconnect) { 
+      alert('no disconnect function');
+      return;
+    }
+
+    const res = await provider.disconnect();
+    setRes({
+      method: "provider.disconnect",
+      tronWeb: provider.tronWeb,
+      res
+    });
   }
 
   async function signMessage() { 
@@ -52,54 +90,67 @@ export default function TronDApp() {
     }
   }
 
-  async function sendRawTransaction() {
+  const [signedTx, setSignedTx] = useState(null);
+  async function signTransaction() {
     const tronWeb = await getTronWeb();
+    if (!tronWeb) { 
+      alert('tronWeb err, please reconnect');
+      return;
+    }
     const toAddress = address;
     if (!toAddress) { 
       alert('no address');
+      return;
     }
 
     const activePermissionId = 2;
+    // const tx = await tronWeb.transactionBuilder.sendTrx(toAddress, 10, fromAddress); // Step1
     const tx = await tronWeb.transactionBuilder.sendTrx(
       toAddress, 10,
       { permissionId: activePermissionId}
     ); // step 1
     try {
       const signedTx = await tronWeb.trx.multiSign(tx, undefined, activePermissionId); // step 2
-      const res = await tronWeb.trx.sendRawTransaction(signedTx); // step 3
+      setSignedTx(signedTx);
 
       setRes({
-        method: "tronWeb.trx.sendRawTransaction",
+        method: "tronWeb.trx.multiSign",
+        tx,
         signedTx,
-        res
       });
     } catch (err) {
       setRes({
-        method: "tronWeb.trx.sendRawTransaction",
-        signedTx,
+        method: "tronWeb.trx.multiSign",
+        tx,
         err
       });
     }
   }
 
-  async function sendRawTransaction2() { 
+  async function sendRawTransaction() { 
     const tronWeb = await getTronWeb();
+    if (!tronWeb) { 
+      alert('tronWeb err, please reconnect');
+      return;
+    }
     const toAddress = address;
-    const fromAddress = address;
-    if (!toAddress || !fromAddress) { 
+    if (!toAddress) { 
       alert('no address');
+      return;
+    }
+    if (signedTx === null) { 
+      alert('no signedTx');
+      return;
     }
 
-    const tx = await tronWeb.transactionBuilder.sendTrx(toAddress, 10, fromAddress); // Step1
     try {
-      const signedTx = await tronWeb.trx.sign(tx); // Step2
-      await tronWeb.trx.sendRawTransaction(signedTx); // Step3
-
+      const res = await tronWeb.trx.sendRawTransaction(signedTx);
       setRes({
         method: "tronWeb.trx.sendRawTransaction",
         signedTx,
         res
       });
+      setSignedTx(null);
     } catch (err) {
       setRes({
         method: "tronWeb.trx.sendRawTransaction",
@@ -107,10 +158,6 @@ export default function TronDApp() {
         err
       });
     }
-  }
-
-  async function stake2(){ 
-
   }
 
   return (
@@ -136,7 +183,7 @@ export default function TronDApp() {
           }
           setProvider(provider);
           setProviderName('mydoge');
-        }} className="bg-[#666] text-[#fff] p-1 m-2">
+        }} className={"text-[#fff] p-1 m-2 " + (providerName === "mydoge" ? "bg-[#000]": "bg-[#666]")}>
           mydoge
         </button>
         <button onClick={() => {
@@ -147,7 +194,7 @@ export default function TronDApp() {
           }
           setProvider(provider);
           setProviderName('tronLink');
-        }} className="bg-[#666] text-[#fff] p-1 m-2">
+        }} className={"text-[#fff] p-1 m-2 " + (providerName === "tronLink" ? "bg-[#000]": "bg-[#666]")}>
           tronLink
         </button>
         <button onClick={() => {
@@ -158,7 +205,7 @@ export default function TronDApp() {
           }
           setProvider(provider);
           setProviderName('okxwallet');
-        }} className="bg-[#666] text-[#fff] p-1 m-2">
+        }} className={"text-[#fff] p-1 m-2 " + (providerName === "okxwallet" ? "bg-[#000]": "bg-[#666]")}>
           okxwallet
         </button>
         <button onClick={() => {
@@ -169,12 +216,15 @@ export default function TronDApp() {
           }
           setProvider(provider);
           setProviderName('bitget');
-        }} className="bg-[#666] text-[#fff] p-1 m-2">
+        }} className={"text-[#fff] p-1 m-2 " + (providerName === "bitkeep" ? "bg-[#000]": "bg-[#666]")}>
           bitget
         </button>
       </div>
 
       <div className="mt-2">
+        <button onClick={connect} className="bg-[#000] text-[#fff] p-1 m-2">
+          connect
+        </button>
         <button onClick={getTronWeb} className="bg-[#000] text-[#fff] p-1 m-2">
           tron_requestAccounts
         </button>
@@ -189,18 +239,15 @@ export default function TronDApp() {
         <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 m-2">
           signMessage
         </button>
+        <button onClick={signTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+        signTransaction
+        </button>
         <button onClick={sendRawTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
           sendRawTransaction
         </button>
-        <button onClick={sendRawTransaction2} className="bg-[#000] text-[#fff] p-1 m-2">
-          sendRawTransaction2
-        </button>
-        <button onClick={stake2} className="bg-[#000] text-[#fff] p-1 m-2">
-          stake2.0
-        </button>
       </div>
 
-      {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
+      {res?.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
         <h2 className="text-lg mb-4">{ providerName || "tronLink" }: {res.method}</h2>
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}
