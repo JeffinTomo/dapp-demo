@@ -10,10 +10,17 @@ export default function TronDApp() {
 
   const toAddress = "xxxxxxxxxxx";
   const [res, setRes] = useState({});
+  const [eventLogs, setEventLogs] = useState([]);
 
   useEffect(() => { 
     window.addEventListener('tronLink#initialized', (res) => { 
       console.log('tronLink#initialized', res);
+    });
+
+    window.addEventListener('message', function (e) {
+      if (e.data.message && e.data.message.action) {
+        setEventLogs(e.data.message);
+      }
     });
   }, [providerName]);
 
@@ -67,7 +74,7 @@ export default function TronDApp() {
       res
     });
     setAddress(res?.address || "TDKLz7RwqF1X4qV3hRRXdS2BM4EnKyv6SW");
-    console.log("provider.connect: ", provider.tronWeb);
+    // console.log("provider.connect: ", provider.tronWeb);
   }
 
   async function disconnect() { 
@@ -352,6 +359,17 @@ export default function TronDApp() {
           {JSON.stringify(res, null, "\t")}
         </pre>
       </div>}
+
+
+      <div className={"bg-[#f5f5f5] border-1 p-5 mt-4 text-xs"}>
+        <h2 className="text-lg mb-4">{providerName || "tronLink"}: message</h2>
+        
+        doc: <a href="https://developers.tron.network/docs/tronlink-events">https://developers.tron.network/docs/tronlink-events</a>
+
+        <pre style={{ wordWrap: "break-word" }}>
+          {JSON.stringify(eventLogs, null, "\t")}
+        </pre>
+      </div>
     </div>
   );
 }
