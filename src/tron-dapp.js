@@ -8,7 +8,7 @@ export default function TronDApp() {
   const [providerName, setProviderName] = useState('mydoge');
   const [provider, setProvider] = useState(providerName ? window[providerName]?.tronLink : window.tronLink);
 
-  const toAddress = "xxxxxxxxxxx";
+  const toAddressList = ["TTWBUyNBFshkEgBJ2hMzXLuvY6tHrHoYaU", "TT67aSyGdPc9V1ZvewwHnT4nZcge3kM6kG"];
   const [res, setRes] = useState({});
   const [eventLogs, setEventLogs] = useState([]);
 
@@ -110,7 +110,7 @@ export default function TronDApp() {
       const signature = await tronWeb.trx.signMessageV2(message); //sign
 
       const base58Address = await tronWeb.trx.verifyMessageV2(message, signature);
-      console.log('verifyMessageV2', base58Address);
+      console.log('verifyMessageV2', base58Address === address);
 
       setRes({
         method: "tronWeb.trx.signMessageV2",
@@ -193,19 +193,18 @@ export default function TronDApp() {
       return;
     }
 
-    if (!toAddress) { 
-      alert('no address');
-      return;
+    let toAddress = toAddressList[0];
+    if (address === toAddressList[0]) { 
+      toAddress = toAddressList[1];
     }
 
-    const activePermissionId = 2;
-    // const tx = await tronWeb.transactionBuilder.sendTrx(toAddress, 10, fromAddress); // Step1
-    const tx = await tronWeb.transactionBuilder.sendTrx(
-      toAddress, 10,
-      { permissionId: activePermissionId}
-    ); // step 1
+    const tx = tronWeb.transactionBuilder.sendTrx(
+      toAddress,      // 接收方地址（Base58 格式，T 开头）
+      10000,         // 金额，单位是 SUN（1 TRX = 1_000_000 SUN）
+      address,     // 发送方地址（可选，通常钱包会自动填充）
+    );
     try {
-      const signedTx = await tronWeb.trx.multiSign(tx, undefined, activePermissionId); // step 2
+      const signedTx = await tronWeb.trx.sign(tx); // step 2
       setSignedTx(signedTx);
 
       setRes({
@@ -227,11 +226,7 @@ export default function TronDApp() {
       alert('tronWeb err, please reconnect');
       return;
     }
-    const toAddress = address;
-    if (!toAddress) { 
-      alert('no address');
-      return;
-    }
+    
     if (signedTx === null) { 
       alert('no signedTx');
       return;
@@ -253,6 +248,87 @@ export default function TronDApp() {
       });
     }
   }
+
+  async function signTokenTransaction() { 
+    const tronWeb = await getTronWeb();
+    if (!tronWeb) { 
+      alert('tronWeb err, please reconnect');
+      return;
+    }
+
+    const tokenAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'; // USDT 合约举例
+    let toAddress = toAddressList[0];
+    if (address === toAddressList[0]) { 
+      toAddress = toAddressList[1];
+    }
+
+    const amount = "100";
+
+    //send trc20 token  
+    const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+      tokenAddress,
+      'transfer(address,uint256)',
+      {
+        feeLimit: 1_000_000, // 可调整
+        callValue: 0,
+        from: address,
+      },
+      [
+        { type: 'address', value: toAddress },
+        { type: 'uint256', value: amount }
+      ],
+      address
+    );
+
+    try {
+      //const signedTx = await tronWeb.trx.sign(tx.transaction);
+      const signedTx = await tronWeb.trx.multiSign(tx, undefined, activePermissionId); // step 2
+      setSignedTx(signedTx);
+
+      setRes({
+        method: "tronWeb.trx.multiSign",
+        tx,
+        signedTx,
+      });
+    } catch (err) {
+      setRes({
+        method: "tronWeb.trx.multiSign",
+        err
+      });
+    }
+  }
+
+  async function sendTokenRawTransaction() { 
+    const tronWeb = await getTronWeb();
+    if (!tronWeb) { 
+      alert('tronWeb err, please reconnect');
+      return;
+    }
+    
+    if (signedTx === null) { 
+      alert('no signedTx');
+      return;
+    }
+
+    try {
+      const res = await tronWeb.trx.sendRawTransaction(signedTx);
+      setRes({
+        method: "tronWeb.trx.sendRawTransaction",
+        type: 'token',
+        signedTx,
+        res
+      });
+      setSignedTx(null);
+    } catch (err) {
+      setRes({
+        method: "tronWeb.trx.sendRawTransaction",
+        type: 'token',
+        signedTx,
+        err
+      });
+    }
+  }
+
 
   const providerNames = ['mydoge','tronLink','okxwallet','bitkeep'];
   const tronWallets = {
@@ -343,13 +419,23 @@ export default function TronDApp() {
         <button onClick={wallet_watchAsset2} className="bg-[#000] text-[#fff] p-1 m-2">
           tronWeb.request.wallet_watchAsset
         </button>
+      </div>
         
-        
+      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}> 
         <button onClick={signTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
-          signTransaction
+          ?signTransaction
         </button>
         <button onClick={sendRawTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
-          sendRawTransaction
+          ?sendRawTransaction
+        </button>
+      </div>
+        
+      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}> 
+        <button onClick={signTokenTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+          ?signTransaction(token)
+        </button>
+        <button onClick={sendTokenRawTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+          ?sendRawTransaction(token)
         </button>
       </div>
 
