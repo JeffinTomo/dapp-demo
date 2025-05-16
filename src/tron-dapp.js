@@ -37,6 +37,7 @@ export default function TronDApp() {
     console.log("tronWeb.defaultAddress", tronWeb.defaultAddress);
     console.log("tronWeb.defaultAddress.base58", tronWeb.defaultAddress?.base58);
     console.log("tronWeb.defaultAddress.hex", tronWeb.defaultAddress?.hex);
+    setAddress(tronWeb.defaultAddress?.base58);
   }
   
   async function connect() { 
@@ -470,11 +471,12 @@ export default function TronDApp() {
       </div>
 
       <div className="mt-2">
+        <button onClick={connect} className="bg-[#000] text-[#fff] p-1 m-2">
+          tronLink.reqeust.tron_requestAccounts
+        </button>
+
         <button onClick={connect2} className="bg-[#000] text-[#fff] p-1 m-2">
           tronLink.connect
-        </button>
-        <button onClick={connect} className="bg-[#000] text-[#fff] p-1 m-2">
-          reqeust.tron_requestAccounts
         </button>
 
         <button onClick={disconnect} className="bg-[#000] text-[#fff] p-1 m-2">
@@ -485,10 +487,10 @@ export default function TronDApp() {
 
       <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}>
         <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 m-2">
-          signMessage
+          tronWeb.trx.sign
         </button>
         <button onClick={signMessageV2} className="bg-[#000] text-[#fff] p-1 m-2">
-          signMessageV2
+          tronWeb.trx.signMessageV2
         </button>
       </div>
         
@@ -506,17 +508,17 @@ export default function TronDApp() {
       </div>
         
       <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}> 
-        <button onClick={signTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={signTransaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
           ?signTransaction
         </button>
-        <button onClick={sendRawTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={sendRawTransaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
           ?sendRawTransaction
         </button>
 
-        <button onClick={signTokenTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={signTokenTransaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
           ?signTransaction(token)
         </button>
-        <button onClick={sendTokenRawTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={sendTokenRawTransaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
           ?sendRawTransaction(token)
         </button>
       </div>
