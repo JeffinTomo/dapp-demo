@@ -31,6 +31,13 @@ export default function TronDApp() {
     }
     return provider?.tronWeb;
   }
+
+  function getAddress() { 
+    const tronWeb = provider.tronWeb;
+    console.log("tronWeb.defaultAddress", tronWeb.defaultAddress);
+    console.log("tronWeb.defaultAddress.base58", tronWeb.defaultAddress?.base58);
+    console.log("tronWeb.defaultAddress.hex", tronWeb.defaultAddress?.hex);
+  }
   
   async function connect() { 
     setRes();
@@ -39,21 +46,17 @@ export default function TronDApp() {
         method: "tronLink.request.tron_requestAccounts",
         ready: true
       });
-      // console.log("tron_requestAccounts.ready=true: ", provider.tronWeb);
     } else {
       const res = await provider.request({ method: 'tron_requestAccounts' });
-      if (res.code === 200) {
-        // alert('tron_requestAccounts ok');
-      }
+      setAddress(res?.address);
+
       setRes({
         method: "tronLink.request.tron_requestAccounts",
-        res
+        res,
       });
-      // console.log("tron_requestAccounts:", provider, res, provider.tronWeb);
     }
-    setAddress(tronWeb?.defaultAddress?.base58 || "TDKLz7RwqF1X4qV3hRRXdS2BM4EnKyv6SW");
-    // console.log(provider);
-    return provider.tronWeb;
+
+    getAddress();
   }
 
   async function connect2() { 
@@ -73,8 +76,8 @@ export default function TronDApp() {
       method: "tronLink.connect",
       res
     });
-    setAddress(res?.address || "TDKLz7RwqF1X4qV3hRRXdS2BM4EnKyv6SW");
-    // console.log("provider.connect: ", provider.tronWeb);
+    setAddress(res?.address);
+    getAddress();
   }
 
   async function disconnect() { 
@@ -106,11 +109,55 @@ export default function TronDApp() {
       return;
     }
     try {
-      const message = "0x1e"; // any hex string
+      let message = "hello world"; 
+      message = tronWeb.toHex(message).replace(/^0x/, '');
+      message = tronWeb.utils.code.hexStr2byteArray(message)
+      
+      message = tronWeb.sha3(message).replace(/^0x/, '');
+      const signature = await tronWeb.trx.sign(message); //sign
+
+      let signature0x = signature.replace(/^0x/, '');
+      var tail = signature0x.substring(128, 130);
+      if(tail == '01'){
+        signature0x = signature0x.substring(0,128) + '1c';
+      }
+      if(tail == '00'){
+        signature0x = signature0x.substring(0,128) + '1b';
+      }
+
+      console.log("verifyMessage", { message, signature, signature0x, tail, address });
+      var res = await tronWeb.trx.verifyMessage(message, signature0x, address);
+
+      setRes({
+        method: "tronWeb.trx.sign",
+        message,
+        signature,
+        checked: res
+      });
+    } catch (err) {
+      console.error("tronWeb.trx.sign", err);
+      setRes({
+        method: "tronWeb.trx.sign",
+        err: err?.message,
+      });
+    }
+  }
+
+
+  //https://tronweb.network/docu/docs/API%20List/trx/verifyMessageV2
+  async function signMessageV2() { 
+    setRes();
+    const tronWeb = await getTronWeb();
+    if (!tronWeb) { 
+      alert('tronWeb err');
+      return;
+    }
+    try {
+      const message = "hello world";
       const signature = await tronWeb.trx.signMessageV2(message); //sign
 
       const base58Address = await tronWeb.trx.verifyMessageV2(message, signature);
-      console.log('verifyMessageV2', base58Address === address);
+      console.log('verifyMessageV2:', base58Address === address, {base58Address, address});
 
       setRes({
         method: "tronWeb.trx.signMessageV2",
@@ -123,6 +170,33 @@ export default function TronDApp() {
         err,
       });
       console.error(err);
+    }
+  }
+
+  async function getBalance() { 
+    const tronWeb = await getTronWeb();
+    if (!tronWeb) { 
+      alert('tronWeb err');
+      return;
+    }
+    if (!address) { 
+      alert('address err');
+      return;
+    }
+
+    try {
+      const balance = await tronWeb.trx.getBalance(address);
+      setRes({
+        method: "tronWeb.trx.getBalance",
+        address,
+        balance
+      });
+    } catch (err) {
+      setRes({
+        method: "tronWeb.trx.getBalance",
+        address,
+        err
+      });
     }
   }
 
@@ -413,6 +487,16 @@ export default function TronDApp() {
         <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 m-2">
           signMessage
         </button>
+        <button onClick={signMessageV2} className="bg-[#000] text-[#fff] p-1 m-2">
+          signMessageV2
+        </button>
+      </div>
+        
+      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}> 
+        <button onClick={getBalance} className="bg-[#000] text-[#fff] p-1 m-2">
+          tronLink.trx.getBalance
+        </button>
+
         <button onClick={wallet_watchAsset} className="bg-[#000] text-[#fff] p-1 m-2">
           tronLink.request.wallet_watchAsset
         </button>
@@ -428,9 +512,7 @@ export default function TronDApp() {
         <button onClick={sendRawTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
           ?sendRawTransaction
         </button>
-      </div>
-        
-      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}> 
+
         <button onClick={signTokenTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
           ?signTransaction(token)
         </button>
@@ -448,10 +530,11 @@ export default function TronDApp() {
 
 
       <div className={"bg-[#f5f5f5] border-1 p-5 mt-4 text-xs"}>
-        <h2 className="text-lg mb-4">{providerName || "tronLink"}: message</h2>
+        <h2 className="text-lg mb-4">
+          {providerName || "tronLink"}: message,
+          doc: <a href="https://developers.tron.network/docs/tronlink-events">https://developers.tron.network/docs/tronlink-events</a>
+        </h2>
         
-        doc: <a href="https://developers.tron.network/docs/tronlink-events">https://developers.tron.network/docs/tronlink-events</a>
-
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(eventLogs, null, "\t")}
         </pre>
