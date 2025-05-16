@@ -2,6 +2,7 @@ import axios from "axios";
 import { payments, Psbt } from "bitcoinjs-lib";
 import * as bitcoin from 'bitcoinjs-lib';
 import sb from "satoshi-bitcoin";
+import { decodeFunctionData, parseAbi } from "viem";
 
 
 const DOGE_NETWORK = {
@@ -183,4 +184,48 @@ export function formatSmallNumber(num, precision = 4) {
   let afterZeros = str.substring(zeroCount + 1, zeroCount + 1 + precision);
     
     return `${beforeZeros}{${zeroCount - 1}}${afterZeros}`;
+}
+
+
+export function decodeTronCallData(callData) {
+  const abi = parseAbi([
+    // Basic TRC20 functions
+    "function transfer(address to, uint256 value) returns (bool)",
+    "function approve(address spender, uint256 value) returns (bool)",
+    "function balanceOf(address owner) view returns (uint256)",
+    "function allowance(address owner, address spender) view returns (uint256)",
+    "function totalSupply() view returns (uint256)",
+    "function name() view returns (string)",
+    "function symbol() view returns (string)",
+    "function decimals() view returns (uint8)",
+
+    // Additional common functions
+    "function transferFrom(address from, address to, uint256 value) returns (bool)",
+    "function burn(uint256 value) returns (bool)",
+    "function mint(address to, uint256 value) returns (bool)",
+    "function pause() returns (bool)",
+    "function unpause() returns (bool)",
+    "function increaseAllowance(address spender, uint256 addedValue) returns (bool)",
+    "function decreaseAllowance(address spender, uint256 subtractedValue) returns (bool)",
+
+    // Events
+    "event Transfer(address indexed from, address indexed to, uint256 value)",
+    "event Approval(address indexed owner, address indexed spender, uint256 value)",
+    "event Paused(address account)",
+    "event Unpaused(address account)",
+  ]);
+
+  try {
+    const decoded = decodeFunctionData({
+      abi,
+      data: "0x" + callData,
+    });
+    return {
+      function: decoded.functionName,
+      to: decoded.args[0],
+      value: decoded.args[1].toString(),
+    };
+  } catch (e) {
+    return { error: "Failed to decode calldata", details: e };
+  }
 }
