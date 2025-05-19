@@ -6,7 +6,7 @@ import { decodeTronCallData } from "./utils";
 
 const contractAddress = "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7";
 //https://tronscan.org/#/token20/TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7
-      
+
 export default function TronDApp() {
   const [address, setAddress] = useState("");
 
@@ -17,8 +17,8 @@ export default function TronDApp() {
   const [res, setRes] = useState({});
   const [eventLogs, setEventLogs] = useState([]);
 
-  useEffect(() => { 
-    window.addEventListener('tronLink#initialized', (res) => { 
+  useEffect(() => {
+    window.addEventListener('tronLink#initialized', (res) => {
       console.log('tronLink#initialized', res);
     });
 
@@ -29,23 +29,23 @@ export default function TronDApp() {
     });
   }, [providerName]);
 
-  async function getTronWeb() { 
-    if (!provider) { 
+  async function getTronWeb() {
+    if (!provider) {
       alert('provider err');
       return;
     }
     return provider?.tronWeb;
   }
 
-  function getAddress() { 
+  function getAddress() {
     const tronWeb = provider.tronWeb;
     console.log("tronWeb.defaultAddress", tronWeb.defaultAddress);
     console.log("tronWeb.defaultAddress.base58", tronWeb.defaultAddress?.base58);
     console.log("tronWeb.defaultAddress.hex", tronWeb.defaultAddress?.hex);
     setAddress(tronWeb.defaultAddress?.base58);
   }
-  
-  async function connect() { 
+
+  async function connect() {
     setRes();
     if (provider.ready) {
       setRes({
@@ -65,14 +65,14 @@ export default function TronDApp() {
     getAddress();
   }
 
-  async function connect2() { 
+  async function connect2() {
     setRes();
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
 
-    if (!provider.connect) { 
+    if (!provider.connect) {
       alert('no connect function');
       return;
     }
@@ -86,9 +86,9 @@ export default function TronDApp() {
     getAddress();
   }
 
-  async function disconnect() { 
+  async function disconnect() {
     setRes();
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -107,28 +107,29 @@ export default function TronDApp() {
     setAddress('');
   }
 
-  async function signMessage() { 
+  async function signMessage() {
     setRes();
     const tronWeb = await getTronWeb();
-    if (!tronWeb) { 
+    if (!tronWeb) {
       alert('tronWeb err');
       return;
     }
     try {
-      let message = "hello world"; 
+      let message = "hello world";
       message = tronWeb.toHex(message).replace(/^0x/, '');
       message = tronWeb.utils.code.hexStr2byteArray(message)
-      
+
       message = tronWeb.sha3(message).replace(/^0x/, '');
       const signature = await tronWeb.trx.sign(message); //sign
+      console.log('signature', signature);
 
       let signature0x = signature.replace(/^0x/, '');
       var tail = signature0x.substring(128, 130);
-      if(tail == '01'){
-        signature0x = signature0x.substring(0,128) + '1c';
+      if (tail == '01') {
+        signature0x = signature0x.substring(0, 128) + '1c';
       }
-      if(tail == '00'){
-        signature0x = signature0x.substring(0,128) + '1b';
+      if (tail == '00') {
+        signature0x = signature0x.substring(0, 128) + '1b';
       }
 
       console.log("verifyMessage", { message, signature, signature0x, tail, address });
@@ -151,10 +152,10 @@ export default function TronDApp() {
 
 
   //https://tronweb.network/docu/docs/API%20List/trx/verifyMessageV2
-  async function signMessageV2() { 
+  async function signMessageV2() {
     setRes();
     const tronWeb = await getTronWeb();
-    if (!tronWeb) { 
+    if (!tronWeb) {
       alert('tronWeb err');
       return;
     }
@@ -163,12 +164,13 @@ export default function TronDApp() {
       const signature = await tronWeb.trx.signMessageV2(message); //sign
 
       const base58Address = await tronWeb.trx.verifyMessageV2(message, signature);
-      console.log('verifyMessageV2:', base58Address === address, {base58Address, address});
+      console.log('verifyMessageV2:', base58Address === address, { base58Address, address });
 
       setRes({
         method: "tronWeb.trx.signMessageV2",
         message,
-        signature
+        signature,
+        verifyMessageV2: base58Address === address,
       });
     } catch (err) {
       setRes({
@@ -179,13 +181,13 @@ export default function TronDApp() {
     }
   }
 
-  async function getBalance() { 
+  async function getBalance() {
     const tronWeb = await getTronWeb();
-    if (!tronWeb) { 
+    if (!tronWeb) {
       alert('tronWeb err');
       return;
     }
-    if (!address) { 
+    if (!address) {
       alert('address err');
       return;
     }
@@ -213,13 +215,13 @@ export default function TronDApp() {
     return tronWeb.toBigNumber(balance).toString();
   }
 
-  async function getTokenBalance() { 
+  async function getTokenBalance() {
     const tronWeb = await getTronWeb();
-    if (!tronWeb) { 
+    if (!tronWeb) {
       alert('tronWeb err');
       return;
     }
-    if (!address) { 
+    if (!address) {
       alert('address err');
       return;
     }
@@ -244,13 +246,13 @@ export default function TronDApp() {
     }
   }
 
-  async function wallet_watchAsset() { 
+  async function wallet_watchAsset() {
     setRes();
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
-    try { 
+    try {
       const res = await provider.request({
         method: 'wallet_watchAsset',
         params: {
@@ -273,14 +275,14 @@ export default function TronDApp() {
     }
   }
 
-  async function wallet_watchAsset2() { 
+  async function wallet_watchAsset2() {
     setRes();
     const tronWeb = await getTronWeb();
-    if (!tronWeb) { 
+    if (!tronWeb) {
       alert('tronWeb err');
       return;
     }
-    try { 
+    try {
       const res = await tronWeb.request({
         method: 'wallet_watchAsset',
         params: {
@@ -290,6 +292,7 @@ export default function TronDApp() {
           }
         },
       });
+
       setRes({
         method: "tronWeb.request.wallet_watchAsset",
         res,
@@ -307,13 +310,13 @@ export default function TronDApp() {
   async function signTransaction() {
     setRes({});
     const tronWeb = await getTronWeb();
-    if (!tronWeb) { 
+    if (!tronWeb) {
       alert('tronWeb err, please reconnect');
       return;
     }
 
     let toAddress = toAddressList[0];
-    if (address === toAddressList[0]) { 
+    if (address === toAddressList[0]) {
       toAddress = toAddressList[1];
     }
 
@@ -321,10 +324,10 @@ export default function TronDApp() {
       toAddress,      // 接收方地址（Base58 格式，T 开头）
       999,         // 金额，单位是 SUN（1 TRX = 1_000_000 SUN）
     );
+    console.log('dapp.multiSign 1', tx);
     try {
       const signedTx = await tronWeb.trx.multiSign(tx); // step 2
       setSignedTx(signedTx);
-      console.log('dapp.multiSign', tx, signedTx);
 
       setRes({
         method: "tronWeb.trx.multiSign",
@@ -339,15 +342,15 @@ export default function TronDApp() {
     }
   }
 
-  async function signTokenTransaction() { 
+  async function signTokenTransaction() {
     const tronWeb = await getTronWeb();
-    if (!tronWeb) { 
+    if (!tronWeb) {
       alert('tronWeb err, please reconnect');
       return;
     }
 
     let toAddress = toAddressList[0];
-    if (address === toAddressList[0]) { 
+    if (address === toAddressList[0]) {
       toAddress = toAddressList[1];
     }
 
@@ -358,7 +361,7 @@ export default function TronDApp() {
       contractAddress,
       'transfer(address,uint256)',
       {
-        feeLimit: 10000, // 可调整
+        feeLimit: 100000000, // 可调整
         callValue: 0,
         from: address,
       },
@@ -368,6 +371,7 @@ export default function TronDApp() {
       ],
       address
     );
+    console.log('dapp.multiSign 2', tx);
 
     try {
       const signedTx = await tronWeb.trx.multiSign(tx.transaction); // step 2
@@ -387,14 +391,14 @@ export default function TronDApp() {
     }
   }
 
-  async function sendRawTransaction() { 
+  async function sendRawTransaction() {
     const tronWeb = await getTronWeb();
-    if (!tronWeb) { 
+    if (!tronWeb) {
       alert('tronWeb err, please reconnect');
       return;
     }
-    
-    if (signedTx === null) { 
+
+    if (signedTx === null) {
       alert('no signedTx');
       return;
     }
@@ -416,16 +420,16 @@ export default function TronDApp() {
     }
   }
 
-  async function sendTransaction() { 
+  async function sendTransaction() {
     setRes({});
     const tronWeb = await getTronWeb();
-    if (!tronWeb) { 
+    if (!tronWeb) {
       alert('tronWeb err, please reconnect');
       return;
     }
 
     let toAddress = toAddressList[0];
-    if (address === toAddressList[0]) { 
+    if (address === toAddressList[0]) {
       toAddress = toAddressList[1];
     }
     try {
@@ -443,17 +447,16 @@ export default function TronDApp() {
     }
   }
 
-
-  async function sendToken() { 
+  async function sendToken() {
     setRes({});
     const tronWeb = await getTronWeb();
-    if (!tronWeb) { 
+    if (!tronWeb) {
       alert('tronWeb err, please reconnect');
       return;
     }
 
     let toAddress = toAddressList[0];
-    if (address === toAddressList[0]) { 
+    if (address === toAddressList[0]) {
       toAddress = toAddressList[1];
     }
     try {
@@ -462,7 +465,7 @@ export default function TronDApp() {
       // const tokenId = tokenInfo?.BitTorrent?.id;
       // console.log('getTokensIssuedByAddress', contractAddress, tokenInfo);
 
-      if (!contractAddress) { 
+      if (!contractAddress) {
         alert('contractAddress err');
         return;
       }
@@ -482,7 +485,7 @@ export default function TronDApp() {
     }
   }
 
-  const providerNames = ['mydoge','tronLink','okxwallet','bitkeep'];
+  const providerNames = ['mydoge', 'tronLink', 'okxwallet', 'bitkeep'];
   const tronWallets = {
     mydoge: {
       providerName: "mydoge",
@@ -527,15 +530,15 @@ export default function TronDApp() {
 
         <p></p>
 
-        {providerName}: <a href={ tronWallets[providerName]?.doc } target="_blank">{ tronWallets[providerName]?.doc }</a>
+        {providerName}: <a href={tronWallets[providerName]?.doc} target="_blank">{tronWallets[providerName]?.doc}</a>
 
         <p></p>
-          
+
         current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
         switch to:
-        {providerNames.map((_providerName) => <button key={ _providerName} onClick={() => {
+        {providerNames.map((_providerName) => <button key={_providerName} onClick={() => {
           let provider = window[_providerName]?.tronLink;
-          if (_providerName === "tronLink") { 
+          if (_providerName === "tronLink") {
             provider = window?.tronLink;
           }
           if (!provider) {
@@ -545,8 +548,9 @@ export default function TronDApp() {
           }
           setProvider(provider);
           setProviderName(_providerName);
-        }} className={"text-[#fff] p-1 m-2 " + (providerName === _providerName ? "bg-[#000]": "bg-[#666]")}>
-          { _providerName === "bitkeep" ? "bitget" : _providerName }
+          setAddress('');
+        }} className={"text-[#fff] p-1 m-2 " + (providerName === _providerName ? "bg-[#000]" : "bg-[#666]")}>
+          {_providerName === "bitkeep" ? "bitget" : _providerName}
         </button>)
         }
       </div>
@@ -566,16 +570,16 @@ export default function TronDApp() {
       </div>
 
 
-      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}>
-        <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 m-2">
+      <div className={'mt-6 ' + (address ? '' : 'opacity-40')}>
+        <button onClick={signMessage} className="bg-[#000] hidden text-[#fff] p-1 m-2">
           tronWeb.trx.sign
         </button>
         <button onClick={signMessageV2} className="bg-[#000] text-[#fff] p-1 m-2">
           tronWeb.trx.signMessageV2
         </button>
       </div>
-        
-      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}> 
+
+      <div className={'mt-6 ' + (address ? '' : 'opacity-40')}>
         <button onClick={getBalance} className="bg-[#000] text-[#fff] p-1 m-2">
           tronLink.trx.getBalance
         </button>
@@ -591,8 +595,8 @@ export default function TronDApp() {
           tronWeb.request.wallet_watchAsset
         </button>
       </div>
-        
-      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}> 
+
+      <div className={'mt-6 ' + (address ? '' : 'opacity-40')}>
         <button onClick={signTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
           signTransaction
         </button>
@@ -610,11 +614,11 @@ export default function TronDApp() {
           ?sendToken
         </button>
 
-        
+
       </div>
 
-      {res?.method && <div className={"bg-[#f5f5f5] border-1 p-5 mt-4 text-xs" +  ((res.err || res.error) ? ' border-[red]' : '')}>
-        <h2 className="text-lg mb-4">{ providerName || "tronLink" }: {res.method}</h2>
+      {res?.method && <div className={"bg-[#f5f5f5] border-1 p-5 mt-4 text-xs" + ((res.err || res.error) ? ' border-[red]' : '')}>
+        <h2 className="text-lg mb-4">{providerName || "tronLink"}: {res.method}</h2>
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}
         </pre>
@@ -626,7 +630,7 @@ export default function TronDApp() {
           {providerName || "tronLink"}: message,
           doc: <a href="https://developers.tron.network/docs/tronlink-events">https://developers.tron.network/docs/tronlink-events</a>
         </h2>
-        
+
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(eventLogs, null, "\t")}
         </pre>
