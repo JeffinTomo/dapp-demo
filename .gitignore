@@ -10,6 +10,7 @@ coverage
 build
 
 # Misc
+.vscode
 .DS_Store
 *.pem
 .env.local
