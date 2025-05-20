@@ -22,8 +22,13 @@ export default function TronDApp() {
       console.log('tronLink#initialized', res);
     });
 
+    const actions = {
+      connect: true,
+      disconnect: true,
+      accountChanged: true
+    };
     window.addEventListener('message', function (e) {
-      if (e.data.message && e.data.message.action) {
+      if (e.data.message && e.data.message.action && e.data.message.isMydoge) {
         setEventLogs(e.data.message);
       }
     });
@@ -324,7 +329,7 @@ export default function TronDApp() {
       toAddress,      // 接收方地址（Base58 格式，T 开头）
       999,         // 金额，单位是 SUN（1 TRX = 1_000_000 SUN）
     );
-    console.log('dapp.multiSign 1', tx);
+    // console.log('dapp.multiSign 1', tx);
     try {
       const signedTx = await tronWeb.trx.multiSign(tx); // step 2
       setSignedTx(signedTx);
@@ -371,7 +376,7 @@ export default function TronDApp() {
       ],
       address
     );
-    console.log('dapp.multiSign 2', tx);
+    // console.log('dapp.multiSign 2', tx);
 
     try {
       const signedTx = await tronWeb.trx.multiSign(tx.transaction); // step 2
