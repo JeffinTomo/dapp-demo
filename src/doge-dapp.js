@@ -1,7 +1,47 @@
 import React, { useState, useEffect } from "react";
 import { getUtxos, createDogePsbt } from "./utils";
+import axios from "axios";
 
 //jeff soical: D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF
+
+const txIds = [
+  "3384d72862072cc69c2f224068ac4451e0794a88f3368bfae38362eb5ea43fa7",
+  "6fcf2247f33a2387d49aca4e42222faee14fb90dbc9d94014f11b34d6ffd9f26",
+  "f4eef49e2922512971f8cf92d1a7534714c671dac5d6e8879318d17543c34fa6",
+  "626e4477d301e307663a150bbe7cfed16d06fed756ba8f368df7ceb1d50e6259",
+  "369f061a1903d93e61352c3ab7ba684c0cdde1678e74ec41eb75eaee23ec568c",
+  "8068791d9cabbf640214f668ae877821a54b8f8563ceec8b4faa8c5d2ffae648",
+  "c3885a23772ba8d4e4027d996f130032ff6b005eae9e44c6799b5d045d5e6293",
+  "f907352d8e990d1f09cc59b59730b5863cef1040b249d68ce28391cc58f40029",
+  "bd861de235b66ce30b2f731ca85620959b10774b0c3dc56904ef588640c92ee1",
+  "fc76d25b8741b228685c38ca6ea63fbf08827ff17da9e5957115cd5186e22e17"
+];
+
+(async () => {
+  const bitcoin = require("bitcoinjs-lib");
+  const bs58check = require('bs58check');
+
+  const txId = "6fcf2247f33a2387d49aca4e42222faee14fb90dbc9d94014f11b34d6ffd9f26";
+  const res = await axios.get(`https://api.mydoge.com/wallet/info?route=%2Ftx%2F${txId}`);
+  const txData = res.data;
+
+
+  const txHex = txData.hex;
+  const tx = bitcoin.Transaction.fromHex(txHex);
+
+  console.log("nft tx detail:", tx, txData);
+
+  tx.outs.forEach((out, idx) => {
+    const script = out.script.toString("hex");
+    console.log("nft tx.item:", idx, out, script);
+
+    if (script.startsWith("6a")) {
+      const data = script.slice(6); // 去掉 '6a'
+      // console.log("tx.outs 2", out, idx, script, data, script === data);
+      console.log("OP_RETURN data:", Buffer.from(data, "hex").toString());
+    }
+  });
+})();
 
 export default function DogeDApp() {
   const [address, setAddress] = useState("");
@@ -30,9 +70,9 @@ export default function DogeDApp() {
     //   console.log('dapp.on.disconnect', res);
     // });
   }, [provider]);
-  
+
   const connect = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -40,10 +80,10 @@ export default function DogeDApp() {
     //{ onlyIfTrusted: true }
     try {
       const res = await provider.connect() || {};
-      
+
       setAddress(res.address);
       setRecipientAddress(res.address);
-      
+
       setRes({
         method: 'connect',
         res
@@ -58,7 +98,7 @@ export default function DogeDApp() {
   };
 
   const getConnectionStatus = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -78,9 +118,9 @@ export default function DogeDApp() {
       });
     }
   };
-  
+
   const requestAccounts = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -103,7 +143,7 @@ export default function DogeDApp() {
   };
 
   const disconnect = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -126,7 +166,7 @@ export default function DogeDApp() {
   }
 
   const getAccounts = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -147,7 +187,7 @@ export default function DogeDApp() {
   };
 
   const getBalance = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -158,7 +198,7 @@ export default function DogeDApp() {
       setRes({
         method: 'getBalance',
         res
-      });      
+      });
     } catch (err) {
       console.error("getBalance error", err);
       setRes({
@@ -168,10 +208,10 @@ export default function DogeDApp() {
     }
   };
 
-  const verifySignature = async(result) =>{
+  const verifySignature = async (result) => {
     try {
       const { signature, publicKey, message } = result;
-      
+
       // 验证签名
       /*
       function verify(
@@ -198,7 +238,7 @@ export default function DogeDApp() {
 
   const message = "abcdefghijk123456789";
   const signMessage = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -221,7 +261,7 @@ export default function DogeDApp() {
   };
 
   const signMessageBip322Simple = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -246,7 +286,7 @@ export default function DogeDApp() {
   };
 
   const requestSignedMessage = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -272,7 +312,7 @@ export default function DogeDApp() {
   };
 
   const requestSignedMessageBip322Simple = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -300,7 +340,7 @@ export default function DogeDApp() {
   };
 
   const requestDecryptedMessage = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -323,9 +363,9 @@ export default function DogeDApp() {
       });
     }
   }
-  
+
   const requestTransaction = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -340,7 +380,7 @@ export default function DogeDApp() {
       setRes({
         method: 'requestTransaction',
         res
-      });      
+      });
     } catch (err) {
       console.error("requestTransaction error", err);
       setRes({
@@ -349,9 +389,9 @@ export default function DogeDApp() {
       });
     }
   };
-  
+
   const getTransactionStatus = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -363,7 +403,7 @@ export default function DogeDApp() {
       setRes({
         method: 'getTransactionStatus',
         res
-      });      
+      });
     } catch (err) {
       console.error("getTransactionStatus error", err);
       setRes({
@@ -374,7 +414,7 @@ export default function DogeDApp() {
   };
 
   const getDRC20Balance = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -387,7 +427,7 @@ export default function DogeDApp() {
         method: 'getDRC20Balance',
         ticker,
         res
-      });      
+      });
     } catch (err) {
       console.error("getDRC20Balance error", err);
       setRes({
@@ -398,7 +438,7 @@ export default function DogeDApp() {
   };
 
   const getTransferableDRC20 = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -411,7 +451,7 @@ export default function DogeDApp() {
         method: 'getTransferableDRC20',
         ticker,
         res
-      });      
+      });
     } catch (err) {
       console.error("getTransferableDRC20 error", err);
       setRes({
@@ -422,7 +462,7 @@ export default function DogeDApp() {
   };
 
   const requestAvailableDRC20Transaction = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -430,7 +470,7 @@ export default function DogeDApp() {
     try {
       const utxos = await getUtxos(address, "", [], "spendable");
       console.log(utxos);
-      if (utxos.length === 0) { 
+      if (utxos.length === 0) {
         alert('no utxos');
         return;
       }
@@ -450,7 +490,7 @@ export default function DogeDApp() {
         method: 'requestAvailableDRC20Transaction',
         ticker,
         res
-      });     
+      });
       setTxId(res.txId || "");
     } catch (err) {
       console.error("requestAvailableDRC20Transaction error", err);
@@ -462,7 +502,7 @@ export default function DogeDApp() {
   };
 
   const requestInscriptionTransaction = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -472,13 +512,13 @@ export default function DogeDApp() {
         ticker
       });
       //inscriptions: [{ "amount": "1000", "location": "68f08b2ad7dfd26192685e04a7038223fa0259e0878e1b636776104c1535bb9f:0:0" }],
-      if (inscriptions.length === 0) { 
+      if (inscriptions.length === 0) {
         alert('no inscription');
         return;
       }
       const { location } = inscriptions[0];
       const res = await provider.requestInscriptionTransaction({
-        location, 
+        location,
         recipientAddress: "DBWyotC9oeCBSV3RHRUm2ME1wVujhMGHYi",
         // feeRate: 10
       });
@@ -497,7 +537,7 @@ export default function DogeDApp() {
   };
 
   const requestInscriptionMintTransaction = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -510,7 +550,7 @@ export default function DogeDApp() {
         amt: '1000'
       });
       const res = await provider.requestInscriptionTransaction({
-        data, 
+        data,
         recipientAddress,
         feeRate: 10
       });
@@ -519,7 +559,7 @@ export default function DogeDApp() {
         ticker,
         res
       });
-      setTxId(res.txid);  
+      setTxId(res.txid);
     } catch (err) {
       console.error("requestInscriptionTransaction error", err);
       setRes({
@@ -527,33 +567,33 @@ export default function DogeDApp() {
         err
       });
     }
-  }; 
+  };
 
   const requestPsbt = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
     setRes({});
-     
+
     const psbtHex = await createDogePsbt({
       senderAddress: address
     });
 
     // const psbtHex = "0100000002a89fc101c3d59017311a9c42deb5383569fa162bc6090dd8be9c914255538d3b0000000000ffffffff20a855ec9caf366d35c243746441fab68920f14f8709dbb0a9e16310a0bfe0680200000000ffffffff02a0860100000000001976a91445f449957cd4bee6f2aa9b2b5147f951b70bbdb888ac5800de02000000001976a914ac93a9d2be33c373df356098dbb4b3351c0c429888ac00000000";
     console.log('psbtHex', psbtHex);
-    
+
     try {
       const res = await provider.requestPsbt({
         rawTx: psbtHex,
-        indexes: [0,1],
+        indexes: [0, 1],
         signOnly: false, // Optionally return the signed transaction instead of broadcasting
       });
       setRes({
         method: 'requestPsbt',
         psbt: psbtHex,
         res
-      });      
+      });
     } catch (err) {
       console.error("requestPsbt error", err);
       setRes({
@@ -564,19 +604,19 @@ export default function DogeDApp() {
   };
 
   const requestPsbtSignOnly = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
     setRes({});
-    
-    
+
+
     const psbtHex = await createDogePsbt({
       senderAddress: address,
       amount: 0.0001,
       fee: 0.0001
     });
-    
+
 
     // const psbtHex = "0100000002de4a7ed3e87dd21f851cbe9559b6c09b3795344740861f0933821f69573cb25b0000000000ffffffff9593995df3f9934e519910c37e3fcb4538ca1e01671893f6bc1c2d4d8cc7eee60200000000ffffffff02a0860100000000001976a91445f449957cd4bee6f2aa9b2b5147f951b70bbdb888ac4cb6c701000000001976a914ac93a9d2be33c373df356098dbb4b3351c0c429888ac00000000";
     console.log('psbtHex', psbtHex);
@@ -584,18 +624,75 @@ export default function DogeDApp() {
     try {
       const res = await provider.requestPsbt({
         rawTx: psbtHex,
-        indexes: [0,1],
+        indexes: [0, 1],
         signOnly: true, // Optionally return the signed transaction instead of broadcasting
       });
       setRes({
         method: 'requestPsbt',
         psbt: psbtHex,
         res
-      });      
+      });
     } catch (err) {
       console.error("requestPsbt error", err);
       setRes({
         method: 'requestPsbt',
+        err
+      });
+    }
+  };
+
+  const getDunesBalance = async () => {
+    if (!provider) {
+      alert('provider err');
+      return;
+    }
+    setRes({});
+    try {
+      const res = await provider.getDunesBalance({
+        ticker
+      });
+      setRes({
+        method: 'getDunesBalance',
+        ticker,
+        res
+      });
+    } catch (err) {
+      console.error("getDunesBalance error", err);
+      setRes({
+        method: 'getDunesBalance',
+        err
+      });
+    }
+  };
+
+  const requestDunesTransaction = async () => {
+    if (!provider) {
+      alert('provider err');
+      return;
+    }
+    setRes({});
+    try {
+      const data = JSON.stringify({
+        p: 'drc-20',
+        op: 'mint',
+        tick: 'doge',
+        amt: '1000'
+      });
+      const res = await provider.requestDunesTransaction({
+        data,
+        recipientAddress,
+        feeRate: 10
+      });
+      setRes({
+        method: 'requestDunesTransaction',
+        ticker,
+        res
+      });
+      setTxId(res.txid);
+    } catch (err) {
+      console.error("requestDunesTransaction error", err);
+      setRes({
+        method: 'requestDunesTransaction',
         err
       });
     }
@@ -615,8 +712,8 @@ export default function DogeDApp() {
           <li>doge psbt parse: <a href="https://www.opreturn.net/tools/decode_rawtx/" target="_blank" rel="noopener noreferrer">https://www.opreturn.net/tools/decode_rawtx/</a></li>
         </ol>
 
-          {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
-          
+        {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
+
         {/* current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
         
         switch to:
@@ -663,7 +760,7 @@ export default function DogeDApp() {
         </button>
       </div>
 
-      <div className={ 'mt-0 ' + (address ? '' : 'opacity-40')}>
+      <div className={'mt-0 ' + (address ? '' : 'opacity-40')}>
         <button onClick={getAccounts} className="bg-[#000] hidden text-[#fff] p-1 m-2">
           getAccounts
         </button>
@@ -673,37 +770,37 @@ export default function DogeDApp() {
         </button>
       </div>
 
-      <div className={ 'mt-0 ' + (address ? '' : 'opacity-40')}>
+      <div className={'mt-0 ' + (address ? '' : 'opacity-40')}>
         <button onClick={signMessage} className="bg-[#000] hidden text-[#fff] p-1 m-2">
           signMessage
-        </button> 
+        </button>
 
         <button onClick={signMessageBip322Simple} className="bg-[#000] hidden text-[#fff] p-1 m-2">
           signMessageBip322Simple
-        </button> 
+        </button>
 
         <button onClick={requestSignedMessage} className="bg-[#000] text-[#fff] p-1 m-2">
           requestSignedMessage
-        </button> 
+        </button>
 
         <button onClick={requestSignedMessageBip322Simple} className="bg-[#000] hidden text-[#fff] p-1 m-2">
           requestSignedMessageBip322Simple
-        </button> 
-        
+        </button>
+
 
         <button onClick={requestDecryptedMessage} className="bg-[#000] opacity-20 text-[#fff] p-1 m-2">
           <del>requestDecryptedMessage</del>
         </button>
       </div>
 
-      <div className={ 'mt-0 ' + (address ? '' : 'opacity-40')}>
+      <div className={'mt-0 ' + (address ? '' : 'opacity-40')}>
         <button onClick={requestPsbt} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
           ?requestPsbt
-        </button> 
+        </button>
 
         <button onClick={requestPsbtSignOnly} className="bg-[#000] opacity-70 text-[#fff] p-1 m-2">
           ?requestPsbt.signOnly
-        </button> 
+        </button>
 
         {/* <button onClick={requestPsbts} className="bg-[#000] text-[#fff] p-1 m-2">
           requestPsbts
@@ -711,35 +808,47 @@ export default function DogeDApp() {
 
         <button onClick={requestTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
           requestTransaction
-        </button> 
+        </button>
       </div>
 
       <div className={'mt-0 ' + (address ? '' : 'opacity-40')}>
         <button onClick={getTransactionStatus} className="bg-[#000] text-[#fff] p-1 m-2">
           getTransactionStatus
-        </button> 
+        </button>
 
         <button onClick={getDRC20Balance} className="bg-[#000] text-[#fff] p-1 m-2">
           getDRC20Balance
-        </button> 
+        </button>
 
         <button onClick={getTransferableDRC20} className="bg-[#000] text-[#fff] p-1 m-2">
           getTransferableDRC20
-        </button> 
+        </button>
 
         <div></div>
 
         <button onClick={requestAvailableDRC20Transaction} className="bg-[#000] text-[#fff] p-1 m-2">
           requestAvailableDRC20Transaction
-        </button>  
+        </button>
 
         <button onClick={requestInscriptionTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
           requestInscriptionTransaction
-        </button> 
+        </button>
 
         <button onClick={requestInscriptionMintTransaction} className="hidden bg-[#000] text-[#fff] p-1 m-2">
           ?requestInscriptionMintTransaction
-        </button> 
+        </button>
+      </div>
+
+
+
+      <div className={'mt-0 ' + (address ? '' : 'opacity-40')}>
+        <button onClick={getDunesBalance} className="bg-[#000] text-[#fff] p-1 m-2">
+          getDunesBalance
+        </button>
+
+        <button onClick={requestDunesTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+          requestDunesTransaction
+        </button>
       </div>
 
       {res.method && <div className={"bg-[#f5f5f5] border-1 p-5 mt-4 text-xs" + (res.err ? ' border-[red]' : '')}>

@@ -1,8 +1,4 @@
 import React, { useState, useEffect } from "react";
-import bs58 from "bs58";
-import BN from "bn.js";
-
-import { decodeTronCallData } from "./utils";
 
 const contractAddress = "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7";
 //https://tronscan.org/#/token20/TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7
@@ -325,20 +321,21 @@ export default function TronDApp() {
       toAddress = toAddressList[1];
     }
 
-    const tx = await tronWeb.transactionBuilder.sendTrx(
+    const transaction = await tronWeb.transactionBuilder.sendTrx(
       toAddress,      // 接收方地址（Base58 格式，T 开头）
       999,         // 金额，单位是 SUN（1 TRX = 1_000_000 SUN）
     );
     // console.log('dapp.multiSign 1', tx);
     try {
-      const signedTx = await tronWeb.trx.multiSign(tx); // step 2
+      const { signature } = await tronWeb.trx.multiSign(transaction); // step 2
+      const signedTx = { ...transaction, signature };
       setSignedTx(signedTx);
 
       setRes({
         method: "tronWeb.trx.multiSign",
-        tx,
         signedTx,
       });
+      // console.log("signTransaction", tx, signedTx)
     } catch (err) {
       setRes({
         method: "tronWeb.trx.multiSign",
@@ -362,11 +359,11 @@ export default function TronDApp() {
     const amount = "1999";
 
     //send trc20 token  
-    const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+    const { transaction } = await tronWeb.transactionBuilder.triggerSmartContract(
       contractAddress,
       'transfer(address,uint256)',
       {
-        feeLimit: 100000000, // 可调整
+        feeLimit: 10000,
         callValue: 0,
         from: address,
       },
@@ -379,15 +376,16 @@ export default function TronDApp() {
     // console.log('dapp.multiSign 2', tx);
 
     try {
-      const signedTx = await tronWeb.trx.multiSign(tx.transaction); // step 2
+      const { signature } = await tronWeb.trx.multiSign(transaction);
+      const signedTx = { ...transaction, signature }; // step 2
       setSignedTx(signedTx);
-      console.log('multiSign.token', tx.transaction, signedTx);
+      // console.log('multiSign.token', tx.transaction, signedTx);
 
       setRes({
         method: "tronWeb.trx.multiSign",
-        tx,
         signedTx,
       });
+      // console.log("signTransaction token", signedTx, transaction)
     } catch (err) {
       setRes({
         method: "tronWeb.trx.multiSign",
@@ -409,14 +407,20 @@ export default function TronDApp() {
     }
 
     try {
+      console.log("sendRawTransaction 1", signedTx);
       const receipt = await tronWeb.trx.sendRawTransaction(signedTx);
+      console.log("sendRawTransaction 2", receipt);
       setRes({
         method: "tronWeb.trx.sendRawTransaction",
         signedTx,
         receipt
       });
+      const txid = receipt?.txid;
+      window.open(`https://tronscan.org/#/transaction/${txid}`)
+      // console.log("sendRawTransaction", signedTx, receipt)
       setSignedTx(null);
     } catch (err) {
+      console.log("sendRawTransaction err", err);
       setRes({
         method: "tronWeb.trx.sendRawTransaction",
         signedTx,
@@ -424,6 +428,40 @@ export default function TronDApp() {
       });
     }
   }
+
+  async function sendHexTransaction() {
+    const tronWeb = await getTronWeb();
+    if (!tronWeb) {
+      alert('tronWeb err, please reconnect');
+      return;
+    }
+
+    const signature = signedTx?.signature || [];
+    if (signature.length === 0) {
+      alert('no signedTx');
+      return;
+    }
+
+    try {
+      const signedHexTransaction = signature[0];
+      const receipt = await tronWeb.trx.sendHexTransaction(signedHexTransaction);
+      setRes({
+        method: "tronWeb.trx.sendHexTransaction",
+        signedTx,
+        receipt
+      });
+      const txid = receipt?.txid;
+      window.open(`https://tronscan.org/#/transaction/${txid}`)
+    } catch (err) {
+      console.log("sendHexTransaction err", err);
+      setRes({
+        method: "tronWeb.trx.sendHexTransaction",
+        signedTx,
+        err
+      });
+    }
+  }
+
 
   async function sendTransaction() {
     setRes({});
@@ -440,10 +478,19 @@ export default function TronDApp() {
     try {
       const res = await tronWeb.trx.sendTransaction(toAddress, 3999);
 
-      setRes({
-        method: "tronWeb.trx.sendTransaction",
-        res,
-      });
+      if (res?.txid) {
+        window.open(`https://tronscan.org/#/transaction/${res?.txid}`)
+
+        setRes({
+          method: "tronWeb.trx.sendTransaction",
+          res,
+        });
+      } else {
+        setRes({
+          method: "tronWeb.trx.sendTransaction",
+          err: res
+        });
+      }
     } catch (err) {
       setRes({
         method: "tronWeb.trx.sendTransaction",
@@ -476,12 +523,21 @@ export default function TronDApp() {
       }
 
       const tokenId = "1002000";
-      const res = await tronWeb.trx.sendToken(toAddress, 4999, tokenId);
+      const res = await tronWeb.trx.sendToken(toAddress, 4999, contractAddress);
 
-      setRes({
-        method: "tronWeb.trx.sendToken",
-        res,
-      });
+      if (res?.txid) {
+        window.open(`https://tronscan.org/#/transaction/${res?.txid}`)
+
+        setRes({
+          method: "tronWeb.trx.sendToken",
+          res,
+        });
+      } else {
+        setRes({
+          method: "tronWeb.trx.sendToken",
+          err: res
+        });
+      }
     } catch (err) {
       setRes({
         method: "tronWeb.trx.sendToken",
@@ -608,18 +664,21 @@ export default function TronDApp() {
         <button onClick={signTokenTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
           signTransaction(token)
         </button>
-        <button onClick={sendRawTransaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
-          ?sendRawTransaction
+        <button onClick={sendRawTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+          sendRawTransaction
         </button>
 
-        <button onClick={sendTransaction} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
-          ?sendTransaction
-        </button>
-        <button onClick={sendToken} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
-          ?sendToken
-        </button>
+        {/* <button onClick={sendHexTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+          sendHexTransaction
+        </button> */}
 
 
+        <button onClick={sendTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+          sendTransaction
+        </button>
+        <button onClick={sendToken} className="bg-[#000] text-[#fff] p-1 m-2">
+          sendToken
+        </button>
       </div>
 
       {res?.method && <div className={"bg-[#f5f5f5] border-1 p-5 mt-4 text-xs" + ((res.err || res.error) ? ' border-[red]' : '')}>
