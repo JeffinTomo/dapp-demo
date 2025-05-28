@@ -1,203 +1,558 @@
-import React, { useState } from "react";
-// import { verifyMessage } from "@unisat/wallet-utils";
-
-// const provider = window.unisat;
-// const provider = window.tomo_btc;
+import React, { useState, useEffect } from "react";
 
 export default function UnisatDApp() {
-  let provider = window.mydoge.doge;
+  const [address, setAddress] = useState("");
 
-  const [currentInfo, setCurrentInfo] = useState({});
-  const [params, setParams] = useState("");
-  const [amount, setAmount] = useState(0.05);
-  const [toAddress, setToAddress] = useState(
-    "D78HGysKL7hZyaitFWbvdJjMaxLvFrQmxF",
-  );
-  const [providerName, setProviderName] = useState("mydoge.doge");
+  const [providerName, setProviderName] = useState('mydoge');
 
-  const requestAccounts = async () => await provider.requestAccounts();
-  const getAccounts = async () => await provider.getAccounts();
-  const getNetwork = async () => await provider.getNetwork();
-  const switchNetwork = async (args) => await provider.switchNetwork(args);
-  const getPublicKey = async () => await provider.getPublicKey();
-  const getBalance = async () => await provider.getBalance();
-  // const getInscriptions = async () => await provider.getInscriptions();
+  const [res, setRes] = useState({});
 
-  const networkChanged = () => {};
-  const accountsChanged = () => {};
+  useEffect(() => {
+    window.addEventListener('unisat#initialized', (res) => {
+      console.log('unisat#initialized', res);
+    });
+  }, [providerName]);
 
-  const sendBitcoin = async () => await provider.sendBitcoin(toAddress, amount);
+  async function getProvider() {
+    if (!providerName) {
+      throw new Error("no provider name")
+      return;
+    }
+    let provider = null;
+    if (providerName === "unisat") {
+      provider = window.unisat;
+    }
+    provider = window[providerName]?.unisat;
 
-  // const sendInscription = async () =>
-  // args = [
-  //   "tb1q8h8s4zd9y0lkrx334aqnj4ykqs220ss7mjxzny",
-  //   "e9b86a063d78cc8a1ed17d291703bcc95bcd521e087ab0c7f1621c9c607def1ai0",
-  //   { feeRate: 15 },
-  // ],
-  // await provider.sendInscription(toAddress, "1");
+    if (!provider) {
+      throw new Error('provider err');
+    }
+    return provider;
+  }
+
+  const connect = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const res = await provider.connect();
+      setAddress(res?.address);
+
+      setRes({
+        method: "provider.connect",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.connect",
+        err,
+      });
+    }
+  }
+
+  const disconnect = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const res = await provider.disconnect();
+      setAddress("");
+
+      setRes({
+        method: "provider.disconnect",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.disconnect",
+        err,
+      });
+    }
+  }
+
+  const requestAccounts = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const res = await provider.requestAccounts();
+      setAddress("");
+
+      setRes({
+        method: "provider.requestAccounts",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.requestAccounts",
+        err,
+      });
+    }
+  }
+
+  const getAccounts = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const res = await provider.getAccounts();
+      setAddress("");
+
+      setRes({
+        method: "provider.getAccounts",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.getAccounts",
+        err,
+      });
+    }
+  }
+
+  const getPublicKey = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const res = await provider.getPublicKey();
+
+      setRes({
+        method: "provider.getPublicKey",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.getPublicKey",
+        err,
+      });
+    }
+  }
+
+  const getNetwork = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const res = await provider.getNetwork();
+
+      setRes({
+        method: "provider.getNetwork",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.getNetwork",
+        err,
+      });
+    }
+  };
+
+  const switchNetwork = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const params = {};
+      const res = await provider.switchNetwork(params);
+
+      setRes({
+        method: "provider.switchNetwork",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.switchNetwork",
+        err,
+      });
+    }
+  };
+
+  const getChain = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const res = await provider.getChain();
+
+      setRes({
+        method: "provider.getChain",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.getChain",
+        err,
+      });
+    }
+  };
+
+  //https://docs.unisat.io/dev/open-api-documentation/unisat-wallet#switchchain
+  const switchChain = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const chain = "BITCOIN_MAINNET";
+      const res = await provider.switchChain(chain);
+
+      setRes({
+        method: "provider.switchChain",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.switchChain",
+        err,
+      });
+    }
+  };
+
+
+  const getBalance = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const res = await provider.getBalance();
+
+      setRes({
+        method: "provider.getBalance",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.getBalance",
+        err,
+      });
+    }
+  };
+
+
+  const networkChanged = () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      provider.on("networkChanged", (res) => {
+        setRes({
+          method: "provider.on(networkChanged)",
+          res,
+        });
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.on(networkChanged)",
+        err,
+      });
+    }
+  };
+
+  const accountsChanged = () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      provider.on("accountsChanged", (res) => {
+        setRes({
+          method: "provider.on(accountsChanged)",
+          res,
+        });
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.on(accountsChanged)",
+        err,
+      });
+    }
+  };
 
   // https://docs.unisat.io/dev/unisat-developer-center/unisat-wallet#signmessage
   const signMessage = async () => {
-    const message = "abcdefghijk123456789";
-    const signature = await provider.signMessage(message, "");
-    // const pubkey = await getPublicKey();
-    // const res = verifyMessage(pubkey, message, signature);
-    return {
-      message,
-      signature,
-    };
+    setRes();
+
+    try {
+      const provider = getProvider();
+
+      const message = "abcdefghijk123456789";
+      const signature = await provider.signMessage(message, "");
+      // const pubkey = await getPublicKey();
+      // const res = verifyMessage(pubkey, message, signature);
+
+      setRes({
+        method: "provider.signMessage",
+        message,
+        signature,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.signMessage",
+        err,
+      });
+    }
   };
 
   const signMessageBip322Simple = async () => {
-    const message = "abcdefghijk123456789";
-    const signature = await provider.signMessage(message, "bip322-simple");
-    // const pubkey = await getPublicKey();
-    // const res = verifyMessage(pubkey, message, signature);
-    return {
-      message,
-      signature,
-    };
+    setRes();
+
+    try {
+      const provider = getProvider();
+
+      const message = "abcdefghijk123456789";
+      const signature = await provider.signMessage(message, "bip322-simple");
+      // const pubkey = await getPublicKey();
+      // const res = verifyMessage(pubkey, message, signature);
+
+      setRes({
+        method: "provider.signMessage",
+        message,
+        signature,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.signMessage",
+        err,
+      });
+    }
   };
 
-  let psbt =
-    "70736274ff0100890200000001668438b4fcafa31fe575284af4fd144a5b1f74edbc1733609de2634f5683607e0100000000ffffffff02920b000000000000225120f0a8ac7eeeb1a7d919c670d60120b94ef502b13e19ffda0b35cc21f8e8b458335c46000000000000225120921792fcbe19532f5a2e79734a71fb5f1270c2a1ef667d8fe2d7f9bc939e37bb000000000001012b8e5b000000000000225120921792fcbe19532f5a2e79734a71fb5f1270c2a1ef667d8fe2d7f9bc939e37bb01172047eafdc07e0d12def374cebee7a9fcf81130f6eb34530fcf936e4557a762c602000000";
-  const signPsbt = async () => await provider.signPsbt(psbt);
-  const signPsbts = async () => await provider.signPsbts([psbt, psbt]);
+  const sendBitcoin = async () => {
+    setRes();
 
-  const funcList = [
-    "requestAccounts",
-    "getAccounts",
-    "getPublicKey",
-    "accountsChanged",
+    try {
+      const provider = getProvider();
+      const amountSat = 10000;
+      const options = { feeRate: 15, memo: "memo" };
+      const res = await provider.sendBitcoin(address, amountSat, options);
 
-    "switchNetwork",
-    "getNetwork",
-    "networkChanged",
+      setRes({
+        method: "provider.sendBitcoin",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.sendBitcoin",
+        err,
+      });
+    }
+  }
 
-    "getBalance",
-    "signMessage",
-    "signMessageBip322Simple",
-    "signPsbt",
-    "signPsbts",
-    "sendBitcoin",
-  ];
+  const signPsbt = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const psbt = createPsbt();
+      const res = await provider.signPsbt(psbt);
+
+      setRes({
+        method: "provider.signPsbt",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.signPsbt",
+        err,
+      });
+    }
+  };
+
+  const signPsbts = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const psbts = [createPsbt(), createPsbt()];
+      const res = await provider.signPsbts(psbts);
+
+      setRes({
+        method: "provider.signPsbts",
+        res,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.signPsbts",
+        err,
+      });
+    }
+  };
+
+  const pushTx = async () => {
+    setRes();
+
+    try {
+      const provider = getProvider();
+      const rawtx = "";
+      let txid = await provider.pushTx({
+        rawtx
+      });
+
+      setRes({
+        method: "provider.pushTx",
+        rawtx,
+        txid,
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.pushTx",
+        err,
+      });
+    }
+  }
+
+  function createPsbt() {
+    const psbt = new Psbt();
+    const amount = 0.0001;
+    psbt.addInput(address, amount);
+    psbt.addOutput(address, amount);
+    return psbt.toHex();
+  }
+
+
+  const providerNames = ['mydoge', 'unisat', 'okxwallet', 'bitkeep'];
+  const wallets = {
+    mydoge: {
+      providerName: "mydoge",
+      name: "MyDoge Wallet",
+      installLink: "https://qsg07xytt12z.sg.larksuite.com/wiki/I5ZDwtq6MiQQpWk9MRelFpjtg9b",
+      doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/ECaVwtEt6i2iuukiiZFlu3Dxg0p",
+      provider: "window.mydoge?.unisat"
+    },
+    unisat: {
+      providerName: "unisat",
+      name: "Unisat Wallet",
+      installLink: "https://chromewebstore.google.com/detail/unisat-wallet/ppbibelpcjmhbdihakflkdcoccbgbkpo",
+      doc: "https://docs.unisat.io/dev/open-api-documentation/unisat-wallet",
+      provider: "window.unisat"
+    },
+    okxwallet: {
+      providerName: "okxwallet",
+      name: "OKX Wallet",
+      installLink: "https://chrome.google.com/webstore/detail/okx-wallet/mcohilncbfahbmgdjkbpemcciiolgcge",
+      doc: "https://web3.okx.com/zh-hans/build/dev-docs/sdks/chains/bitcoin/provider",
+      provider: "window.okxwallet?.unisat"
+    },
+    bitkeep: {
+      providerName: "bitkeep",
+      name: "Bitget Wallet",
+      installLink: "https://web3.bitget.com/zh-CN/wallet-download",
+      doc: "https://web3.bitget.com/en/docs/provider-api/btc.html",
+      provider: "window.bitkeep?.unisat"
+    }
+  };
 
   return (
-    <div className="p-3 w-11/12  text-xs">
-      <h2>Doge DApp Demo</h2>
-      <div className="mb-2 bg-gray-400 p-4 text-xs">
-        provider = window.{providerName};
-      </div>
+    <div className="m-5 text-sm">
+      <div className="mt-2 bg-[#f5f5f5] p-2">
+        <h1>Unisat Dapp Demo: </h1>
+        {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
 
-      <div className="bg-[#dedede] p-1 mb-1">
-        <button
-          className="bg-[#000] text-[#fff] p-1 m-2"
-          onClick={async () => {
-            setProviderName("mydoge.doge");
-            provider = window.mydoge.doge;
-          }}
-        >
-          use mydoge wallet
-        </button>
-        <button
-          className="bg-[#000] text-[#fff] p-1 m-2"
-          onClick={async () => {
-            setProviderName("unisat");
-            provider = window.unisat;
-          }}
-        >
-          use unisat wallet
-        </button>
-        <button
-          className="bg-[#000] text-[#fff] p-1 m-2"
-          onClick={async () => {
-            setProviderName("bitkeep.unisat");
-            provider = window.bitkeep.unisat;
-          }}
-        >
-          use bitget wallet
-        </button>
-      </div>
-
-      <p></p>
-
-      <textarea
-        className="m-4 w-4/5 border-1 hidden"
-        value={params}
-        onChange={(e) => setParams(e.target.value)}
-      />
-
-      <p></p>
-
-      <div style={{ gap: 10 }} className="flex flex-wrap">
-        {[
-          requestAccounts,
-          getAccounts,
-          getPublicKey,
-          accountsChanged,
-
-          switchNetwork,
-          getNetwork,
-          networkChanged,
-
-          getBalance,
-          signMessage,
-          signMessageBip322Simple,
-          signPsbt,
-          signPsbts,
-          sendBitcoin,
-        ].map((func, index) => (
-          <div key={index}>
-            <button
-              className="border-1 p-1 text-xs rounded-5 bg-[#dedede]"
-              onClick={async () => {
-                window.location.hash = func.name;
-                try {
-                  setCurrentInfo({
-                    "update time": new Date().getTime(),
-                    "function name": func.name,
-                    "function params": params.split(","),
-                    "function returns": await func(
-                      params ? params.split(",") : undefined,
-                    ),
-                  });
-                } catch (e) {
-                  console.error(e);
-                }
-              }}
-            >
-              {funcList[index]}
-            </button>
-          </div>
-        ))}
-      </div>
-      <div className="bg-[#f5f5f5] border-1 p-5 mt-3 mb-3">
-        amount:{" "}
-        <input
-          type="text"
-          value={amount}
-          onChange={(e) => {
-            setAmount(e.target.value / 1);
-          }}
-        />
         <p></p>
-        to{" "}
-        <input
-          type="text"
-          value={toAddress}
-          style={{ width: "300px" }}
-          onChange={(e) => {
-            setToAddress(e.target.value);
-          }}
-        />
+
+        {providerName}: <a href={wallets[providerName]?.doc} target="_blank">{wallets[providerName]?.doc}</a>
+
+        <p></p>
+
+        current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
+        switch to:
+        {providerNames.map((_providerName) => <button key={_providerName} onClick={() => {
+          let provider = window[_providerName]?.unisat;
+          if (_providerName === "unisat") {
+            provider = window?.unisat;
+          }
+          if (!provider) {
+            const link = wallets[_providerName]?.installLink
+            window.open(link, '_blank');
+            return;
+          }
+          setProviderName(_providerName);
+          setAddress('');
+        }} className={"text-[#fff] p-1 m-2 " + (providerName === _providerName ? "bg-[#000]" : "bg-[#666]")}>
+          {_providerName === "bitkeep" ? "bitget" : _providerName}
+        </button>)
+        }
       </div>
-      <div className="bg-[#f5f5f5] border-1 p-5">
-        {Object.keys(currentInfo).map((k) => (
-          <div key={k} style={{ wordWrap: "break-word" }}>
-            {k}: {JSON.stringify(currentInfo[k])}
-          </div>
-        ))}
+
+      <div className="mt-2">
+        <button onClick={connect} className="bg-[#000] text-[#fff] p-1 m-2">
+          connect
+        </button>
+        <button onClick={disconnect} className="bg-[#000] text-[#fff] p-1 m-2">
+          disconnect
+        </button>
+
+
+        <button onClick={accountsChanged} className="bg-[#000] text-[#fff] p-1 m-2">
+          accountsChanged
+        </button>
+        <button onClick={networkChanged} className="bg-[#000] text-[#fff] p-1 m-2">
+          networkChanged
+        </button>
       </div>
+
+      <div className={'mt-2 ' + (address ? '' : 'opacity-40')}>
+        <button onClick={getPublicKey} className="bg-[#000] text-[#fff] p-1 m-2">
+          getPublicKey
+        </button>
+        <button onClick={getAccounts} className="bg-[#000] text-[#fff] p-1 m-2">
+          getAccounts
+        </button>
+        <button onClick={requestAccounts} className="bg-[#000] text-[#fff] p-1 m-2">
+          requestAccounts
+        </button>
+
+        <button onClick={getBalance} className="bg-[#000] text-[#fff] p-1 m-2">
+          getBalance
+        </button>
+      </div>
+
+      <div className={'mt-2 ' + (address ? '' : 'opacity-40')}>
+        <button onClick={getNetwork} className="bg-[#000] text-[#fff] p-1 m-2">
+          getNetwork
+        </button>
+        <button onClick={switchNetwork} className="bg-[#000] text-[#fff] p-1 m-2">
+          switchNetwork
+        </button>
+
+        <button onClick={getChain} className="bg-[#000] text-[#fff] p-1 m-2">
+          getChain
+        </button>
+        <button onClick={switchChain} className="bg-[#000] text-[#fff] p-1 m-2">
+          switchChain
+        </button>
+      </div>
+
+      <div className={'mt-2 ' + (address ? '' : 'opacity-40')}>
+        <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 m-2">
+          signMessage
+        </button>
+        <button onClick={signMessageBip322Simple} className="bg-[#000] text-[#fff] p-1 m-2">
+          signMessageBip322Simple
+        </button>
+      </div>
+
+
+      <div className={'mt-2 ' + (address ? '' : 'opacity-40')}>
+        <button onClick={sendBitcoin} className="bg-[#000] text-[#fff] p-1 m-2">
+          sendBitcoin
+        </button>
+        <button onClick={pushTx} className="bg-[#000] text-[#fff] p-1 m-2">
+          pushTx
+        </button>
+        <button onClick={signPsbt} className="bg-[#000] text-[#fff] p-1 m-2">
+          signPsbt
+        </button>
+        <button onClick={signPsbts} className="bg-[#000] text-[#fff] p-1 m-2">
+          signPsbts
+        </button>
+      </div>
+
+      {res?.method && <div className={"bg-[#f5f5f5] border-1 p-5 mt-4 text-xs" + ((res.err || res.error) ? ' border-[red]' : '')}>
+        <h2 className="text-lg mb-4">{providerName || "tronLink"}: {res.method}</h2>
+        <pre style={{ wordWrap: "break-word" }}>
+          {JSON.stringify(res, null, "\t")}
+        </pre>
+      </div>}
     </div>
   );
 }
