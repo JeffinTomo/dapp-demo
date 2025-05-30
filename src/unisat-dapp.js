@@ -544,16 +544,16 @@ export default function UnisatDApp() {
 
 
       <div className={'mt-2 ' + (address ? '' : 'opacity-40')}>
-        <button onClick={sendBitcoin} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={sendBitcoin} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
           sendBitcoin
         </button>
-        <button onClick={pushTx} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={pushTx} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
           pushTx
         </button>
-        <button onClick={signPsbt} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={signPsbt} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
           signPsbt
         </button>
-        <button onClick={signPsbts} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={signPsbts} className="bg-[#000] opacity-40 text-[#fff] p-1 m-2">
           signPsbts
         </button>
       </div>
