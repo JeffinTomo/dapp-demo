@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from "react";
+// import { verifyMessage } from "@unisat/wallet-utils";
+
+function verifyMessage(pubkey, message, signature) {
+  return ""
+}
 
 export default function UnisatDApp() {
   const [address, setAddress] = useState("");
@@ -13,7 +18,7 @@ export default function UnisatDApp() {
     });
   }, [providerName]);
 
-  async function getProvider() {
+  function getProvider() {
     if (!providerName) {
       throw new Error("no provider name")
       return;
@@ -21,8 +26,9 @@ export default function UnisatDApp() {
     let provider = null;
     if (providerName === "unisat") {
       provider = window.unisat;
+    } else {
+      provider = window[providerName]?.unisat;
     }
-    provider = window[providerName]?.unisat;
 
     if (!provider) {
       throw new Error('provider err');
@@ -32,9 +38,9 @@ export default function UnisatDApp() {
 
   const connect = async () => {
     setRes();
+    const provider = getProvider();
 
     try {
-      const provider = getProvider();
       const res = await provider.connect();
       setAddress(res?.address);
 
@@ -43,6 +49,7 @@ export default function UnisatDApp() {
         res,
       });
     } catch (err) {
+      console.error("connect err", provider, err);
       setRes({
         method: "provider.connect",
         err,
@@ -76,7 +83,7 @@ export default function UnisatDApp() {
     try {
       const provider = getProvider();
       const res = await provider.requestAccounts();
-      setAddress("");
+      setAddress(res[0]);
 
       setRes({
         method: "provider.requestAccounts",
@@ -96,7 +103,7 @@ export default function UnisatDApp() {
     try {
       const provider = getProvider();
       const res = await provider.getAccounts();
-      setAddress("");
+      setAddress(res[0]);
 
       setRes({
         method: "provider.getAccounts",
@@ -153,8 +160,7 @@ export default function UnisatDApp() {
 
     try {
       const provider = getProvider();
-      const params = {};
-      const res = await provider.switchNetwork(params);
+      const res = await provider.switchNetwork("testnet");
 
       setRes({
         method: "provider.switchNetwork",
@@ -193,8 +199,8 @@ export default function UnisatDApp() {
 
     try {
       const provider = getProvider();
-      const chain = "BITCOIN_MAINNET";
-      const res = await provider.switchChain(chain);
+      const chainId = "BITCOIN_TESTNET";
+      const res = await provider.switchChain(chainId);
 
       setRes({
         method: "provider.switchChain",
@@ -275,14 +281,16 @@ export default function UnisatDApp() {
       const provider = getProvider();
 
       const message = "abcdefghijk123456789";
-      const signature = await provider.signMessage(message, "");
-      // const pubkey = await getPublicKey();
-      // const res = verifyMessage(pubkey, message, signature);
+      const signature = await provider.signMessage(message);
+      const pubkey = await provider.getPublicKey();
+      const result = verifyMessage(pubkey, message, signature);
 
       setRes({
         method: "provider.signMessage",
         message,
         signature,
+        pubkey,
+        check: result,
       });
     } catch (err) {
       setRes({
@@ -300,13 +308,16 @@ export default function UnisatDApp() {
 
       const message = "abcdefghijk123456789";
       const signature = await provider.signMessage(message, "bip322-simple");
-      // const pubkey = await getPublicKey();
-      // const res = verifyMessage(pubkey, message, signature);
+
+      const pubkey = await provider.getPublicKey();
+      const result = verifyMessage(pubkey, message, signature);
 
       setRes({
         method: "provider.signMessage",
         message,
         signature,
+        pubkey,
+        check: result,
       });
     } catch (err) {
       setRes({
