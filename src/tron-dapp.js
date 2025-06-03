@@ -323,7 +323,7 @@ export default function TronDApp() {
 
     const transaction = await tronWeb.transactionBuilder.sendTrx(
       toAddress,      // 接收方地址（Base58 格式，T 开头）
-      999,         // 金额，单位是 SUN（1 TRX = 1_000_000 SUN）
+      99998,         // 金额，单位是 SUN（1 TRX = 1_000_000 SUN）
     );
     // console.log('dapp.multiSign 1', tx);
     try {
@@ -363,7 +363,7 @@ export default function TronDApp() {
       contractAddress,
       'transfer(address,uint256)',
       {
-        feeLimit: 10000,
+        feeLimit: 100_000_000,
         callValue: 0,
         from: address,
       },
@@ -410,6 +410,19 @@ export default function TronDApp() {
       console.log("sendRawTransaction 1", signedTx);
       const receipt = await tronWeb.trx.sendRawTransaction(signedTx);
       console.log("sendRawTransaction 2", receipt);
+      let confirmed = false;
+      let txInfo = null;
+
+      // if (receipt?.txid) {
+      //   for (let i = 0; i < 10; i++) {
+      //     await new Promise((res) => setTimeout(res, 1000));
+      //     txInfo = await tronWeb.trx.getTransactionInfo(receipt.txid);
+      //     if (txInfo && txInfo.blockNumber) {
+      //       confirmed = true;
+      //       break;
+      //     }
+      //   }
+      // }
       setRes({
         method: "tronWeb.trx.sendRawTransaction",
         signedTx,
@@ -445,6 +458,19 @@ export default function TronDApp() {
     try {
       const signedHexTransaction = signature[0];
       const receipt = await tronWeb.trx.sendHexTransaction(signedHexTransaction);
+      let confirmed = false;
+      let txInfo = null;
+
+      // if (receipt?.txid) {
+      //   for (let i = 0; i < 10; i++) {
+      //     await new Promise((res) => setTimeout(res, 1000));
+      //     txInfo = await tronWeb.trx.getTransactionInfo(receipt.txid);
+      //     if (txInfo && txInfo.blockNumber) {
+      //       confirmed = true;
+      //       break;
+      //     }
+      //   }
+      // }
       setRes({
         method: "tronWeb.trx.sendHexTransaction",
         signedTx,
@@ -664,13 +690,9 @@ export default function TronDApp() {
         <button onClick={signTokenTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
           signTransaction(token)
         </button>
-        <button onClick={sendRawTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
-          sendRawTransaction
-        </button>
-
-        {/* <button onClick={sendHexTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={sendHexTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
           sendHexTransaction
-        </button> */}
+        </button>
 
 
         <button onClick={sendTransaction} className="bg-[#000] text-[#fff] p-1 m-2">
