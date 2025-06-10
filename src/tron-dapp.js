@@ -325,7 +325,7 @@ export default function TronDApp() {
       toAddress,      // 接收方地址（Base58 格式，T 开头）
       99998,         // 金额，单位是 SUN（1 TRX = 1_000_000 SUN）
     );
-    // console.log('dapp.multiSign 1', tx);
+    console.log('dapp.multiSign 1', transaction);
     try {
       const { signature } = await tronWeb.trx.multiSign(transaction); // step 2
       const signedTx = { ...transaction, signature };
