@@ -28,6 +28,15 @@ export default function TronDApp() {
         setEventLogs(e.data.message);
       }
     });
+
+    window.addEventListener(
+      "TIP6963:announceProvider",
+      (event) => {
+        console.log('TIP6963:announceProvider', event);
+      }
+    );
+    window.dispatchEvent(new Event("TIP6963:requestProvider"));
+
   }, [providerName]);
 
   async function getTronWeb() {
