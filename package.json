@@ -75,9 +75,6 @@
     "typescript": ">=5"
   },
   "overrides": {
-    "typescript": ">=5",
-    "superstruct": {
-      "sourceMap": false
-    }
+    "typescript": ">=5"
   }
 }
