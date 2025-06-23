@@ -1,9 +1,4 @@
 import React, { useState, useEffect } from "react";
-// import { verifyMessage } from "@unisat/wallet-utils";
-
-function verifyMessage(pubkey, message, signature) {
-  return ""
-}
 
 export default function UnisatDApp() {
   const [address, setAddress] = useState("");
@@ -298,15 +293,12 @@ export default function UnisatDApp() {
 
       const message = "abcdefghijk123456789";
       const signature = await provider.signMessage(message);
-      const pubkey = await provider.getPublicKey();
-      const result = verifyMessage(pubkey, message, signature);
 
       setRes({
         method: "provider.signMessage",
         message,
         signature,
-        pubkey,
-        check: result,
+        check: "https://bitaps.com/signature",
       });
     } catch (err) {
       setRes({
