@@ -12,6 +12,7 @@
     "ajv": "^8.14.0",
     "axios": "^1.7.9",
     "bitcoinjs-lib": "^6.1.7",
+    "bn.js": "^5.2.2",
     "browser-passworder": "^2.0.3",
     "bs58": "^6.0.0",
     "buffer": "^6.0.3",
@@ -19,6 +20,7 @@
     "crypto-js": "^4.2.0",
     "dayjs": "1.11.6",
     "ethers": "^6.13.5",
+    "lodash-es": "^4.17.21",
     "phaser": "3.55.2",
     "querystring": "^0.2.1",
     "react": "18.2.0",
@@ -68,12 +70,13 @@
     "cross-env": "7.0.3",
     "eslint-plugin-react-hooks": "4.6.0",
     "sass": "^1.54.9",
-    "typescript": "^5.0.4"
+    "typescript": ">=5"
   },
   "resolutions": {
-    "typescript": "^5.0.4"
+    "typescript": ">=5"
   },
   "overrides": {
+    "typescript": ">=5",
     "superstruct": {
       "sourceMap": false
     }

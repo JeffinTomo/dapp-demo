@@ -770,6 +770,17 @@ export default function SolanaDApp() {
           mydoge
         </button>
         <button onClick={() => {
+          const provider = window.tomo_wallet?.solana;
+          if (!provider) {
+            window.open('https://tomo.inc', '_blank');
+            return;
+          }
+          setProvider(provider);
+          setProviderName('tomo');
+        }} className="bg-[#666] text-[#fff] p-1 m-2">
+          tomo
+        </button>
+        <button onClick={() => {
           const provider = window.phantom?.solana;
           if (!provider) {
             window.open('https://phantom.app/', '_blank');

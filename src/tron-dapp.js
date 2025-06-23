@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { get } from 'lodash-es'
 
 const contractAddress = "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7";
 //https://tronscan.org/#/token20/TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7
@@ -581,37 +582,45 @@ export default function TronDApp() {
     }
   }
 
-  const providerNames = ['mydoge', 'tronLink', 'okxwallet', 'bitkeep'];
   const tronWallets = {
     mydoge: {
       providerName: "mydoge",
       name: "MyDoge Wallet",
       installLink: "https://qsg07xytt12z.sg.larksuite.com/wiki/I5ZDwtq6MiQQpWk9MRelFpjtg9b",
       doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/J6F0wd2Imi5VJzk40yMlKd8JgCf",
-      provider: "window.mydoge?.tronLink"
+      provider: "mydoge.tronLink"
+    },
+    tomo: {
+      providerName: "tomo",
+      name: "Tomo Wallet",
+      installLink: "https://qsg07xytt12z.sg.larksuite.com/wiki/I5ZDwtq6MiQQpWk9MRelFpjtg9b",
+      doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/J6F0wd2Imi5VJzk40yMlKd8JgCf",
+      provider: "tomo_wallet.tronLink"
     },
     tronLink: {
       providerName: "tronLink",
       name: "TronLink Wallet",
       installLink: "https://chrome.google.com/webstore/detail/tronlink/ibnejdfjmmkpcnlpebklmnkoeoihofec",
       doc: "https://docs.tronlink.org/dapp/start-developing",
-      provider: "window.tronLink"
+      provider: "tronLink"
     },
     okxwallet: {
       providerName: "okxwallet",
       name: "OKX Wallet",
       installLink: "https://chrome.google.com/webstore/detail/okx-wallet/mcohilncbfahbmgdjkbpemcciiolgcge",
       doc: "https://web3.okx.com/zh-hans/build/dev-docs/sdks/chains/tron/provider",
-      provider: "window.okxwallet?.tronLink"
+      provider: "okxwallet.tronLink"
     },
     bitkeep: {
       providerName: "bitkeep",
       name: "Bitget Wallet",
       installLink: "https://web3.bitget.com/zh-CN/wallet-download",
       doc: "https://web3.bitget.com/en/docs/provider-api/tron.html",
-      provider: "window.bitkeep?.tronLink"
+      provider: "bitkeep.tronLink"
     }
   };
+
+  const providerNames = Object.keys(tronWallets);
 
   return (
     <div className="m-5 text-sm">
@@ -633,10 +642,8 @@ export default function TronDApp() {
         current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
         switch to:
         {providerNames.map((_providerName) => <button key={_providerName} onClick={() => {
-          let provider = window[_providerName]?.tronLink;
-          if (_providerName === "tronLink") {
-            provider = window?.tronLink;
-          }
+          const provider = get(window, tronWallets[_providerName]?.provider, null);
+
           if (!provider) {
             const link = tronWallets[_providerName]?.installLink
             window.open(link, '_blank');

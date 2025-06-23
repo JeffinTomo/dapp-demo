@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Web3 from "web3";
 import { ethers } from "ethers";
 import {
@@ -20,6 +20,8 @@ import {
   transfer,
 } from "./erc20/contract";
 
+import { get } from 'lodash-es'
+
 //https://base.blockscout.com/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
 // const erc20ContractAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const erc20ContractAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
@@ -29,8 +31,12 @@ const erc20ContractAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
 
 export default function EvmDApp() {
   const [providerName, setProviderName] = useState("mydoge.ethereum");
-  let provider = window.mydoge?.ethereum;
-  const web3 = new Web3(provider);
+
+  const provider = useMemo(() => {
+    console.log(`getting provider from ${providerName}`)
+    return get(window, providerName, {})
+  }, [providerName])
+  const web3 = useMemo(() => new Web3(provider), [provider]);
 
   const [res, setRes] = useState({});
   const [address, setAddress] = useState("");
@@ -90,7 +96,7 @@ export default function EvmDApp() {
     });
   };
 
-  const getChainId = async() => {
+  const getChainId = async () => {
     const res = await provider.request({ method: "eth_chainId" });
     setRes({
       method: "getChainId/eth_chainId",
@@ -180,16 +186,16 @@ export default function EvmDApp() {
     }
     // chainId = "0x1b58"; for bitget
     // try {
-      let res = await provider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId }],
-      });
-      console.log("wallet_switchEthereumChain", res);
-        
-      setRes({
-        method: "wallet_switchEthereumChain",
-        res,
-      });
+    let res = await provider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId }],
+    });
+    console.log("wallet_switchEthereumChain", res);
+
+    setRes({
+      method: "wallet_switchEthereumChain",
+      res,
+    });
     // } catch (switchError) {
     //   console.log(switchError);
     // }
@@ -213,7 +219,7 @@ export default function EvmDApp() {
       },
     };
 
-    const res= await provider.request({
+    const res = await provider.request({
       method: "wallet_watchAsset",
       params: customTokenInfo,
     });
@@ -385,12 +391,12 @@ export default function EvmDApp() {
       alert("plase connect 1st");
       return;
     }
-    if (!encryptedMessage) { 
+    if (!encryptedMessage) {
       alert("plase encryptMessage 1st");
       return;
     }
     let res = await provider.request({
-      method: "eth_decrypt", 
+      method: "eth_decrypt",
       params: [encryptedMessage, address],
     });
 
@@ -399,7 +405,7 @@ export default function EvmDApp() {
       message: encryptedMessage,
       res,
     });
-    console.log('decryptMessage', res === message3,encryptedMessage, address, res);
+    console.log('decryptMessage', res === message3, encryptedMessage, address, res);
     return res;
   };
 
@@ -460,7 +466,7 @@ export default function EvmDApp() {
     // );
   };
 
-  const otherRequests = async() => {
+  const otherRequests = async () => {
     let hash =
       "0x47a3e1bce2cf0a10170c2dde69886c27038ea6ac7f1d742df208d4c4da7fc282";
     let methods = {
@@ -600,16 +606,22 @@ export default function EvmDApp() {
           className="bg-[#000] text-[#fff] p-1 m-5"
           onClick={async () => {
             setProviderName("mydoge.ethereum");
-            provider = window.mydoge.ethereum;
           }}
         >
           use mydoge wallet
         </button>
         <button
+          className="bg-[#000] text-[#fff] p-1 m-5"
+          onClick={async () => {
+            setProviderName("tomo_wallet.ethereum");
+          }}
+        >
+          use tomo wallet
+        </button>
+        <button
           className="bg-[#000] text-[#fff] p-1 mr-5"
           onClick={async () => {
             setProviderName("ethereum");
-            provider = window.ethereum;
           }}
         >
           use metamask
@@ -618,7 +630,6 @@ export default function EvmDApp() {
           className="bg-[#000] text-[#fff] p-1 mr-5"
           onClick={async () => {
             setProviderName("bitkeep.ethereum");
-            provider = window.bitkeep.ethereum;
           }}
         >
           use bitget wallet
@@ -627,7 +638,6 @@ export default function EvmDApp() {
           className="bg-[#000] text-[#fff] p-1 mr-5"
           onClick={async () => {
             setProviderName("okxwallet.ethereum");
-            provider = window.okxwallet;
           }}
         >
           use okxwallet
@@ -655,7 +665,7 @@ export default function EvmDApp() {
             <button
               size="sm"
               className={"border-1 rounded-5 bg-[#000] text-[#fff] p-1" + (funcList[index] !== "connect" && address === "" ? " opacity-40" : "")}
-              onClick={async() => {
+              onClick={async () => {
                 setRes({})
                 try {
                   await func();
@@ -674,7 +684,7 @@ export default function EvmDApp() {
         ))}
       </div>
 
-      <div className={"bg-[#f5f5f5] border-1 p-5" +  ((res.err || res.error) ? ' border-[red]' : '')}>
+      <div className={"bg-[#f5f5f5] border-1 p-5" + ((res.err || res.error) ? ' border-[red]' : '')}>
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}
         </pre>
@@ -703,12 +713,12 @@ function ERC20Contact({ address, providerName, provider }) {
   const [data, setData] = useState({});
 
   useEffect(() => {
-    (async()=>{ 
+    (async () => {
       const chainId = await provider.request({ method: "eth_chainId" });
-      if (chainId !== "0x2105") { 
+      if (chainId !== "0x2105") {
         return;
       }
-      
+
       //init erc20 contract
       const contractToken = init(provider, erc20ContractAddress);
 
@@ -729,7 +739,7 @@ function ERC20Contact({ address, providerName, provider }) {
   return (
     <>
       <div className="mt-10">
-        <h2 className="mt-5 mb-2 text-lg">erc20: { erc20ContractAddress }</h2>
+        <h2 className="mt-5 mb-2 text-lg">erc20: {erc20ContractAddress}</h2>
         <button
           size="sm"
           className="border-1 rounded-5 bg-[#dedede] p-1 mr-5"
