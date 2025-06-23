@@ -40,6 +40,11 @@ export default function UnisatDApp() {
     setRes();
     const provider = getProvider();
 
+    if (!provider.connect) {
+      alert('provider not support connect');
+      return;
+    }
+
     try {
       const res = await provider.connect();
       setAddress(res?.address);
@@ -60,8 +65,13 @@ export default function UnisatDApp() {
   const disconnect = async () => {
     setRes();
 
+    const provider = getProvider();
+    if (!provider.disconnect) {
+      alert('provider not support disconnect');
+      return;
+    }
+
     try {
-      const provider = getProvider();
       const res = await provider.disconnect();
       setAddress("");
 
@@ -70,6 +80,7 @@ export default function UnisatDApp() {
         res,
       });
     } catch (err) {
+      console.error("disconnect err", provider, err);
       setRes({
         method: "provider.disconnect",
         err,
@@ -157,6 +168,8 @@ export default function UnisatDApp() {
 
   const switchNetwork = async () => {
     setRes();
+    alert('provider not support switchNetwork');
+    return;
 
     try {
       const provider = getProvider();
@@ -196,6 +209,9 @@ export default function UnisatDApp() {
   //https://docs.unisat.io/dev/open-api-documentation/unisat-wallet#switchchain
   const switchChain = async () => {
     setRes();
+
+    alert('provider not support switchChain');
+    return;
 
     try {
       const provider = getProvider();
@@ -496,7 +512,7 @@ export default function UnisatDApp() {
         <button onClick={accountsChanged} className="bg-[#000] text-[#fff] p-1 m-2">
           accountsChanged
         </button>
-        <button onClick={networkChanged} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={networkChanged} className="bg-[#000] text-[#fff] p-1 m-2 opacity-40">
           networkChanged
         </button>
       </div>
@@ -521,14 +537,14 @@ export default function UnisatDApp() {
         <button onClick={getNetwork} className="bg-[#000] text-[#fff] p-1 m-2">
           getNetwork
         </button>
-        <button onClick={switchNetwork} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={switchNetwork} className="bg-[#000] text-[#fff] p-1 m-2 opacity-40">
           switchNetwork
         </button>
 
         <button onClick={getChain} className="bg-[#000] text-[#fff] p-1 m-2">
           getChain
         </button>
-        <button onClick={switchChain} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={switchChain} className="bg-[#000] text-[#fff] p-1 m-2 opacity-40">
           switchChain
         </button>
       </div>
