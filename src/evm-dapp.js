@@ -20,6 +20,8 @@ import {
   transfer,
 } from "./erc20/contract";
 
+import { Wallets } from "./wallets";
+
 import { get } from 'lodash-es'
 
 //https://base.blockscout.com/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
@@ -30,12 +32,9 @@ const erc20ContractAddress = "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4";
 // const erc20ContractAddress = "0xcdE172dc5ffC46D228838446c57C1227e0B82049";
 
 export default function EvmDApp() {
-  const [providerName, setProviderName] = useState("mydoge.ethereum");
+  const [providerName, setProviderName] = useState("mydoge");
+  const [provider, setProvider] = useState(window?.mydoge?.ethereum);
 
-  const provider = useMemo(() => {
-    console.log(`getting provider from ${providerName}`)
-    return get(window, providerName, {})
-  }, [providerName])
   const web3 = useMemo(() => new Web3(provider), [provider]);
 
   const [res, setRes] = useState({});
@@ -589,59 +588,18 @@ export default function EvmDApp() {
         <div style={{ height: "1000px", border: "10px solid red" }}></div>
       </div>
       <h2 className="text-lg">
-        ETH DApp Demo,{" "}
-        <a
-          className="text-blue-700"
-          href="https://chromewebstore.google.com/detail/tomo-wallet/pfccjkejcgoppjnllalolplgogenfojk"
-        >
-          tomo wallet 插件
-        </a>
+        ETH DApp Demo
       </h2>
-      <div className="mb-2 bg-gray-400 p-4 text-xs">
-        provider = window.{providerName};
-      </div>
 
-      <div className="bg-[#dedede] p-1 mb-1">
-        <button
-          className="bg-[#000] text-[#fff] p-1 m-5"
-          onClick={async () => {
-            setProviderName("mydoge.ethereum");
-          }}
-        >
-          use mydoge wallet
-        </button>
-        <button
-          className="bg-[#000] text-[#fff] p-1 m-5"
-          onClick={async () => {
-            setProviderName("tomo_wallet.ethereum");
-          }}
-        >
-          use tomo wallet
-        </button>
-        <button
-          className="bg-[#000] text-[#fff] p-1 mr-5"
-          onClick={async () => {
-            setProviderName("ethereum");
-          }}
-        >
-          use metamask
-        </button>
-        <button
-          className="bg-[#000] text-[#fff] p-1 mr-5"
-          onClick={async () => {
-            setProviderName("bitkeep.ethereum");
-          }}
-        >
-          use bitget wallet
-        </button>
-        <button
-          className="bg-[#000] text-[#fff] p-1 mr-5"
-          onClick={async () => {
-            setProviderName("okxwallet.ethereum");
-          }}
-        >
-          use okxwallet
-        </button>
+      <div className="mt-2 bg-[#f5f5f5] p-2">
+        {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
+
+        <p></p>
+        <Wallets type="evm" onChanged={({ provider, providerName }) => {
+          setProviderName(providerName);
+          setProvider(provider);
+          setAddress('');
+        }} />
       </div>
 
       <div style={{ gap: 10 }} className="m-5 flex flex-wrap">

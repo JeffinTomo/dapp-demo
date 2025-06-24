@@ -5,83 +5,115 @@ const walletInfos = {
     providerName: "mydoge",
     name: "MyDoge Wallet",
     installLink: "https://qsg07xytt12z.sg.larksuite.com/wiki/I5ZDwtq6MiQQpWk9MRelFpjtg9b",
-    doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/ECaVwtEt6i2iuukiiZFlu3Dxg0p",
   },
   unisat: {
     providerName: "unisat",
     name: "Unisat Wallet",
     installLink: "https://chromewebstore.google.com/detail/unisat-wallet/ppbibelpcjmhbdihakflkdcoccbgbkpo",
-    doc: "https://docs.unisat.io/dev/open-api-documentation/unisat-wallet",
+  },
+  metamask: {
+    providerName: "metamask",
+    name: "Metamask Wallet",
+    installLink: "https://metamask.io/",
   },
   okxwallet: {
     providerName: "okxwallet",
     name: "OKX Wallet",
     installLink: "https://chrome.google.com/webstore/detail/okx-wallet/mcohilncbfahbmgdjkbpemcciiolgcge",
-    doc: "https://web3.okx.com/zh-hans/build/dev-docs/sdks/chains/bitcoin/provider",
   },
   bitkeep: {
     providerName: "bitkeep",
     name: "Bitget Wallet",
     installLink: "https://web3.bitget.com/zh-CN/wallet-download",
-    doc: "https://web3.bitget.com/en/docs/provider-api/btc.html",
   },
   phantom: {
     providerName: "phantom",
     name: "Phantom Wallet",
     installLink: "https://phantom.app/",
-    doc: "https://docs.phantom.app/integrate/web3-provider",
   },
   tomo: {
     providerName: "tomo",
     name: "Tomo Wallet",
-    installLink: "https://qsg07xytt12z.sg.larksuite.com/wiki/I5ZDwtq6MiQQpWk9MRelFpjtg9b",
-    doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/J6F0wd2Imi5VJzk40yMlKd8JgCf",
+    installLink: "https://chromewebstore.google.com/detail/tomo-wallet/pfccjkejcgoppjnllalolplgogenfojk",
   },
 }
 
-const unisateWallets = {
+const evmWallets = {
   mydoge: {
     providerName: "mydoge",
-    provider: window.mydoge?.unisat
+    provider: window.mydoge?.ethereum,
+    doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/XLq9wrNRLiAXANkCj4QlERCxg7f",
   },
   tomo: {
     providerName: "tomo",
-    provider: window.tomo_wallet?.unisat
-  },
-  unisat: {
-    providerName: "unisat",
-    provider: window.unisat
+    provider: window.tomo_wallet?.ethereum,
+    doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/XLq9wrNRLiAXANkCj4QlERCxg7f",
   },
   okxwallet: {
     providerName: "okxwallet",
-    provider: window.okxwallet?.unisat
+    provider: window.okxwallet?.ethereum,
+    doc: "https://web3.okx.com/zh-hans/build/dev-docs/sdks/chains/evm/provider",
   },
   bitkeep: {
     providerName: "bitkeep",
-    provider: window.bitkeep?.unisat
+    provider: window.bitkeep?.ethereum,
+    doc: "https://web3.bitget.com/en/docs/provider-api/evm.html",
+  }
+};
+
+const unisatWallets = {
+  mydoge: {
+    providerName: "mydoge",
+    provider: window.mydoge?.unisat,
+    doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/ECaVwtEt6i2iuukiiZFlu3Dxg0pp",
+  },
+  tomo: {
+    providerName: "tomo",
+    provider: window.tomo_wallet?.unisat,
+    doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/ECaVwtEt6i2iuukiiZFlu3Dxg0p",
+  },
+  unisat: {
+    providerName: "unisat",
+    provider: window.unisat,
+    doc: "https://docs.unisat.io/dev/open-api-documentation/unisat-wallet",
+  },
+  okxwallet: {
+    providerName: "okxwallet",
+    provider: window.okxwallet?.unisat,
+    doc: "https://web3.okx.com/zh-hans/build/dev-docs/sdks/chains/bitcoin/provider",
+  },
+  bitkeep: {
+    providerName: "bitkeep",
+    provider: window.bitkeep?.unisat,
+    doc: "https://web3.bitget.com/en/docs/provider-api/btc.html",
   }
 };
 
 const solanaWallets = {
   mydoge: {
     providerName: "mydoge",
-    provider: window.mydoge?.solana
+    provider: window.mydoge?.solana,
+    doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/LyVnwBkzaibRDEkUfXclabRmg6g",
   },
   tomo: {
     providerName: "tomo",
-    provider: window.tomo_wallet?.solana
+    provider: window.tomo_wallet?.solana,
+    doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/LyVnwBkzaibRDEkUfXclabRmg6g",
   },
   phantom: {
     providerName: "phantom",
-    provider: window.phantom?.solana
+    provider: window.phantom?.solana,
+    doc: "https://docs.phantom.com/solana/detecting-the-provider",
   },
   okxwallet: {
     providerName: "okxwallet",
-    provider: window.okxwallet?.solana
+    provider: window.okxwallet?.solana,
+    doc: "https://web3.okx.com/zh-hans/build/dev-docs/sdks/chains/solana/provider",
   },
   bitkeep: {
     providerName: "bitkeep",
-    provider: window.bitkeep?.solana
+    provider: window.bitkeep?.solana,
+    doc: "https://web3.bitget.com/en/docs/provider-api/solana.html",
   }
 }
 
@@ -89,27 +121,36 @@ const solanaWallets = {
 const tronWallets = {
   mydoge: {
     providerName: "mydoge",
-    provider: window.mydoge?.tronLink
+    provider: window.mydoge?.tronLink,
+    doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/J6F0wd2Imi5VJzk40yMlKd8JgCf",
   },
   tomo: {
     providerName: "tomo",
-    provider: window.tomo_wallet?.tronLink
+    provider: window.tomo_wallet?.tronLink,
+    doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/J6F0wd2Imi5VJzk40yMlKd8JgCf",
   },
   tronLink: {
     providerName: "tronLink",
-    provider: window.tronLink
+    provider: window.tronLink,
+    doc: "https://docs.tronlink.org/dapp/start-developing",
   },
   okxwallet: {
     providerName: "okxwallet",
-    provider: window.okxwallet?.tronLink
+    provider: window.okxwallet?.tronLink,
+    doc: "https://web3.okx.com/zh-hans/build/dev-docs/sdks/chains/tron/provider",
   },
   bitkeep: {
     providerName: "bitkeep",
-    provider: window.bitkeep?.tronLink
+    provider: window.bitkeep?.tronLink,
+    doc: "https://web3.bitget.com/en/docs/provider-api/tron.html",
   }
 };
 
 export const walletsConfig = {
+  evm: {
+    providerNames: ['mydoge', 'tomo', 'metamask', 'okxwallet', 'bitkeep'],
+    wallets: getWallets(evmWallets)
+  },
   unisat: {
     providerNames: ['mydoge', 'tomo', 'unisat', 'okxwallet', 'bitkeep'],
     wallets: getWallets(unisateWallets)
@@ -139,17 +180,18 @@ export function Wallets({ type, onChanged }) {
   if (!walletsConfig[type]) {
     alert(`no ${type} config.`)
   }
-  const { providerNames, wallets } = walletsConfig[type];
+  const { providerNames = [], wallets = [] } = walletsConfig[type] || {};
   const [providerName, setProviderName] = useState(providerNames[0]);
 
   return (<>
-    {providerName}: <a href={walletInfos[providerName]?.doc} target="_blank">{walletInfos[providerName]?.doc}</a>
+    {providerName} doc: <a href={walletInfos[providerName]?.doc} target="_blank">{walletInfos[providerName]?.doc}</a>
 
     <p></p>
 
     current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
     switch to:
     {wallets.map((wallet) => <button key={wallet.providerName} onClick={() => {
+      console.log('wallet click', wallet.provider, wallet);
       const { provider, installLink } = wallet;
       if (!provider) {
         window.open(installLink, '_blank');

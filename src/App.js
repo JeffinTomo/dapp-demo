@@ -12,12 +12,13 @@ import {
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
-import EvmDapp from "./evm-dapp";
+import ShopDApp from "./shop-dapp";
+
+const EvmDapp = React.lazy(() => import("./evm-dapp"));
 const DogeDapp = React.lazy(() => import("./doge-dapp"));
 const SolanaDapp = React.lazy(() => import("./solana-dapp"));
 const TronDapp = React.lazy(() => import("./tron-dapp"));
-import ShopDApp from "./shop-dapp";
-import UnisatDApp from "./unisat-dapp";
+const UnisatDApp = React.lazy(() => import("./unisat-dapp"));
 
 
 function App() {
