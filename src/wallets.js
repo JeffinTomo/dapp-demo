@@ -31,12 +31,22 @@ const walletInfos = {
     installLink: "https://phantom.app/",
     doc: "https://docs.phantom.app/integrate/web3-provider",
   },
+  tomo: {
+    providerName: "tomo",
+    name: "Tomo Wallet",
+    installLink: "https://qsg07xytt12z.sg.larksuite.com/wiki/I5ZDwtq6MiQQpWk9MRelFpjtg9b",
+    doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/J6F0wd2Imi5VJzk40yMlKd8JgCf",
+  },
 }
 
 const unisateWallets = {
   mydoge: {
     providerName: "mydoge",
     provider: window.mydoge?.unisat
+  },
+  tomo: {
+    providerName: "tomo",
+    provider: window.tomo_wallet?.unisat
   },
   unisat: {
     providerName: "unisat",
@@ -57,6 +67,10 @@ const solanaWallets = {
     providerName: "mydoge",
     provider: window.mydoge?.solana
   },
+  tomo: {
+    providerName: "tomo",
+    provider: window.tomo_wallet?.solana
+  },
   phantom: {
     providerName: "phantom",
     provider: window.phantom?.solana
@@ -71,14 +85,42 @@ const solanaWallets = {
   }
 }
 
+
+const tronWallets = {
+  mydoge: {
+    providerName: "mydoge",
+    provider: window.mydoge?.tronLink
+  },
+  tomo: {
+    providerName: "tomo",
+    provider: window.tomo_wallet?.tronLink
+  },
+  tronLink: {
+    providerName: "tronLink",
+    provider: window.tronLink
+  },
+  okxwallet: {
+    providerName: "okxwallet",
+    provider: window.okxwallet?.tronLink
+  },
+  bitkeep: {
+    providerName: "bitkeep",
+    provider: window.bitkeep?.tronLink
+  }
+};
+
 export const walletsConfig = {
   unisat: {
-    providerNames: ['mydoge', 'unisat', 'okxwallet', 'bitkeep'],
+    providerNames: ['mydoge', 'tomo', 'unisat', 'okxwallet', 'bitkeep'],
     wallets: getWallets(unisateWallets)
   },
   solana: {
-    providerNames: ['mydoge', 'phantom', 'okxwallet', 'bitkeep'],
+    providerNames: ['mydoge', 'tomo', 'phantom', 'okxwallet', 'bitkeep'],
     wallets: getWallets(solanaWallets)
+  },
+  tron: {
+    providerNames: ['mydoge', 'tomo', 'tronLink', 'okxwallet', 'bitkeep'],
+    wallets: getWallets(tronWallets)
   }
 }
 
@@ -108,7 +150,6 @@ export function Wallets({ type, onChanged }) {
     current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
     switch to:
     {wallets.map((wallet) => <button key={wallet.providerName} onClick={() => {
-      console.log('wallet', wallet);
       const { provider, installLink } = wallet;
       if (!provider) {
         window.open(installLink, '_blank');

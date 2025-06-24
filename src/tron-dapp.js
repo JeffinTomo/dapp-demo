@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { get } from 'lodash-es'
 
+import { Wallets } from "./wallets";
+
 const contractAddress = "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7";
 //https://tronscan.org/#/token20/TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7
 
@@ -582,80 +584,23 @@ export default function TronDApp() {
     }
   }
 
-  const tronWallets = {
-    mydoge: {
-      providerName: "mydoge",
-      name: "MyDoge Wallet",
-      installLink: "https://qsg07xytt12z.sg.larksuite.com/wiki/I5ZDwtq6MiQQpWk9MRelFpjtg9b",
-      doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/J6F0wd2Imi5VJzk40yMlKd8JgCf",
-      provider: "mydoge.tronLink"
-    },
-    tomo: {
-      providerName: "tomo",
-      name: "Tomo Wallet",
-      installLink: "https://qsg07xytt12z.sg.larksuite.com/wiki/I5ZDwtq6MiQQpWk9MRelFpjtg9b",
-      doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/J6F0wd2Imi5VJzk40yMlKd8JgCf",
-      provider: "tomo_wallet.tronLink"
-    },
-    tronLink: {
-      providerName: "tronLink",
-      name: "TronLink Wallet",
-      installLink: "https://chrome.google.com/webstore/detail/tronlink/ibnejdfjmmkpcnlpebklmnkoeoihofec",
-      doc: "https://docs.tronlink.org/dapp/start-developing",
-      provider: "tronLink"
-    },
-    okxwallet: {
-      providerName: "okxwallet",
-      name: "OKX Wallet",
-      installLink: "https://chrome.google.com/webstore/detail/okx-wallet/mcohilncbfahbmgdjkbpemcciiolgcge",
-      doc: "https://web3.okx.com/zh-hans/build/dev-docs/sdks/chains/tron/provider",
-      provider: "okxwallet.tronLink"
-    },
-    bitkeep: {
-      providerName: "bitkeep",
-      name: "Bitget Wallet",
-      installLink: "https://web3.bitget.com/zh-CN/wallet-download",
-      doc: "https://web3.bitget.com/en/docs/provider-api/tron.html",
-      provider: "bitkeep.tronLink"
-    }
-  };
-
-  const providerNames = Object.keys(tronWallets);
-
   return (
     <div className="m-5 text-sm">
       <div className="mt-2 bg-[#f5f5f5] p-2">
         <h1>Tron Dapp Demo: </h1>
         {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
 
-
         <p></p>
 
         trc20: <a href="https://coinranking.com/coins/trc-20">https://coinranking.com/coins/trc-20</a>
 
-        <p></p>
-
-        {providerName}: <a href={tronWallets[providerName]?.doc} target="_blank">{tronWallets[providerName]?.doc}</a>
 
         <p></p>
-
-        current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
-        switch to:
-        {providerNames.map((_providerName) => <button key={_providerName} onClick={() => {
-          const provider = get(window, tronWallets[_providerName]?.provider, null);
-
-          if (!provider) {
-            const link = tronWallets[_providerName]?.installLink
-            window.open(link, '_blank');
-            return;
-          }
+        <Wallets type="tron" onChanged={({ provider, providerName }) => {
+          setProviderName(providerName);
           setProvider(provider);
-          setProviderName(_providerName);
           setAddress('');
-        }} className={"text-[#fff] p-1 m-2 " + (providerName === _providerName ? "bg-[#000]" : "bg-[#666]")}>
-          {_providerName === "bitkeep" ? "bitget" : _providerName}
-        </button>)
-        }
+        }} />
       </div>
 
       <div className="mt-2">
