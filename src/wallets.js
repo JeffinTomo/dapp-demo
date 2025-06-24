@@ -153,7 +153,7 @@ export const walletsConfig = {
   },
   unisat: {
     providerNames: ['mydoge', 'tomo', 'unisat', 'okxwallet', 'bitkeep'],
-    wallets: getWallets(unisateWallets)
+    wallets: getWallets(unisatWallets)
   },
   solana: {
     providerNames: ['mydoge', 'tomo', 'phantom', 'okxwallet', 'bitkeep'],
