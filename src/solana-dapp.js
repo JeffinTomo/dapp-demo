@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Wallets } from "./wallets";
+
 import bs58 from "bs58";
 import BN from "bn.js";
 
@@ -68,9 +70,9 @@ export default function SolanaDApp() {
       console.log('dapp.on.disconnect', res);
     });
   }, [provider]);
-  
+
   const connect = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -84,21 +86,21 @@ export default function SolanaDApp() {
       const address1 = publicKey ? publicKey.toString() : address.toString();
       setFromPubkey(publicKey || new PublicKey(address));
       // console.log('connect publicKey', publicKey, publicKey.toString());
-      
+
       setRes({
         method: 'connect',
         res
       });
-      
+
       //todo: publicKey 的格式
       setAddress(address1);
     } catch (err) {
       console.error("connected error", err);
     }
   };
-  
+
   const connectOnlyIfTrusted = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -111,14 +113,14 @@ export default function SolanaDApp() {
         method: 'connect',
         params,
         res
-      });      
+      });
     } catch (err) {
       console.error("connected error", err);
     }
   };
 
   const connect2 = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -137,7 +139,7 @@ export default function SolanaDApp() {
   };
 
   const disconnect = async () => {
-    if (!provider) { 
+    if (!provider) {
       alert('provider err');
       return;
     }
@@ -175,25 +177,25 @@ export default function SolanaDApp() {
     }
   };
 
-  const accountChanged = async () => { 
+  const accountChanged = async () => {
     console.log('accountChanged reg ok');
     provider.on("accountChanged", (publicKey) => {
       if (publicKey) {
         console.log(`dapp.on.accountChanged: ${publicKey.toBase58()}`, Math.random());
-      } else { 
+      } else {
         console.log('social wallet, no publicKey');
       }
       setRes({
         method: 'on.accountChanged',
-        res: {publicKey}
+        res: { publicKey }
       });
     });
   }
 
-  const verifySignature = async(result) =>{
+  const verifySignature = async (result) => {
     try {
       const { signature, publicKey, message } = result;
-      
+
       console.log('验证签名 params：1', { signature, publicKey, message }, new TextDecoder().decode(message));
 
       // 验证签名
@@ -216,12 +218,12 @@ export default function SolanaDApp() {
     const hex = Array.from(bytes)
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
-      
+
     return withPrefix ? `0x${hex}` : hex;
   }
 
   const signMessage = async () => {
-    if (!address) { 
+    if (!address) {
       alert('please connect 1st');
       return;
     };
@@ -246,12 +248,12 @@ export default function SolanaDApp() {
 
       const checkResult = await verifySignature(params);
       console.log('signMessage check result:', checkResult);
-      if (!checkResult) { 
+      if (!checkResult) {
         console.error('signMessage check error', encodedMessage, res)
       }
 
 
-      if (res?.signature) { 
+      if (res?.signature) {
         setSignature(signature);
       }
       setRes({
@@ -265,7 +267,7 @@ export default function SolanaDApp() {
   };
 
   const signMessage2 = async () => {
-    if (!address) { 
+    if (!address) {
       alert('please connect 1st');
       return;
     };
@@ -274,7 +276,7 @@ export default function SolanaDApp() {
       // uint8Array
       const message = `To avoid digital dognappers, sign below to authenticate with CryptoCorgis`;
       const encodedMessage = new TextEncoder().encode(message);
-      
+
       const res = await provider.request({
         method: 'signMessage',
         params: {
@@ -284,7 +286,7 @@ export default function SolanaDApp() {
       });
 
       console.log('request.signMessage:', encodedMessage, res);
-      
+
       const params = {
         message: new TextEncoder().encode(res.message),
         signature: res.signature,
@@ -294,7 +296,7 @@ export default function SolanaDApp() {
 
       const checkResult = await verifySignature(params);
       console.log('request.signMessage check result:', checkResult);
-      if (!checkResult) { 
+      if (!checkResult) {
         console.error('signMessage error', encodedMessage, res)
       }
 
@@ -309,7 +311,7 @@ export default function SolanaDApp() {
   };
 
   const signIn = async () => {
-    if (!address) { 
+    if (!address) {
       alert('please connect 1st');
       return;
     };
@@ -332,7 +334,7 @@ export default function SolanaDApp() {
         publicKey: res.publicKey ? res.publicKey.toBytes() : new PublicKey(address).toBytes()
       });
       console.log('signIn check result:', checkResult);
-      
+
       setRes({
         method: 'signIn',
         params,
@@ -343,14 +345,14 @@ export default function SolanaDApp() {
     }
   };
 
-  const signAndSendTransaction = async () => { 
+  const signAndSendTransaction = async () => {
     setRes({});
     const tx = await createLegacyTx();
     const res = await provider.signAndSendTransaction(tx);
 
     console.log('signAndSendTransaction legacyTransaction', tx, signature);
     addSignedData(res.signature);
-    
+
     setRes({
       method: 'signAndSendTransaction',
       type: 'legacyTransaction',
@@ -359,7 +361,7 @@ export default function SolanaDApp() {
 
   }
 
-  const signAndSendTransaction2 = async () => { 
+  const signAndSendTransaction2 = async () => {
     setRes({});
     const tx = await createVersionedTx();
     const res = await provider.signAndSendTransaction(tx);
@@ -374,7 +376,7 @@ export default function SolanaDApp() {
     });
   }
 
-  const signAndSendTransaction3 = async () => { 
+  const signAndSendTransaction3 = async () => {
     setRes({});
 
     const tx = await createLookupTx();
@@ -386,7 +388,7 @@ export default function SolanaDApp() {
       type: 'lookupMessage',
       res
     });
-  }  
+  }
 
   const signAndSendAllTransactions = async () => {
     setRes({});
@@ -402,12 +404,12 @@ export default function SolanaDApp() {
     });
   }
 
-  const sendRawTransaction = async () => { 
-    if (!address) { 
+  const sendRawTransaction = async () => {
+    if (!address) {
       alert('please connect 1st');
       return;
     };
-    if (!rawTransaction) { 
+    if (!rawTransaction) {
       alert('please user signTransaction create rawTransaction 1st');
       return;
     };
@@ -423,7 +425,7 @@ export default function SolanaDApp() {
   }
 
   const signVersionedTransaction = async () => {
-    if (!address) { 
+    if (!address) {
       alert('please connect 1st');
       return;
     };
@@ -441,7 +443,7 @@ export default function SolanaDApp() {
   };
 
   const signLegacyTransaction = async () => {
-    if (!address) { 
+    if (!address) {
       alert('please connect 1st');
       return;
     };
@@ -459,14 +461,14 @@ export default function SolanaDApp() {
   };
 
   const signLookupTransaction = async () => {
-    if (!address) { 
+    if (!address) {
       alert('please connect 1st');
       return;
     };
     setRes({});
 
     const transaction = await createLookupTx();
-    const res =  await provider.signTransaction(transaction);
+    const res = await provider.signTransaction(transaction);
     setRawTransaction(res.signature);
     setRes({
       method: 'signTransaction',
@@ -490,7 +492,7 @@ export default function SolanaDApp() {
     });
   }
 
-  const sendSolana = async () => { 
+  const sendSolana = async () => {
     const balances = await connection.getMultipleAccountsInfo([address].map((addr) => new PublicKey(addr)));
 
     setRes({
@@ -512,7 +514,7 @@ export default function SolanaDApp() {
     });
   }
 
-  const sendSolana2 = async () => { 
+  const sendSolana2 = async () => {
     const balances = await connection.getMultipleAccountsInfo([address].map((addr) => new PublicKey(addr)));
 
     setRes({
@@ -536,28 +538,28 @@ export default function SolanaDApp() {
   }
 
   //https://solscan.io/token/4TBi66vi32S7J8X1A6eWfaLHYmUXu7CStcEmsJQdpump
-  const sendToken = async () => { 
+  const sendToken = async () => {
     const pubkey = new PublicKey(address);
-  
+
     const accounts = await connection.getParsedTokenAccountsByOwner(pubkey, {
       programId: TOKEN_PROGRAM_ID,
     });
     console.log('sendToken 1', accounts);
-  
+
     const balances = {};
     accounts.value.map((account) => {
       const parsedData = account.account.data;
       const info = parsedData.parsed?.info;
 
       console.log('sendToken 2', parsedData);
-  
+
       const balance = Number(info.tokenAmount.amount);
-      if (balance > 0) { 
-        balances[info.mint] =  {
-        tokenAddress: info.mint,
-        balance,
-        decimals: info.tokenAmount.decimals,
-      };
+      if (balance > 0) {
+        balances[info.mint] = {
+          tokenAddress: info.mint,
+          balance,
+          decimals: info.tokenAmount.decimals,
+        };
       }
     });
 
@@ -581,7 +583,7 @@ export default function SolanaDApp() {
     });
   }
 
-  const sendToken2 = async () => { 
+  const sendToken2 = async () => {
     const params = {
       tokenAddress,
       from: address,
@@ -600,7 +602,7 @@ export default function SolanaDApp() {
 
   const sendSignedTx = async () => {
     const signedTx = "7DQ4JxKhz8YttxmH6PwdM7Yzi2PWhkWSJu9BbLMdiuzdH9SRjboHsikwfkmHTQXb2R1C5XTZ1qyDziFY1VeXiz47pSWgvmeg2xiknqoDhcPvuKxKa4VCLPMXFdK986DhMU29S8u7GxCRogCuxee8Ww4xievxAPPrEqaRJDNv91vBQXJMyV1wbfuhKv6NA6UTdDJAXXzTYCoFZf67dak6sjErT9vQVhcsdjB6hVvVpBgVrTh5tswuSV5ej4cs3sV6zF7rJmLgE7RrpfjJHK1GrRSKsYkxv4ukXH4kk9gi3UBKCXe5zyEqWKUs";
-  
+
     // const rawTransaction = Buffer.from(bs58.decode(signedTx));
     let rawTransaction;
     try {
@@ -612,13 +614,13 @@ export default function SolanaDApp() {
       VersionedTransaction.deserialize(base58Buffer);
       rawTransaction = base58Buffer;
     }
-  
+
     console.log("solana.sendSignedTx 1", signedTx, rawTransaction);
     const transaction = VersionedTransaction.deserialize(rawTransaction);
     if (!transaction.signatures || transaction.signatures.length === 0) {
       throw new Error("lack of sign");
     }
-  
+
     const simulation = await connection.simulateTransaction(transaction, {
       sigVerify: true,
       commitment: "confirmed",
@@ -628,7 +630,7 @@ export default function SolanaDApp() {
       console.error(simulation);
       throw new Error(`simulation failed: ${simulation.value.err}`);
     }
-  
+
     const confirmationStrategy = {
       commitment: "confirmed",
       preflightCommitment: "confirmed",
@@ -636,9 +638,9 @@ export default function SolanaDApp() {
       maxRetries: 3,
     };
     const signature = await sendAndConfirmRawTransaction(connection, rawTransaction, confirmationStrategy);
-  
+
     console.log("solana.sendSignedTx 3", confirmationStrategy, signature, rawTransaction);
-  
+
     return { signature };
   };
 
@@ -646,7 +648,7 @@ export default function SolanaDApp() {
   const toPubkey = address ? new PublicKey(address) : null;
 
   //https://solana.com/zh/docs/tokens/basics/transfer-tokens#typescript
-  async function createLegacyTx() { 
+  async function createLegacyTx() {
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
     const transaction = new Transaction().add(
       SystemProgram.transfer({
@@ -673,7 +675,7 @@ export default function SolanaDApp() {
     return transaction;
   }
 
-  async function createVersionedTx() { 
+  async function createVersionedTx() {
     if (!fromPubkey) {
       throw new Error('Please connect wallet first');
     }
@@ -699,9 +701,9 @@ export default function SolanaDApp() {
     return transaction;
   }
 
-  async function createLookupTx() { 
+  async function createLookupTx() {
     const publicKey = fromPubkey;
-    
+
     const recentSlot = await connection.getSlot();
     const [lookupTableInst, lookupTableAddress] = AddressLookupTableProgram.createLookupTable({
       authority: publicKey,
@@ -717,7 +719,7 @@ export default function SolanaDApp() {
 
     // To create the Address Lookup Table on chain:
     // send the `lookupTableInst` instruction in a transaction
-    const blockhash =  (await connection.getLatestBlockhash()).blockhash;
+    const blockhash = (await connection.getLatestBlockhash()).blockhash;
     const lookupMessage = new TransactionMessage({
       payerKey: publicKey,
       recentBlockhash: blockhash,
@@ -728,21 +730,21 @@ export default function SolanaDApp() {
     return lookupTransaction;
   }
 
-  function openTxDetail (signature) { 
+  function openTxDetail(signature) {
     window.open(`https://explorer.solana.com/tx/${signature}?cluster=${network}`);
   }
   function addSignedData(signature) {
     signature = bs58.encode(signature);
     openTxDetail(signature);
     window.addSigned = window.addSigned || {};
-    if (typeof signature === 'string') { 
+    if (typeof signature === 'string') {
       window.addSigned[signature] = true;
     }
   }
 
   useEffect(() => {
     const signedMap = window.addSigned || {};
-    for (var signature in signedMap) { 
+    for (var signature in signedMap) {
       connection.getSignatureStatus(signature).then((res) => {
         console.log('getSignatureStatus:', signature, res);
       });
@@ -754,54 +756,13 @@ export default function SolanaDApp() {
       <div className="mt-2 bg-[#f5f5f5] p-2">
         <h1>Solana Dapp Demo</h1>
         <div>solana web3: <a className="text-[skyblue]" href="https://solana-labs.github.io/solana-web3.js/classes/Connection.html#getsignaturestatuses">https://solana-labs.github.io/solana-web3.js/classes/Connection.html#getsignaturestatuses</a></div>
-          {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
-          
-        current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
-        switch to:
-        <button onClick={() => {
-          const provider = window.mydoge?.solana;
-          if (!provider) {
-            window.open('https://qsg07xytt12z.sg.larksuite.com/wiki/I5ZDwtq6MiQQpWk9MRelFpjtg9b', '_blank');
-            return;
-          }
+        {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
+
+        <div><Wallets type="solana" onChanged={({ provider, providerName }) => {
           setProvider(provider);
-          setProviderName('mydoge');
-        }} className="bg-[#666] text-[#fff] p-1 m-2">
-          mydoge
-        </button>
-        <button onClick={() => {
-          const provider = window.phantom?.solana;
-          if (!provider) {
-            window.open('https://phantom.app/', '_blank');
-            return;
-          }
-          setProvider(provider);
-          setProviderName('phantom');
-        }} className="bg-[#666] text-[#fff] p-1 m-2">
-          phantom
-        </button>
-        <button onClick={() => {
-          const provider = window.okxwallet?.solana;
-          if (!provider) {
-            window.open('https://web3.okx.com/zh-hans/build/docs/sdks/web-detect-okx-wallet', '_blank');
-            return;
-          }
-          setProvider(provider);
-          setProviderName('okxwallet');
-        }} className="bg-[#666] text-[#fff] p-1 m-2">
-          okxwallet
-        </button>
-        <button onClick={() => {
-          const provider = window.bitkeep?.solana;
-          if (!provider) {
-            window.open('https://web3.bitget.com/zh-CN/wallet-download', '_blank');
-            return;
-          }
-          setProvider(provider);
-          setProviderName('bitget');
-        }} className="bg-[#666] text-[#fff] p-1 m-2">
-          bitget
-        </button>
+          setProviderName(providerName);
+          setAddress('');
+        }} /></div>
       </div>
 
       <div className="mt-2">
@@ -831,7 +792,7 @@ export default function SolanaDApp() {
         </button>
       </div>
 
-      <div className={ 'mt-6 ' + (address ? '' : 'opacity-40')}>
+      <div className={'mt-6 ' + (address ? '' : 'opacity-40')}>
         <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 m-2">
           signMessage
         </button>
@@ -858,7 +819,7 @@ export default function SolanaDApp() {
           className="bg-[#000] text-[#fff] p-1 m-2"
         >
           sendSolana
-        </button> 
+        </button>
 
         <button
           onClick={sendSolana2}
@@ -872,14 +833,14 @@ export default function SolanaDApp() {
           className="bg-[#000] text-[#fff] p-1 m-2"
         >
           sendToken
-        </button> 
+        </button>
 
         <button
           onClick={sendToken2}
           className="bg-[#000] text-[#fff] p-1 m-2"
         >
           sendToken(over balance)
-        </button> 
+        </button>
 
         <div className="h-[30px]"></div>
 
@@ -907,7 +868,7 @@ export default function SolanaDApp() {
           className="bg-[#000] opacity-40 text-[#fff] p-1 m-2"
         >
           ?signAllTransactions
-        </button> 
+        </button>
 
         <div className="h-[0px]"></div>
 
@@ -918,7 +879,7 @@ export default function SolanaDApp() {
       </div>
 
       {res.method && <div className="bg-[#f5f5f5] border-1 p-5 mt-4 text-xs">
-        <h2 className="text-lg mb-4">{ providerName }: {res.method}</h2>
+        <h2 className="text-lg mb-4">{providerName}: {res.method}</h2>
         <pre style={{ wordWrap: "break-word" }}>
           {JSON.stringify(res, null, "\t")}
         </pre>

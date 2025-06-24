@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Wallets } from "./wallets";
 
 export default function UnisatDApp() {
   const [address, setAddress] = useState("");
@@ -142,6 +143,28 @@ export default function UnisatDApp() {
     }
   }
 
+  const accountsChanged = () => {
+    setRes();
+
+    try {
+      const provider = getProvider(); setRes({
+        method: "provider.on(accountsChanged)",
+        res: "waiting for accountsChanged",
+      });
+      provider.on("accountsChanged", (res) => {
+        setRes({
+          method: "provider.on(accountsChanged)",
+          res,
+        });
+      });
+    } catch (err) {
+      setRes({
+        method: "provider.on(accountsChanged)",
+        err,
+      });
+    }
+  };
+
   const getNetwork = async () => {
     setRes();
 
@@ -163,8 +186,6 @@ export default function UnisatDApp() {
 
   const switchNetwork = async () => {
     setRes();
-    alert('provider not support switchNetwork');
-    return;
 
     try {
       const provider = getProvider();
@@ -205,9 +226,6 @@ export default function UnisatDApp() {
   const switchChain = async () => {
     setRes();
 
-    alert('provider not support switchChain');
-    return;
-
     try {
       const provider = getProvider();
       const chainId = "BITCOIN_TESTNET";
@@ -220,26 +238,6 @@ export default function UnisatDApp() {
     } catch (err) {
       setRes({
         method: "provider.switchChain",
-        err,
-      });
-    }
-  };
-
-
-  const getBalance = async () => {
-    setRes();
-
-    try {
-      const provider = getProvider();
-      const res = await provider.getBalance();
-
-      setRes({
-        method: "provider.getBalance",
-        res,
-      });
-    } catch (err) {
-      setRes({
-        method: "provider.getBalance",
         err,
       });
     }
@@ -265,20 +263,21 @@ export default function UnisatDApp() {
     }
   };
 
-  const accountsChanged = () => {
+
+  const getBalance = async () => {
     setRes();
 
     try {
       const provider = getProvider();
-      provider.on("accountsChanged", (res) => {
-        setRes({
-          method: "provider.on(accountsChanged)",
-          res,
-        });
+      const res = await provider.getBalance();
+
+      setRes({
+        method: "provider.getBalance",
+        res,
       });
     } catch (err) {
       setRes({
-        method: "provider.on(accountsChanged)",
+        method: "provider.getBalance",
         err,
       });
     }
@@ -421,44 +420,11 @@ export default function UnisatDApp() {
 
   function createPsbt() {
     const psbt = new Psbt();
-    const amount = 0.0001;
+    const amount = 0.00001;
     psbt.addInput(address, amount);
     psbt.addOutput(address, amount);
     return psbt.toHex();
   }
-
-
-  const providerNames = ['mydoge', 'unisat', 'okxwallet', 'bitkeep'];
-  const wallets = {
-    mydoge: {
-      providerName: "mydoge",
-      name: "MyDoge Wallet",
-      installLink: "https://qsg07xytt12z.sg.larksuite.com/wiki/I5ZDwtq6MiQQpWk9MRelFpjtg9b",
-      doc: "https://qsg07xytt12z.sg.larksuite.com/wiki/ECaVwtEt6i2iuukiiZFlu3Dxg0p",
-      provider: "window.mydoge?.unisat"
-    },
-    unisat: {
-      providerName: "unisat",
-      name: "Unisat Wallet",
-      installLink: "https://chromewebstore.google.com/detail/unisat-wallet/ppbibelpcjmhbdihakflkdcoccbgbkpo",
-      doc: "https://docs.unisat.io/dev/open-api-documentation/unisat-wallet",
-      provider: "window.unisat"
-    },
-    okxwallet: {
-      providerName: "okxwallet",
-      name: "OKX Wallet",
-      installLink: "https://chrome.google.com/webstore/detail/okx-wallet/mcohilncbfahbmgdjkbpemcciiolgcge",
-      doc: "https://web3.okx.com/zh-hans/build/dev-docs/sdks/chains/bitcoin/provider",
-      provider: "window.okxwallet?.unisat"
-    },
-    bitkeep: {
-      providerName: "bitkeep",
-      name: "Bitget Wallet",
-      installLink: "https://web3.bitget.com/zh-CN/wallet-download",
-      doc: "https://web3.bitget.com/en/docs/provider-api/btc.html",
-      provider: "window.bitkeep?.unisat"
-    }
-  };
 
   return (
     <div className="m-5 text-sm">
@@ -467,29 +433,10 @@ export default function UnisatDApp() {
         {address && <p>connected: <span className="text-xl text-[red]">{address}</span></p>}
 
         <p></p>
-
-        {providerName}: <a href={wallets[providerName]?.doc} target="_blank">{wallets[providerName]?.doc}</a>
-
-        <p></p>
-
-        current wallet: <span className="text-2xl text-[red]">{providerName}</span> <br />
-        switch to:
-        {providerNames.map((_providerName) => <button key={_providerName} onClick={() => {
-          let provider = window[_providerName]?.unisat;
-          if (_providerName === "unisat") {
-            provider = window?.unisat;
-          }
-          if (!provider) {
-            const link = wallets[_providerName]?.installLink
-            window.open(link, '_blank');
-            return;
-          }
-          setProviderName(_providerName);
+        <Wallets type="unisat" onChanged={({ provider, providerName }) => {
+          setProviderName(providerName);
           setAddress('');
-        }} className={"text-[#fff] p-1 m-2 " + (providerName === _providerName ? "bg-[#000]" : "bg-[#666]")}>
-          {_providerName === "bitkeep" ? "bitget" : _providerName}
-        </button>)
-        }
+        }} />
       </div>
 
       <div className="mt-2">
@@ -545,7 +492,7 @@ export default function UnisatDApp() {
         <button onClick={signMessage} className="bg-[#000] text-[#fff] p-1 m-2">
           signMessage
         </button>
-        <button onClick={signMessageBip322Simple} className="bg-[#000] text-[#fff] p-1 m-2">
+        <button onClick={signMessageBip322Simple} className="bg-[#000] text-[#fff] p-1 m-2 opacity-40">
           signMessageBip322Simple
         </button>
       </div>
