@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { TronWeb } from "tronweb";
 import { get } from 'lodash-es'
 
 import { Wallets } from "./wallets";
 
 const contractAddress = "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7";
 //https://tronscan.org/#/token20/TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7
+
+const amount = "0.003999";
+const value = TronWeb.toHex(TronWeb.toSun(amount));
+console.log("tron-dapp", value, amount);
+
+
 
 export default function TronDApp() {
   const [address, setAddress] = useState("");

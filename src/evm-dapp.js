@@ -182,6 +182,7 @@ export default function EvmDApp() {
     let chainId = "0x1";
     if (currentChainId === chainId) {
       chainId = "0x2105";
+      chainId = toHex(221122420); //dogeos devnet
     }
     // chainId = "0x1b58"; for bitget
     // try {
@@ -427,7 +428,7 @@ export default function EvmDApp() {
     let value = web3.utils.toWei(amount, "ether");
     value = web3.utils.numberToHex(value);
     let transactionParameters = {
-      to: "0xef565b426ce34c617170379168b61b150c223b87",
+      to: address,
       value,
       from: address,
       data: web3.utils.toHex("tx data test"),
