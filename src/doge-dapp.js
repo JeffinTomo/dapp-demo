@@ -648,6 +648,7 @@ export default function DogeDApp() {
     }
     setRes({});
     try {
+      const ticker = "DOGECOIN•DUNES";
       const res = await provider.getDunesBalance({
         ticker
       });
@@ -672,16 +673,11 @@ export default function DogeDApp() {
     }
     setRes({});
     try {
-      const data = JSON.stringify({
-        p: 'drc-20',
-        op: 'mint',
-        tick: 'doge',
-        amt: '1000'
-      });
+      const ticker = "DOGECOIN•DUNES";
       const res = await provider.requestDunesTransaction({
-        data,
-        recipientAddress,
-        feeRate: 10
+        ticker,
+        amount: 1,
+        recipientAddress: address
       });
       setRes({
         method: 'requestDunesTransaction',
